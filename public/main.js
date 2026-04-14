@@ -257,7 +257,7 @@ function renderHomePreview() {
       <article class="preview-job-card tone-${trustInfo.tone}">
         <div class="preview-job-main">
           <h3 class="preview-card-title">${listing.title}</h3>
-          <p>${listing.company} · ${listing.location} · ${buildSourceMarkup(listing.source)}</p>
+          <p class="preview-card-company">${listing.company} · ${listing.location} · ${buildSourceMarkup(listing.source)}</p>
           <div class="preview-job-meta">
             <span>${listing.salary}</span>
             <span>${listing.workMode}</span>

@@ -776,14 +776,19 @@ p {
 }
 
 .preview-card-title,
-.preview-card-company,
-.preview-job-card h3,
-.preview-job-card p {
+.preview-job-card h3 {
   display: block;
   max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.preview-card-company {
+  display: block;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .preview-job-card p,
