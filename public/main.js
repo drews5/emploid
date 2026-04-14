@@ -17,6 +17,8 @@ const JOB_TITLES = [
   'Financial Analyst',
   'Product Designer',
   'Software Engineer',
+  'IT Support Intern',
+  'IT Operations Intern',
   'Marketing Manager',
   'Data Analyst',
   'Business Operations Manager',
@@ -35,6 +37,8 @@ const SALARY_BY_TITLE = {
   'Financial Analyst': [75, 95],
   'Product Designer': [105, 145],
   'Software Engineer': [120, 170],
+  'IT Support Intern': [24, 32],
+  'IT Operations Intern': [26, 34],
   'Marketing Manager': [95, 125],
   'Data Analyst': [80, 115],
   'Business Operations Manager': [95, 135],
@@ -207,6 +211,11 @@ const TRACKER_STORAGE_KEY = 'emploid-tracker-applications-v1';
 const RESUME_STORAGE_KEY = 'emploid-resume-profile-v1';
 
 const RESUME_ROLE_PROFILES = [
+  {
+    label: 'IT Intern',
+    jobTitles: ['IT Support Intern', 'IT Operations Intern', 'Software Engineer'],
+    terms: ['it support', 'help desk', 'ticketing', 'active directory', 'windows', 'hardware', 'network', 'troubleshooting']
+  },
   {
     label: 'Product Designer',
     jobTitles: ['Product Designer'],
@@ -409,6 +418,7 @@ async function extractResumeText(file) {
 
 function buildResumeProfile(text, fileName) {
   const normalized = text.toLowerCase();
+  const itInternProfile = RESUME_ROLE_PROFILES.find((profile) => profile.label === 'IT Intern');
   const roleScores = RESUME_ROLE_PROFILES
     .map((profile) => ({
       ...profile,
@@ -417,7 +427,10 @@ function buildResumeProfile(text, fileName) {
     .filter((profile) => profile.score > 0)
     .sort((left, right) => right.score - left.score);
 
-  const focusProfiles = roleScores.slice(0, 2);
+  const focusProfiles = [
+    ...(itInternProfile ? [{ ...itInternProfile, score: (itInternProfile.terms.reduce((total, term) => total + (normalized.includes(term) ? 2 : 0), 0)) + 10 }] : []),
+    ...roleScores.filter((profile) => profile.label !== 'IT Intern')
+  ].slice(0, 2);
   const focusRoles = focusProfiles.flatMap((profile) => profile.jobTitles).filter((value, index, array) => array.indexOf(value) === index);
   const skills = focusProfiles.flatMap((profile) => profile.terms.slice(0, 4)).filter((value, index, array) => array.indexOf(value) === index).slice(0, 6);
   const workModes = WORK_MODES.filter((mode) => normalized.includes(mode.toLowerCase()));
@@ -431,8 +444,9 @@ function buildResumeProfile(text, fileName) {
     skills,
     workModes,
     locations,
-    summary: focusRoles.length ? focusRoles.join(' + ') : 'Personalized search',
+    summary: focusRoles.length ? focusRoles.join(' + ') : 'IT Intern',
     chips: [
+      'Simulated IT intern profile',
       ...focusRoles,
       ...workModes,
       ...locations.slice(0, 1),
@@ -573,6 +587,8 @@ let activeTrackerFilter = 'all';
 let expandedTrackerId = null;
 let trackerApplications = loadTrackerApplications();
 let resumeProfile = loadResumeProfile();
+let waveTrackerId = null;
+let waveTrackerTimer;
 
 function renderHomePreview() {
   if (!homePreviewList) return;
@@ -617,8 +633,9 @@ function trackerMatchesFilter(application) {
   return application.status === activeTrackerFilter;
 }
 
-function trackerStageMarkup(stage) {
+function trackerStageMarkup(stage, applicationId) {
   const stageIndex = TRACKER_STAGES.indexOf(stage);
+  const progress = (stageIndex / (TRACKER_STAGES.length - 1)) * 100;
   return `
     <div class="tracker-progress">
       <div class="tracker-stage-labels">
@@ -627,11 +644,26 @@ function trackerStageMarkup(stage) {
           return `<span class="${className}">${label}</span>`;
         }).join('')}
       </div>
-      <div class="tracker-stage-track">
-        ${TRACKER_STAGES.map((_, index) => {
-          const className = index === stageIndex ? 'current' : index < stageIndex ? 'filled' : '';
-          return `<span class="${className}"></span>`;
-        }).join('')}
+      <div class="tracker-stage-slider-shell">
+        <div class="tracker-stage-base"></div>
+        <div class="tracker-stage-fill" style="width:${progress}%;"></div>
+        <div class="tracker-stage-track">
+          ${TRACKER_STAGES.map((_, index) => {
+            const className = index === stageIndex ? 'current' : index < stageIndex ? 'filled' : '';
+            return `<span class="${className}"></span>`;
+          }).join('')}
+        </div>
+        <input
+          class="tracker-stage-slider"
+          type="range"
+          min="0"
+          max="${TRACKER_STAGES.length - 1}"
+          step="1"
+          value="${stageIndex}"
+          data-tracker-stage
+          data-tracker-id="${applicationId}"
+          aria-label="Update application stage for ${applicationId}"
+        />
       </div>
     </div>
   `;
@@ -679,6 +711,36 @@ function updateTrackerApplication(applicationId, updater) {
   renderTracker();
 }
 
+function triggerTrackerWave(applicationId) {
+  waveTrackerId = applicationId;
+  clearTimeout(waveTrackerTimer);
+  renderTracker();
+  waveTrackerTimer = setTimeout(() => {
+    waveTrackerId = null;
+    renderTracker();
+  }, 850);
+}
+
+function setTrackerStage(applicationId, stageIndex) {
+  const nextStage = TRACKER_STAGES[Math.max(0, Math.min(TRACKER_STAGES.length - 1, stageIndex))];
+  updateTrackerApplication(applicationId, (entry) => ({
+    ...entry,
+    stage: nextStage,
+    status: nextStage === 'Applied'
+      ? (entry.status === 'archived' ? 'archived' : 'active')
+      : entry.status,
+    lastActivity: `${nextStage} updated just now`,
+    nextAction: nextStage === 'Applied'
+      ? 'Wait for the first signal, then follow up if the role still looks active.'
+      : nextStage === 'Reviewing'
+        ? 'Watch for recruiter movement and prep a short follow-up.'
+        : nextStage === 'Interview'
+          ? 'Prep stories, questions, and role-specific examples before the conversation.'
+          : 'Review compensation, timeline, and reporting structure before deciding.'
+  }));
+  triggerTrackerWave(applicationId);
+}
+
 function handleTrackerAction(applicationId, action) {
   const application = trackerApplications.find((entry) => entry.id === applicationId);
   if (!application) return;
@@ -696,6 +758,7 @@ function handleTrackerAction(applicationId, action) {
       lastActivity: 'Follow-up sent just now',
       nextAction: 'Wait 3 business days for a reply, then decide whether to keep it active or archive it.'
     }));
+    triggerTrackerWave(applicationId);
     showToast('Follow-up logged in your tracker.');
     return;
   }
@@ -714,6 +777,7 @@ function handleTrackerAction(applicationId, action) {
             : 'Keep momentum up and watch for recruiter movement.'
       };
     });
+    triggerTrackerWave(applicationId);
     showToast('Application stage updated.');
     return;
   }
@@ -725,6 +789,7 @@ function handleTrackerAction(applicationId, action) {
       lastActivity: 'Archived today',
       nextAction: 'Archived to keep your board focused on live roles.'
     }));
+    triggerTrackerWave(applicationId);
     showToast('Application archived.');
     return;
   }
@@ -737,6 +802,7 @@ function handleTrackerAction(applicationId, action) {
       lastActivity: 'Restored today',
       nextAction: 'Re-check the role and decide if it still deserves a follow-up.'
     }));
+    triggerTrackerWave(applicationId);
     showToast('Application restored.');
   }
 }
@@ -779,6 +845,7 @@ function trackJobApplication(job) {
   trackerApplications = [application, ...trackerApplications];
   saveTrackerApplications();
   renderTracker();
+  triggerTrackerWave(application.id);
 }
 
 function renderTrackerSummary() {
@@ -907,7 +974,7 @@ function renderTrackerList() {
     const timeline = buildTrackerTimeline(application);
 
     return `
-      <article class="tracker-card tone-${trustInfo.tone}">
+      <article class="tracker-card tone-${trustInfo.tone}${waveTrackerId === application.id ? ' wave' : ''}">
         <div class="tracker-card-top">
           <div class="tracker-company-mark">${companyMark(application.company)}</div>
 
@@ -918,7 +985,7 @@ function renderTrackerList() {
             </div>
             <h3 class="tracker-card-title">${application.role}</h3>
             <p class="tracker-card-subline">${application.company} · ${buildSourceMarkup(application.source)} · Applied ${application.appliedDaysAgo} days ago</p>
-            ${trackerStageMarkup(application.stage)}
+            ${trackerStageMarkup(application.stage, application.id)}
             <div class="tracker-meta-row">
               ${metaPills.map((item) => `<span class="tracker-meta-pill">${item}</span>`).join('')}
             </div>
@@ -961,13 +1028,13 @@ function renderTrackerList() {
 function renderResumeMatchUI() {
   if (homeResumeStatus) {
     homeResumeStatus.textContent = resumeProfile
-      ? `${resumeProfile.fileName}: tailoring around ${resumeProfile.summary}.`
+      ? `${resumeProfile.fileName}: simulating an IT intern profile around ${resumeProfile.summary}.`
       : 'Upload your resume and we’ll tailor the search instantly.';
   }
 
   if (resumeMatchSummary) {
     resumeMatchSummary.textContent = resumeProfile
-      ? `Matching for ${resumeProfile.summary}. Uploading a new resume refreshes the results immediately.`
+      ? `Simulating an IT intern resume and matching for ${resumeProfile.summary}. Uploading a new resume refreshes the results immediately.`
       : 'Upload a PDF or plain-text resume and we’ll surface the strongest matching roles in this feed.';
   }
 
@@ -1091,6 +1158,11 @@ if (trackerListEl) {
     const target = event.target.closest('[data-tracker-action]');
     if (!target) return;
     handleTrackerAction(target.dataset.trackerId, target.dataset.trackerAction);
+  });
+  trackerListEl.addEventListener('input', (event) => {
+    const target = event.target.closest('[data-tracker-stage]');
+    if (!target) return;
+    setTrackerStage(target.dataset.trackerId, Number(target.value));
   });
 }
 window.addEventListener('resize', () => {

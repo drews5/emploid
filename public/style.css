@@ -1570,6 +1570,7 @@ p {
   margin-top: 10px;
   font-family: var(--font-heading);
   font-size: 2.2rem;
+  font-weight: 900;
   line-height: 1;
   color: var(--text-primary);
 }
@@ -1629,8 +1630,9 @@ p {
 }
 
 .tracker-card {
-  padding: 22px;
+  padding: 18px;
   background: rgba(255, 255, 255, 0.96);
+  overflow: hidden;
 }
 
 .tracker-card.tone-high {
@@ -1643,6 +1645,25 @@ p {
 
 .tracker-card.tone-low {
   border-color: rgba(179, 58, 58, 0.18);
+}
+
+.tracker-card.wave::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(200, 91, 36, 0.08) 30%, rgba(200, 91, 36, 0.18) 48%, rgba(200, 91, 36, 0.08) 66%, transparent 100%);
+  transform: translateX(-110%);
+  animation: trackerWave 850ms ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes trackerWave {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(110%);
+  }
 }
 
 .tracker-card-top {
@@ -1698,18 +1719,18 @@ p {
 }
 
 .tracker-chip.trust-high {
-  background: var(--score-high-soft);
-  color: var(--score-high);
+  background: #e3f5e9;
+  color: #175b31;
 }
 
 .tracker-chip.trust-mid {
-  background: var(--score-mid-soft);
-  color: var(--score-mid);
+  background: #e3f5e9;
+  color: #175b31;
 }
 
 .tracker-chip.trust-low {
-  background: var(--score-low-soft);
-  color: var(--score-low);
+  background: #e3f5e9;
+  color: #175b31;
 }
 
 .tracker-card-title {
@@ -1736,6 +1757,14 @@ p {
 
 .tracker-card-actions .btn {
   min-width: 168px;
+}
+
+.tracker-card-actions .btn-primary {
+  background: #9f3f11;
+}
+
+.tracker-card-actions .btn-primary:hover {
+  background: #88350e;
 }
 
 .tracker-secondary-btn {
@@ -1769,14 +1798,45 @@ p {
   color: var(--text-primary);
 }
 
+.tracker-stage-slider-shell {
+  position: relative;
+  margin-top: 12px;
+  padding: 6px 0;
+}
+
+.tracker-stage-base,
+.tracker-stage-fill {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 8px;
+  border-radius: 999px;
+  transform: translateY(-50%);
+}
+
+.tracker-stage-base {
+  width: 100%;
+  background: #d9e2f2;
+}
+
+.tracker-stage-fill {
+  background: linear-gradient(90deg, #c85b24, #e18a44);
+}
+
 .tracker-stage-track {
-  margin-top: 10px;
+  position: relative;
+  z-index: 1;
+  margin: 0;
 }
 
 .tracker-stage-track span {
-  height: 6px;
+  width: 18px;
+  height: 18px;
+  justify-self: center;
   border-radius: 999px;
   background: #d9e2f2;
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(141, 160, 182, 0.28);
 }
 
 .tracker-stage-track span.filled {
@@ -1784,7 +1844,17 @@ p {
 }
 
 .tracker-stage-track span.current {
-  background: linear-gradient(90deg, #d56318, #f09a52);
+  background: #c85b24;
+  box-shadow: 0 0 0 3px rgba(200, 91, 36, 0.14);
+}
+
+.tracker-stage-slider {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: ew-resize;
 }
 
 .tracker-meta-row {
