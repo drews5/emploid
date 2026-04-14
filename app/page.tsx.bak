@@ -1,0 +1,8 @@
+export default function Home() {
+  return (
+    <main>
+      <h1>Emploid API</h1>
+      <p>The API is running. Use the frontend SPA or call the API endpoints directly.</p>
+    </main>
+  );
+}

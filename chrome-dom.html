@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emploid | Listing Trust Score job search</title>
+  <link rel="icon" type="image/svg+xml" href="/images/logoicon.svg">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body data-page="home">
+  <header>
+    <nav class="nav" id="main-nav">
+      <div class="container nav-inner">
+        <a href="#" class="nav-logo" data-page="home" aria-label="Emploid home">
+          <img src="/images/logoicon.svg" alt="Emploid logo mark">
+          <span class="nav-logo-word">emploid</span>
+        </a>
+
+        <div class="nav-links">
+          <a href="#" class="nav-link active" data-page="home" id="nav-home">Search</a>
+          <a href="#" class="nav-link" data-page="jobs" id="nav-jobs">Browse Jobs</a>
+          <a href="#" class="nav-link" data-page="about" id="nav-about">About</a>
+        </div>
+
+        <div class="nav-auth">
+          <button class="nav-login" type="button">Log in</button>
+          <button class="btn btn-secondary" type="button" id="nav-early-access">Early Access</button>
+        </div>
+
+        <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu" type="button">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+
+      <div class="nav-mobile-menu" id="nav-mobile-menu">
+        <a href="#" class="nav-mobile-link active" data-page="home">Search</a>
+        <a href="#" class="nav-mobile-link" data-page="jobs">Browse Jobs</a>
+        <a href="#" class="nav-mobile-link" data-page="about">About</a>
+        <a href="#" class="nav-mobile-link">Log in</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section id="page-home" class="page active">
+      <section class="hero">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <h1>
+              Find jobs that are
+              <span class="squiggle-wrap">actually hiring.</span>
+            </h1>
+            <p class="hero-sub">
+              Over 40% of online job postings are "ghost jobs" — listings for roles that
+              aren't really open. We scan thousands of postings across every major job board
+              to filter out the fakes, so you only spend time on real opportunities.
+            </p>
+
+            <div class="hero-search-stack">
+              <label class="sr-only" for="hero-search">Search jobs</label>
+              <div class="hero-search">
+                <svg class="hero-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input id="hero-search" type="text" class="input" placeholder="Role, company, or keyword (e.g., Marketing, Target)" autocomplete="off">
+                <button class="btn btn-primary hero-search-btn" id="hero-search-btn" type="button">Search</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-preview">
+            <div class="browser-window">
+              <div class="browser-bar">
+                <div class="browser-dots">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <div class="browser-address">emploid.com/search</div>
+              </div>
+              <div class="browser-body">
+                <div class="preview-header">
+                  <div>
+                    <p class="preview-kicker">Product preview</p>
+                    <h2>Every result shows a Listing Trust Score before you click apply.</h2>
+                  </div>
+                </div>
+                <div class="preview-list" id="home-preview-list">
+      <article class="preview-job-card tone-high">
+        <div class="preview-job-main">
+          <h3 class="preview-card-title">Financial Analyst</h3>
+          <p>Target · Minneapolis, MN · <span class="source-inline source-linkedin">via LinkedIn</span></p>
+          <div class="preview-job-meta">
+            <span>$75k-$90k</span>
+            <span>Hybrid</span>
+            <span>Full-time</span>
+            <span>2d ago</span>
+          </div>
+        </div>
+        <div class="preview-trust">
+          <div class="trust-ring">
+    <svg viewBox="0 0 30 30" aria-hidden="true">
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--ring-track)" stroke-width="4"></circle>
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--score-high)" stroke-width="4" stroke-linecap="round" stroke-dasharray="73.89025921243193 1.5079644737231064" transform="rotate(-90 15 15)"></circle>
+    </svg>
+    <span class="trust-ring-value">98</span>
+  </div>
+          <span class="preview-trust-label tone-high">High Trust</span>
+        </div>
+      </article>
+    
+      <article class="preview-job-card tone-high">
+        <div class="preview-job-main">
+          <h3 class="preview-card-title">Senior Financial Planning and Strategy Analyst</h3>
+          <p>Northwestern Mutual Life Insurance Company · Minneapolis, MN · <span class="source-inline source-linkedin">via LinkedIn</span></p>
+          <div class="preview-job-meta">
+            <span>$120k-$145k</span>
+            <span>Remote</span>
+            <span>Full-time</span>
+            <span>1d ago</span>
+          </div>
+        </div>
+        <div class="preview-trust">
+          <div class="trust-ring">
+    <svg viewBox="0 0 30 30" aria-hidden="true">
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--ring-track)" stroke-width="4"></circle>
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--score-high)" stroke-width="4" stroke-linecap="round" stroke-dasharray="68.61238355440108 6.785840131753957" transform="rotate(-90 15 15)"></circle>
+    </svg>
+    <span class="trust-ring-value">91</span>
+  </div>
+          <span class="preview-trust-label tone-high">High Trust</span>
+        </div>
+      </article>
+    
+      <article class="preview-job-card tone-mid">
+        <div class="preview-job-main">
+          <h3 class="preview-card-title">Marketing Manager</h3>
+          <p>Best Buy · Minneapolis, MN · <span class="source-inline source-handshake">via Handshake</span></p>
+          <div class="preview-job-meta">
+            <span>$85k-$102k</span>
+            <span>Hybrid</span>
+            <span>Full-time</span>
+            <span>5d ago</span>
+          </div>
+        </div>
+        <div class="preview-trust">
+          <div class="trust-ring">
+    <svg viewBox="0 0 30 30" aria-hidden="true">
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--ring-track)" stroke-width="4"></circle>
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--score-mid)" stroke-width="4" stroke-linecap="round" stroke-dasharray="50.51680986972388 24.881413816431156" transform="rotate(-90 15 15)"></circle>
+    </svg>
+    <span class="trust-ring-value">67</span>
+  </div>
+          <span class="preview-trust-label tone-mid">Review Carefully</span>
+        </div>
+      </article>
+    
+      <article class="preview-job-card tone-low">
+        <div class="preview-job-main">
+          <h3 class="preview-card-title">Operations Coordinator</h3>
+          <p>Peloton · New York, NY · <span class="source-inline source-glassdoor">via Glassdoor</span></p>
+          <div class="preview-job-meta">
+            <span>$58k-$68k</span>
+            <span>On-site</span>
+            <span>Full-time</span>
+            <span>3w ago</span>
+          </div>
+        </div>
+        <div class="preview-trust">
+          <div class="trust-ring">
+    <svg viewBox="0 0 30 30" aria-hidden="true">
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--ring-track)" stroke-width="4"></circle>
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--score-low)" stroke-width="4" stroke-linecap="round" stroke-dasharray="25.635396053292713 49.762827632862326" transform="rotate(-90 15 15)"></circle>
+    </svg>
+    <span class="trust-ring-value">34</span>
+  </div>
+          <span class="preview-trust-label tone-low">Low Trust</span>
+        </div>
+      </article>
+    
+      <article class="preview-job-card tone-high">
+        <div class="preview-job-main">
+          <h3 class="preview-card-title">Software Engineer</h3>
+          <p>Google · Chicago, IL · <span class="source-inline source-company-direct">via Company Direct</span></p>
+          <div class="preview-job-meta">
+            <span>$135k-$168k</span>
+            <span>Hybrid</span>
+            <span>Full-time</span>
+            <span>4d ago</span>
+          </div>
+        </div>
+        <div class="preview-trust">
+          <div class="trust-ring">
+    <svg viewBox="0 0 30 30" aria-hidden="true">
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--ring-track)" stroke-width="4"></circle>
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--score-high)" stroke-width="4" stroke-linecap="round" stroke-dasharray="71.62831250184728 3.769911184307759" transform="rotate(-90 15 15)"></circle>
+    </svg>
+    <span class="trust-ring-value">95</span>
+  </div>
+          <span class="preview-trust-label tone-high">High Trust</span>
+        </div>
+      </article>
+    </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats-strip">
+        <div class="container stats-strip-inner">
+          <div class="stats-inline">
+            <span><strong class="mono">12,000+</strong> listings scanned</span>
+            <span class="stats-divider"></span>
+            <span><strong class="mono">6</strong> job boards indexed</span>
+            <span class="stats-divider"></span>
+            <span><strong class="mono squiggle-wrap">43%</strong> flagged as low trust</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="process-section">
+        <div class="container">
+          <div class="section-heading">
+            <p class="section-kicker">How it actually works</p>
+            <h2>One search, a clearer signal, and a direct path to the employer.</h2>
+          </div>
+
+          <div class="process-steps">
+            <article class="process-step">
+              <div class="process-number">01</div>
+              <h3>We scan everything</h3>
+              <p>
+                One search covers every major job board and thousands of company
+                career pages. LinkedIn, Indeed, Handshake, Glassdoor, and more.
+              </p>
+            </article>
+            <article class="process-step">
+              <div class="process-number">02</div>
+              <h3>We score for trust</h3>
+              <p>
+                Our Listing Trust Score analyzes posting age, repost frequency,
+                salary transparency, and hiring activity to estimate if a job is
+                real. Scores range from 0 (likely fake) to 100 (likely real).
+              </p>
+            </article>
+            <article class="process-step">
+              <div class="process-number">03</div>
+              <h3>You apply directly</h3>
+              <p>
+                Every apply link routes straight to the employer's own website.
+                No middlemen, no redirects, no third-party portals.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="comparison-section">
+        <div class="container">
+          <div class="section-heading">
+            <p class="section-kicker">What you get</p>
+            <h2>What you get vs. a normal job board</h2>
+          </div>
+
+          <div class="comparison-grid">
+            <article class="comparison-column comparison-column-muted">
+              <h3>On a typical job board</h3>
+              <div class="comparison-list">
+                <div class="comparison-item"><span class="comparison-icon comparison-icon-muted">-</span><span>Job title and description</span></div>
+                <div class="comparison-item"><span class="comparison-icon comparison-icon-muted">-</span><span>Apply through the job board</span></div>
+                <div class="comparison-item"><span class="comparison-icon comparison-icon-muted">-</span><span>No idea if the job is real</span></div>
+                <div class="comparison-item"><span class="comparison-icon comparison-icon-muted">-</span><span>Salary sometimes listed</span></div>
+                <div class="comparison-item"><span class="comparison-icon comparison-icon-muted">-</span><span>No recruiter info</span></div>
+                <div class="comparison-item"><span class="comparison-icon comparison-icon-muted">-</span><span>Listings from one source</span></div>
+              </div>
+            </article>
+
+            <article class="comparison-column comparison-column-strong">
+              <h3>On Emploid</h3>
+              <div class="comparison-list">
+                <div class="comparison-item"><span class="comparison-icon comparison-icon-check">?</span><span>Job title, description, and trust score</span></div>
+                <div class="comparison-item"><span class="comparison-icon comparison-icon-check">?</span><span>Apply directly on the company's website</span></div>
+                <div class="comparison-item"><span class="comparison-icon comparison-icon-check">?</span><span>Listing Trust Score flags stale and suspicious listings</span></div>
+                <div class="comparison-item"><span class="comparison-icon comparison-icon-check">?</span><span>Salary shown or estimated from market data</span></div>
+                <div class="comparison-item"><span class="comparison-icon comparison-icon-check">?</span><span>Hiring contact identified when possible</span></div>
+                <div class="comparison-item"><span class="comparison-icon comparison-icon-check">?</span><span>Aggregated from 6+ job boards and career pages</span></div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section id="page-jobs" class="page">
+      <div class="container jobs-shell">
+        <aside class="sidebar-panel">
+          <div class="filters-heading">Narrow it down</div>
+
+          <div class="filter-group">
+            <label class="filter-label" for="search-input">Keyword search</label>
+            <input type="text" class="input" id="search-input" placeholder="Role, company, or keyword">
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label" for="trust-score-filter">Minimum Trust Score: <span id="trust-score-val">0</span></label>
+            <input type="range" class="range-slider" id="trust-score-filter" min="0" max="100" value="0" step="1">
+            <div class="range-helper">
+              <span>0 = low trust</span>
+              <span>100 = high trust</span>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label" for="salary-filter">Minimum salary</label>
+            <select class="select" id="salary-filter">
+              <option value="0">Any</option>
+              <option value="60000">$60k+</option>
+              <option value="100000">$100k+</option>
+              <option value="150000">$150k+</option>
+              <option value="200000">$200k+</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label" for="sentiment-filter">Recent Hiring Activity</label>
+            <select class="select" id="sentiment-filter">
+              <option value="all">All conditions</option>
+              <option value="growing">Actively hiring</option>
+              <option value="stable">Steady</option>
+              <option value="layoffs">Cooling off</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Direct signals</label>
+            <label class="switch-label">
+              <span>Direct Company Links only</span>
+              <span class="switch">
+                <input type="checkbox" id="direct-apply-toggle" checked="">
+                <span class="slider"></span>
+              </span>
+            </label>
+            <label class="switch-label compact">
+              <span>Hiring contact spotted</span>
+              <span class="switch">
+                <input type="checkbox" id="recruiter-toggle">
+                <span class="slider"></span>
+              </span>
+            </label>
+          </div>
+
+          <div class="filter-group filter-group-last">
+            <label class="filter-label">Work mode</label>
+            <label class="checkbox-label"><input type="checkbox" value="Remote"> Remote</label>
+            <label class="checkbox-label"><input type="checkbox" value="Hybrid"> Hybrid</label>
+            <label class="checkbox-label"><input type="checkbox" value="On-site"> On-site</label>
+          </div>
+        </aside>
+
+        <div class="jobs-main">
+          <div class="jobs-list-header">
+            <div>
+              <div class="jobs-count" id="jobs-count">60 openings across 6 job boards</div>
+              <div class="jobs-count-sub" id="jobs-count-sub">Showing 1-8 of 60 matches</div>
+            </div>
+
+            <div class="jobs-header-controls">
+              <label class="uppercase-label" for="sort-select">Sort</label>
+              <select id="sort-select" class="select jobs-sort-select">
+                <option value="relevance">Relevance</option>
+                <option value="trust-desc">Trust Score (High ? Low)</option>
+                <option value="salary-desc">Salary (High ? Low)</option>
+                <option value="recent">Most Recent</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="jobs-list" class="jobs-list"><article class="job-card tone-high">
+      <button class="btn-bookmark job-bookmark-btn" type="button" aria-label="Save job"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.6L5 21V4a1 1 0 0 1 1-1Z"></path></svg></button>
+      <div class="job-card-grid">
+        <div class="job-card-content">
+          <div class="job-card-title-row">
+            <h3 class="job-title">Product Designer</h3>
+          </div>
+          <p class="job-company-line">Adobe · New York, NY · <span class="source-inline source-handshake">via Handshake</span></p>
+          <div class="job-meta-line">
+            <span class="meta-pill">$120k-$140k</span>
+            <span class="meta-pill">On-site</span>
+            <span class="meta-pill">Full-time</span>
+            <span class="job-posted-age">3w ago</span>
+          </div>
+          <div class="job-smart-tags"><span class="signal-chip green">Direct Company Link</span><span class="signal-chip green">Actively Hiring</span></div>
+        </div>
+
+        <div class="job-trust-panel">
+          <div class="trust-ring">
+    <svg viewBox="0 0 30 30" aria-hidden="true">
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--ring-track)" stroke-width="4"></circle>
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--score-high)" stroke-width="4" stroke-linecap="round" stroke-dasharray="74.64424144929349 0.7539822368615461" transform="rotate(-90 15 15)"></circle>
+    </svg>
+    <span class="trust-ring-value">99</span>
+  </div>
+          <span class="job-score-status tone-high">High Trust</span>
+        </div>
+      </div>
+
+      <div class="job-card-footer">
+        <a href="https://www.adobe.com/careers/8208" target="_blank" rel="noopener" class="btn btn-primary job-apply-btn">Apply on adobe.com/careers ?</a>
+      </div>
+    </article><article class="job-card tone-high">
+      <button class="btn-bookmark job-bookmark-btn" type="button" aria-label="Save job"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.6L5 21V4a1 1 0 0 1 1-1Z"></path></svg></button>
+      <div class="job-card-grid">
+        <div class="job-card-content">
+          <div class="job-card-title-row">
+            <h3 class="job-title">Software Engineer</h3>
+          </div>
+          <p class="job-company-line">Stripe · Remote · <span class="source-inline source-glassdoor">via Glassdoor</span></p>
+          <div class="job-meta-line">
+            <span class="meta-pill">$130k-$155k</span>
+            <span class="meta-pill">Remote</span>
+            <span class="meta-pill">Contract</span>
+            <span class="job-posted-age">1w ago</span>
+          </div>
+          <div class="job-smart-tags"><span class="signal-chip green">Direct Company Link</span><span class="signal-chip green">Actively Hiring</span></div>
+        </div>
+
+        <div class="job-trust-panel">
+          <div class="trust-ring">
+    <svg viewBox="0 0 30 30" aria-hidden="true">
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--ring-track)" stroke-width="4"></circle>
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--score-high)" stroke-width="4" stroke-linecap="round" stroke-dasharray="74.64424144929349 0.7539822368615461" transform="rotate(-90 15 15)"></circle>
+    </svg>
+    <span class="trust-ring-value">99</span>
+  </div>
+          <span class="job-score-status tone-high">High Trust</span>
+        </div>
+      </div>
+
+      <div class="job-card-footer">
+        <a href="https://www.stripe.com/careers/8209" target="_blank" rel="noopener" class="btn btn-primary job-apply-btn">Apply on stripe.com/careers ?</a>
+      </div>
+    </article><article class="job-card tone-high">
+      <button class="btn-bookmark job-bookmark-btn" type="button" aria-label="Save job"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.6L5 21V4a1 1 0 0 1 1-1Z"></path></svg></button>
+      <div class="job-card-grid">
+        <div class="job-card-content">
+          <div class="job-card-title-row">
+            <h3 class="job-title">Product Designer</h3>
+          </div>
+          <p class="job-company-line">Airbnb · Austin, TX · <span class="source-inline source-glassdoor">via Glassdoor</span></p>
+          <div class="job-meta-line">
+            <span class="meta-pill">$110k-$130k</span>
+            <span class="meta-pill">On-site</span>
+            <span class="meta-pill">Full-time</span>
+            <span class="job-posted-age">4d ago</span>
+          </div>
+          <div class="job-smart-tags"><span class="signal-chip green">Direct Company Link</span><span class="signal-chip green">Actively Hiring</span></div>
+        </div>
+
+        <div class="job-trust-panel">
+          <div class="trust-ring">
+    <svg viewBox="0 0 30 30" aria-hidden="true">
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--ring-track)" stroke-width="4"></circle>
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--score-high)" stroke-width="4" stroke-linecap="round" stroke-dasharray="74.64424144929349 0.7539822368615461" transform="rotate(-90 15 15)"></circle>
+    </svg>
+    <span class="trust-ring-value">99</span>
+  </div>
+          <span class="job-score-status tone-high">High Trust</span>
+        </div>
+      </div>
+
+      <div class="job-card-footer">
+        <a href="https://www.airbnb.com/careers/8213" target="_blank" rel="noopener" class="btn btn-primary job-apply-btn">Apply on airbnb.com/careers ?</a>
+      </div>
+    </article><article class="job-card tone-high">
+      <button class="btn-bookmark job-bookmark-btn" type="button" aria-label="Save job"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.6L5 21V4a1 1 0 0 1 1-1Z"></path></svg></button>
+      <div class="job-card-grid">
+        <div class="job-card-content">
+          <div class="job-card-title-row">
+            <h3 class="job-title">Data Analyst</h3>
+          </div>
+          <p class="job-company-line">Airbnb · Austin, TX · <span class="source-inline source-company-direct">via Company Direct</span></p>
+          <div class="job-meta-line">
+            <span class="meta-pill">$90k-$105k</span>
+            <span class="meta-pill">On-site</span>
+            <span class="meta-pill">Contract</span>
+            <span class="job-posted-age">3d ago</span>
+          </div>
+          <div class="job-smart-tags"><span class="signal-chip green">Direct Company Link</span><span class="signal-chip green">Actively Hiring</span></div>
+        </div>
+
+        <div class="job-trust-panel">
+          <div class="trust-ring">
+    <svg viewBox="0 0 30 30" aria-hidden="true">
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--ring-track)" stroke-width="4"></circle>
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--score-high)" stroke-width="4" stroke-linecap="round" stroke-dasharray="74.64424144929349 0.7539822368615461" transform="rotate(-90 15 15)"></circle>
+    </svg>
+    <span class="trust-ring-value">99</span>
+  </div>
+          <span class="job-score-status tone-high">High Trust</span>
+        </div>
+      </div>
+
+      <div class="job-card-footer">
+        <a href="https://www.airbnb.com/careers/8232" target="_blank" rel="noopener" class="btn btn-primary job-apply-btn">Apply on airbnb.com/careers ?</a>
+      </div>
+    </article><article class="job-card tone-high">
+      <button class="btn-bookmark job-bookmark-btn" type="button" aria-label="Save job"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.6L5 21V4a1 1 0 0 1 1-1Z"></path></svg></button>
+      <div class="job-card-grid">
+        <div class="job-card-content">
+          <div class="job-card-title-row">
+            <h3 class="job-title">Business Operations Manager</h3>
+          </div>
+          <p class="job-company-line">Target · Minneapolis, MN · <span class="source-inline source-company-direct">via Company Direct</span></p>
+          <div class="job-meta-line">
+            <span class="meta-pill">$95k-$110k</span>
+            <span class="meta-pill">Hybrid</span>
+            <span class="meta-pill">Full-time</span>
+            <span class="job-posted-age">2w ago</span>
+          </div>
+          <div class="job-smart-tags"><span class="signal-chip green">Direct Company Link</span><span class="signal-chip green">Actively Hiring</span></div>
+        </div>
+
+        <div class="job-trust-panel">
+          <div class="trust-ring">
+    <svg viewBox="0 0 30 30" aria-hidden="true">
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--ring-track)" stroke-width="4"></circle>
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--score-high)" stroke-width="4" stroke-linecap="round" stroke-dasharray="74.64424144929349 0.7539822368615461" transform="rotate(-90 15 15)"></circle>
+    </svg>
+    <span class="trust-ring-value">99</span>
+  </div>
+          <span class="job-score-status tone-high">High Trust</span>
+        </div>
+      </div>
+
+      <div class="job-card-footer">
+        <a href="https://www.target.com/careers/8243" target="_blank" rel="noopener" class="btn btn-primary job-apply-btn">Apply on target.com/careers ?</a>
+      </div>
+    </article><article class="job-card tone-high">
+      <button class="btn-bookmark job-bookmark-btn" type="button" aria-label="Save job"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.6L5 21V4a1 1 0 0 1 1-1Z"></path></svg></button>
+      <div class="job-card-grid">
+        <div class="job-card-content">
+          <div class="job-card-title-row">
+            <h3 class="job-title">Product Designer</h3>
+          </div>
+          <p class="job-company-line">Best Buy · Remote · <span class="source-inline source-glassdoor">via Glassdoor</span></p>
+          <div class="job-meta-line">
+            <span class="meta-pill">$110k-$130k</span>
+            <span class="meta-pill">Remote</span>
+            <span class="meta-pill">Contract</span>
+            <span class="job-posted-age">6d ago</span>
+          </div>
+          <div class="job-smart-tags"><span class="signal-chip green">Direct Company Link</span><span class="signal-chip green">Actively Hiring</span></div>
+        </div>
+
+        <div class="job-trust-panel">
+          <div class="trust-ring">
+    <svg viewBox="0 0 30 30" aria-hidden="true">
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--ring-track)" stroke-width="4"></circle>
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--score-high)" stroke-width="4" stroke-linecap="round" stroke-dasharray="74.64424144929349 0.7539822368615461" transform="rotate(-90 15 15)"></circle>
+    </svg>
+    <span class="trust-ring-value">99</span>
+  </div>
+          <span class="job-score-status tone-high">High Trust</span>
+        </div>
+      </div>
+
+      <div class="job-card-footer">
+        <a href="https://www.bestbuy.com/careers/8262" target="_blank" rel="noopener" class="btn btn-primary job-apply-btn">Apply on bestbuy.com/careers ?</a>
+      </div>
+    </article><article class="job-card tone-high">
+      <button class="btn-bookmark job-bookmark-btn" type="button" aria-label="Save job"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.6L5 21V4a1 1 0 0 1 1-1Z"></path></svg></button>
+      <div class="job-card-grid">
+        <div class="job-card-content">
+          <div class="job-card-title-row">
+            <h3 class="job-title">Recruiting Coordinator</h3>
+          </div>
+          <p class="job-company-line">UnitedHealth Group · Seattle, WA · <span class="source-inline source-company-direct">via Company Direct</span></p>
+          <div class="job-meta-line">
+            <span class="meta-pill">$60k-$70k</span>
+            <span class="meta-pill">Hybrid</span>
+            <span class="meta-pill">Full-time</span>
+            <span class="job-posted-age">3w ago</span>
+          </div>
+          <div class="job-smart-tags"><span class="signal-chip green">Direct Company Link</span><span class="signal-chip green">Actively Hiring</span></div>
+        </div>
+
+        <div class="job-trust-panel">
+          <div class="trust-ring">
+    <svg viewBox="0 0 30 30" aria-hidden="true">
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--ring-track)" stroke-width="4"></circle>
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--score-high)" stroke-width="4" stroke-linecap="round" stroke-dasharray="74.64424144929349 0.7539822368615461" transform="rotate(-90 15 15)"></circle>
+    </svg>
+    <span class="trust-ring-value">99</span>
+  </div>
+          <span class="job-score-status tone-high">High Trust</span>
+        </div>
+      </div>
+
+      <div class="job-card-footer">
+        <a href="https://www.unitedhealthgroup.com/careers/8263" target="_blank" rel="noopener" class="btn btn-primary job-apply-btn">Apply on unitedhealthgroup.com/careers ?</a>
+      </div>
+    </article><article class="job-card tone-high">
+      <button class="btn-bookmark job-bookmark-btn" type="button" aria-label="Save job"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.6L5 21V4a1 1 0 0 1 1-1Z"></path></svg></button>
+      <div class="job-card-grid">
+        <div class="job-card-content">
+          <div class="job-card-title-row">
+            <h3 class="job-title">Marketing Manager</h3>
+          </div>
+          <p class="job-company-line">Stripe · Minneapolis, MN · <span class="source-inline source-glassdoor">via Glassdoor</span></p>
+          <div class="job-meta-line">
+            <span class="meta-pill">$95k-$110k</span>
+            <span class="meta-pill">On-site</span>
+            <span class="meta-pill">Full-time</span>
+            <span class="job-posted-age">1d ago</span>
+          </div>
+          <div class="job-smart-tags"><span class="signal-chip green">Direct Company Link</span><span class="signal-chip green">Actively Hiring</span><span class="signal-chip gray">Reposted</span></div>
+        </div>
+
+        <div class="job-trust-panel">
+          <div class="trust-ring">
+    <svg viewBox="0 0 30 30" aria-hidden="true">
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--ring-track)" stroke-width="4"></circle>
+      <circle cx="15" cy="15" r="12" fill="none" stroke="var(--score-high)" stroke-width="4" stroke-linecap="round" stroke-dasharray="71.62831250184728 3.769911184307759" transform="rotate(-90 15 15)"></circle>
+    </svg>
+    <span class="trust-ring-value">95</span>
+  </div>
+          <span class="job-score-status tone-high">High Trust</span>
+        </div>
+      </div>
+
+      <div class="job-card-footer">
+        <a href="https://www.stripe.com/careers/8215" target="_blank" rel="noopener" class="btn btn-primary job-apply-btn">Apply on stripe.com/careers ?</a>
+      </div>
+    </article></div>
+          <div id="jobs-pagination" class="pagination" aria-label="Pagination"><button type="button" class="pagination-btn text" disabled="">Previous</button><button type="button" class="pagination-btn active">1</button><button type="button" class="pagination-btn">2</button><button type="button" class="pagination-btn">3</button><button type="button" class="pagination-btn">4</button><button type="button" class="pagination-btn">5</button><button type="button" class="pagination-btn text">Next</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-about" class="page">
+      <div class="container about-shell">
+        <section class="about-hero">
+          <div class="about-hero-copy">
+            <h1>
+              We built this because job searching
+              shouldn't feel like a part-time job.
+            </h1>
+            <div class="about-copy-block">
+              <p>
+                To anyone burning hours on job boards: the modern job hunt is broken.
+                Companies leave filled positions online to look like they're growing,
+                or to collect resumes for the future. You end up spending hours crafting
+                cover letters for roles that were never truly open.
+              </p>
+              <p>
+                We built Emploid to fix this. By tracking how long a job has been posted,
+                whether the link goes directly to the employer, and the company's actual
+                hiring patterns, we created a trust filter that works.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <div class="about-story-grid">
+          <article class="about-panel">
+            <p class="section-kicker">Our origin</p>
+            <p>
+              Emploid started as a class project for IBUS 3055 at the Carlson School of
+              Management. We were five students frustrated with the same problem every
+              job seeker faces: wasting time on listings that lead nowhere.
+            </p>
+            <p>
+              We use heuristic analysis of posting age, repost frequency, recent hiring
+              activity, and public financial data to estimate the likelihood that a job
+              is real. And we get you directly to hiring managers — not middlemen.
+            </p>
+          </article>
+
+          <article class="about-panel">
+            <p class="section-kicker">No ads. No dark patterns.</p>
+            <p>
+              We don't accept payments to boost listings. Our search algorithm prioritizes
+              role relevance, salary transparency, and Listing Trust Score — in that order.
+              If a listing looks fake, we'll tell you. If a company hasn't actually hired
+              anyone in months, you'll see that too.
+            </p>
+          </article>
+        </div>
+
+        <div class="team-section">
+          <div class="team-section-header">
+            <p class="section-kicker">The team</p>
+            <h2>Built by students who got tired of wasting time.</h2>
+          </div>
+
+          <div class="team-grid">
+            <article class="team-card">
+              <div class="team-photo team-initial">D</div>
+              <div class="team-info">
+                <div class="team-name">Drew</div>
+                <div class="team-major">Product Lead</div>
+                <div class="team-social">
+                  <a class="team-link" href="https://linkedin.com/in/" target="_blank" rel="noopener noreferrer" aria-label="Open Drew's LinkedIn profile">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.94 8.5H3.56V20h3.38V8.5Zm.22-3.56A1.97 1.97 0 0 0 5.25 3a1.99 1.99 0 1 0 0 3.94c1.1 0 1.91-.75 1.91-2ZM20.44 13.05c0-3.23-1.72-4.73-4.02-4.73-1.85 0-2.68 1.02-3.14 1.74V8.5H9.91c.04 1.03 0 11.5 0 11.5h3.37v-6.42c0-.34.03-.68.13-.92.27-.68.88-1.38 1.9-1.38 1.34 0 1.87 1.02 1.87 2.5V20h3.37v-6.95Z"></path></svg>
+                  </a>
+                </div>
+              </div>
+            </article>
+            <article class="team-card">
+              <div class="team-photo team-initial">G</div>
+              <div class="team-info">
+                <div class="team-name">Gabe</div>
+                <div class="team-major">Lead Engineer</div>
+                <div class="team-social">
+                  <a class="team-link" href="https://linkedin.com/in/" target="_blank" rel="noopener noreferrer" aria-label="Open Gabe's LinkedIn profile">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.94 8.5H3.56V20h3.38V8.5Zm.22-3.56A1.97 1.97 0 0 0 5.25 3a1.99 1.99 0 1 0 0 3.94c1.1 0 1.91-.75 1.91-2ZM20.44 13.05c0-3.23-1.72-4.73-4.02-4.73-1.85 0-2.68 1.02-3.14 1.74V8.5H9.91c.04 1.03 0 11.5 0 11.5h3.37v-6.42c0-.34.03-.68.13-.92.27-.68.88-1.38 1.9-1.38 1.34 0 1.87 1.02 1.87 2.5V20h3.37v-6.95Z"></path></svg>
+                  </a>
+                </div>
+              </div>
+            </article>
+            <article class="team-card">
+              <div class="team-photo team-initial">A</div>
+              <div class="team-info">
+                <div class="team-name">Aubrey</div>
+                <div class="team-major">Design Lead</div>
+                <div class="team-social">
+                  <a class="team-link" href="https://linkedin.com/in/" target="_blank" rel="noopener noreferrer" aria-label="Open Aubrey's LinkedIn profile">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.94 8.5H3.56V20h3.38V8.5Zm.22-3.56A1.97 1.97 0 0 0 5.25 3a1.99 1.99 0 1 0 0 3.94c1.1 0 1.91-.75 1.91-2ZM20.44 13.05c0-3.23-1.72-4.73-4.02-4.73-1.85 0-2.68 1.02-3.14 1.74V8.5H9.91c.04 1.03 0 11.5 0 11.5h3.37v-6.42c0-.34.03-.68.13-.92.27-.68.88-1.38 1.9-1.38 1.34 0 1.87 1.02 1.87 2.5V20h3.37v-6.95Z"></path></svg>
+                  </a>
+                </div>
+              </div>
+            </article>
+            <article class="team-card">
+              <div class="team-photo team-initial">Y</div>
+              <div class="team-info">
+                <div class="team-name">Yumo</div>
+                <div class="team-major">Data Lead</div>
+                <div class="team-social">
+                  <a class="team-link" href="https://linkedin.com/in/" target="_blank" rel="noopener noreferrer" aria-label="Open Yumo's LinkedIn profile">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.94 8.5H3.56V20h3.38V8.5Zm.22-3.56A1.97 1.97 0 0 0 5.25 3a1.99 1.99 0 1 0 0 3.94c1.1 0 1.91-.75 1.91-2ZM20.44 13.05c0-3.23-1.72-4.73-4.02-4.73-1.85 0-2.68 1.02-3.14 1.74V8.5H9.91c.04 1.03 0 11.5 0 11.5h3.37v-6.42c0-.34.03-.68.13-.92.27-.68.88-1.38 1.9-1.38 1.34 0 1.87 1.02 1.87 2.5V20h3.37v-6.95Z"></path></svg>
+                  </a>
+                </div>
+              </div>
+            </article>
+            <article class="team-card">
+              <div class="team-photo team-initial">M</div>
+              <div class="team-info">
+                <div class="team-name">Muhammed</div>
+                <div class="team-major">Growth Lead</div>
+                <div class="team-social">
+                  <a class="team-link" href="https://linkedin.com/in/" target="_blank" rel="noopener noreferrer" aria-label="Open Muhammed's LinkedIn profile">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.94 8.5H3.56V20h3.38V8.5Zm.22-3.56A1.97 1.97 0 0 0 5.25 3a1.99 1.99 0 1 0 0 3.94c1.1 0 1.91-.75 1.91-2ZM20.44 13.05c0-3.23-1.72-4.73-4.02-4.73-1.85 0-2.68 1.02-3.14 1.74V8.5H9.91c.04 1.03 0 11.5 0 11.5h3.37v-6.42c0-.34.03-.68.13-.92.27-.68.88-1.38 1.9-1.38 1.34 0 1.87 1.02 1.87 2.5V20h3.37v-6.95Z"></path></svg>
+                  </a>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand-logo">
+            <img src="/images/logoicon.svg" alt="Emploid">
+            <span class="footer-brand-word">emploid</span>
+          </div>
+          <p class="footer-brand-desc">Job searching, minus the guesswork.</p>
+        </div>
+
+        <div class="footer-col">
+          <h5>Platform Utilities</h5>
+          <span class="footer-link" data-page="jobs">Database Query</span>
+          <span class="footer-link" data-page="home">Listing Trust Score Engine</span>
+          <span class="footer-link" data-page="about">Methodology</span>
+        </div>
+
+        <div class="footer-col">
+          <h5>Legal</h5>
+          <span class="footer-link">Privacy Policy</span>
+          <span class="footer-link">Terms of Service</span>
+        </div>
+      </div>
+
+      <div class="footer-bottom">© 2026 Emploid. Built at the Carlson School of Management.</div>
+    </div>
+  </footer>
+
+  <div class="modal-overlay" id="job-modal-overlay">
+    <div class="modal" id="modal-content-area"></div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="/main.js"></script>
+
+
+</body></html>

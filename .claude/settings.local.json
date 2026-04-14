@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run:*)",
+      "Bash(wc -l /c/Users/drews/Downloads/emploid/emploid-app/scripts/scrapers/*.py)",
+      "Bash(grep -r \"TODO\\\\|FIXME\\\\|HACK\\\\|XXX\\\\|WIP\" /c/Users/drews/Downloads/emploid/emploid-app --include=*.ts --include=*.tsx --include=*.js --include=*.py --exclude-dir=node_modules --exclude-dir=.next)"
+    ]
+  }
+}
