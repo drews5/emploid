@@ -19,6 +19,7 @@
         <div class="nav-links">
           <a href="#" class="nav-link active" data-page="home" id="nav-home">Search</a>
           <a href="#" class="nav-link" data-page="jobs" id="nav-jobs">Browse Jobs</a>
+          <a href="#" class="nav-link" data-page="tracker" id="nav-tracker">Tracker</a>
           <a href="#" class="nav-link" data-page="about" id="nav-about">About</a>
         </div>
 
@@ -35,6 +36,7 @@
       <div class="nav-mobile-menu" id="nav-mobile-menu">
         <a href="#" class="nav-mobile-link active" data-page="home">Search</a>
         <a href="#" class="nav-mobile-link" data-page="jobs">Browse Jobs</a>
+        <a href="#" class="nav-mobile-link" data-page="tracker">Tracker</a>
         <a href="#" class="nav-mobile-link" data-page="about">About</a>
         <a href="#" class="nav-mobile-link">Log in</a>
       </div>
@@ -69,6 +71,14 @@
                 </svg>
                 <input id="hero-search" type="text" class="input" placeholder="Role, company, or keyword (e.g., Marketing, Target)" autocomplete="off" />
                 <button class="btn btn-primary hero-search-btn" id="hero-search-btn" type="button">Search</button>
+              </div>
+
+              <div class="resume-entry-card">
+                <div>
+                  <p class="resume-entry-kicker">Resume Match</p>
+                  <p class="resume-entry-copy" id="home-resume-status">Upload your resume and we’ll tailor the search instantly.</p>
+                </div>
+                <button class="btn btn-secondary" id="home-resume-trigger" type="button">Upload Resume</button>
               </div>
             </div>
           </div>
@@ -262,6 +272,24 @@
         </aside>
 
         <div class="jobs-main">
+          <div class="resume-match-panel" id="resume-match-panel">
+            <div class="resume-match-copy">
+              <p class="section-kicker">Resume Match</p>
+              <h3>Search from your experience, not a blank box.</h3>
+              <p class="resume-match-summary" id="resume-match-summary">
+                Upload a PDF or plain-text resume and we’ll surface the strongest matching roles in this feed.
+              </p>
+            </div>
+
+            <div class="resume-match-actions">
+              <button class="btn btn-secondary" id="jobs-resume-trigger" type="button">Upload Resume</button>
+              <button class="btn btn-secondary resume-clear-btn" id="clear-resume-match" type="button">Clear Match</button>
+            </div>
+
+            <div class="resume-match-chips" id="resume-match-chips"></div>
+            <p class="resume-match-note">Every time you click apply, we add the role to your tracker automatically.</p>
+          </div>
+
           <div class="jobs-list-header">
             <div>
               <div class="jobs-count" id="jobs-count">Scanning job boards...</div>
@@ -406,6 +434,61 @@
         </div>
       </div>
     </section>
+
+    <section id="page-tracker" class="page">
+      <section class="tracker-page">
+        <div class="container tracker-shell">
+          <div class="tracker-header">
+            <div class="tracker-copy">
+              <p class="section-kicker">Portal</p>
+              <h1>Application Tracker</h1>
+              <p class="tracker-sub">
+                Know what’s active, what’s stalled, and what needs a follow-up next.
+              </p>
+            </div>
+
+            <div class="tracker-summary-grid" id="tracker-summary-grid"></div>
+          </div>
+
+          <div class="tracker-toolbar">
+            <div class="tracker-filter-pills" id="tracker-filter-pills">
+              <button class="tracker-filter-pill active" type="button" data-tracker-filter="all">All Status</button>
+              <button class="tracker-filter-pill" type="button" data-tracker-filter="needs-action">Need Attention</button>
+              <button class="tracker-filter-pill" type="button" data-tracker-filter="interview">Interviewing</button>
+              <button class="tracker-filter-pill" type="button" data-tracker-filter="offer">Offers</button>
+              <button class="tracker-filter-pill" type="button" data-tracker-filter="archived">Archived</button>
+            </div>
+
+            <p class="tracker-toolbar-note" id="tracker-toolbar-note"></p>
+          </div>
+
+          <div class="tracker-list" id="tracker-list"></div>
+
+          <section class="tracker-insights">
+            <div class="tracker-insights-heading">
+              <p class="section-kicker">Weekly Insights</p>
+              <h2>Where momentum is real.</h2>
+            </div>
+
+            <div class="tracker-insights-grid">
+              <article class="tracker-chart-card">
+                <div class="tracker-chart-header">
+                  <div>
+                    <h3>Reply Momentum</h3>
+                    <p class="tracker-chart-copy">Recruiter replies, interview movement, and follow-up traction over the last week.</p>
+                  </div>
+                  <div class="tracker-chart-stat" id="tracker-chart-stat"></div>
+                </div>
+
+                <div class="tracker-chart" id="tracker-chart"></div>
+              </article>
+
+              <article class="tracker-callout-card" id="tracker-callout-card"></article>
+            </div>
+          </section>
+        </div>
+      </section>
+    </section>
   </main>
 
   <footer>
@@ -422,6 +505,7 @@
         <div class="footer-col">
           <h5>Platform Utilities</h5>
           <span class="footer-link" data-page="jobs">Database Query</span>
+          <span class="footer-link" data-page="tracker">Application Tracker</span>
           <span class="footer-link" data-page="home">Listing Trust Score Engine</span>
           <span class="footer-link" data-page="about">Methodology</span>
         </div>
@@ -442,6 +526,7 @@
   </div>
 
   <div id="toast" class="toast"></div>
+  <input id="resume-upload-input" type="file" accept=".pdf,.txt,.md,.rtf" hidden />
 
   <script src="/main.js"></script>
 </body>

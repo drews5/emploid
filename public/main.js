@@ -80,6 +80,170 @@ const PREVIEW_LISTINGS = [
   { title: 'Software Engineer', company: 'Google', location: 'Chicago, IL', source: 'Company Direct', trustScore: 95, salary: '$135k-$168k', workMode: 'Hybrid', jobType: 'Full-time', age: '4d ago' }
 ];
 
+const TRACKER_STAGES = ['Applied', 'Reviewing', 'Interview', 'Offer'];
+
+const DEFAULT_TRACKER_APPLICATIONS = [
+  {
+    id: 'adobe-product',
+    role: 'Associate Product Designer',
+    company: 'Adobe',
+    source: 'Company Direct',
+    appliedDaysAgo: 3,
+    stage: 'Interview',
+    status: 'needs-action',
+    trustScore: 96,
+    location: 'Remote',
+    salary: '$98k-$122k',
+    lastActivity: 'Recruiter replied 6h ago',
+    nextAction: 'Send panel availability and 2 portfolio samples before tonight.',
+    actionLabel: 'Reply today',
+    secondaryAction: 'Prep brief',
+    tags: ['Direct company link', 'Hiring contact replied', 'Portfolio requested'],
+    interviewsThisWeek: true
+  },
+  {
+    id: 'spotify-growth',
+    role: 'Growth Marketing Analyst',
+    company: 'Spotify',
+    source: 'LinkedIn',
+    appliedDaysAgo: 12,
+    stage: 'Reviewing',
+    status: 'active',
+    trustScore: 91,
+    location: 'Hybrid',
+    salary: '$88k-$110k',
+    lastActivity: 'Application viewed yesterday',
+    nextAction: 'Hold until Friday, then send one short follow-up if there is still no response.',
+    actionLabel: 'Set follow-up',
+    secondaryAction: 'Open listing',
+    tags: ['High trust listing', 'Direct employer page found', 'No recruiter yet'],
+    interviewsThisWeek: false
+  },
+  {
+    id: 'airbnb-research',
+    role: 'UX Research Intern',
+    company: 'Airbnb',
+    source: 'Company Direct',
+    appliedDaysAgo: 5,
+    stage: 'Reviewing',
+    status: 'interview',
+    trustScore: 89,
+    location: 'Remote',
+    salary: '$42/hr',
+    lastActivity: 'Recruiter screen booked for Thursday',
+    nextAction: 'Review case-study stories and prep three questions about scope.',
+    actionLabel: 'Prep interview',
+    secondaryAction: 'View timeline',
+    tags: ['Interview scheduled', 'Hiring team active', 'High-trust role'],
+    interviewsThisWeek: true
+  },
+  {
+    id: 'target-finance',
+    role: 'Corporate Finance Intern',
+    company: 'Target',
+    source: 'Handshake',
+    appliedDaysAgo: 9,
+    stage: 'Applied',
+    status: 'needs-action',
+    trustScore: 73,
+    location: 'Minneapolis, MN',
+    salary: '$29/hr',
+    lastActivity: 'No reply yet',
+    nextAction: 'Follow up with the campus recruiter tomorrow morning while the role is still fresh.',
+    actionLabel: 'Follow up',
+    secondaryAction: 'Find contact',
+    tags: ['Campus pipeline', 'Direct recruiter listed', 'Fresh posting'],
+    interviewsThisWeek: false
+  },
+  {
+    id: 'bestbuy-ops',
+    role: 'Business Operations Analyst',
+    company: 'Best Buy',
+    source: 'Company Direct',
+    appliedDaysAgo: 18,
+    stage: 'Offer',
+    status: 'offer',
+    trustScore: 84,
+    location: 'Hybrid',
+    salary: '$82k-$96k',
+    lastActivity: 'Offer came in this morning',
+    nextAction: 'Compare compensation, ask about team structure, and request the deadline in writing.',
+    actionLabel: 'Review offer',
+    secondaryAction: 'Compare comp',
+    tags: ['Offer stage', 'Direct company link', 'Real team opening'],
+    interviewsThisWeek: false
+  },
+  {
+    id: 'lyft-community',
+    role: 'Community Partnerships Coordinator',
+    company: 'Lyft',
+    source: 'Indeed',
+    appliedDaysAgo: 29,
+    stage: 'Applied',
+    status: 'archived',
+    trustScore: 37,
+    location: 'Chicago, IL',
+    salary: '$58k-$68k',
+    lastActivity: 'No activity for 29 days',
+    nextAction: 'Archive this one and stop spending follow-up energy on a low-signal listing.',
+    actionLabel: 'Archive',
+    secondaryAction: 'View notes',
+    tags: ['Low trust listing', 'Long silence', 'Likely stale'],
+    interviewsThisWeek: false
+  }
+];
+
+const TRACKER_REPLY_MOMENTUM = [
+  { label: 'Mon', value: 1 },
+  { label: 'Tue', value: 3 },
+  { label: 'Wed', value: 2 },
+  { label: 'Thu', value: 5, highlight: true },
+  { label: 'Fri', value: 4 },
+  { label: 'Sat', value: 2 },
+  { label: 'Sun', value: 1 }
+];
+
+const TRACKER_STORAGE_KEY = 'emploid-tracker-applications-v1';
+const RESUME_STORAGE_KEY = 'emploid-resume-profile-v1';
+
+const RESUME_ROLE_PROFILES = [
+  {
+    label: 'Product Designer',
+    jobTitles: ['Product Designer'],
+    terms: ['product designer', 'ux', 'ui', 'figma', 'wireframe', 'prototype', 'design system', 'user research']
+  },
+  {
+    label: 'Software Engineer',
+    jobTitles: ['Software Engineer', 'Frontend Engineer'],
+    terms: ['software engineer', 'frontend', 'react', 'javascript', 'typescript', 'developer', 'web app', 'node']
+  },
+  {
+    label: 'Marketing Manager',
+    jobTitles: ['Marketing Manager'],
+    terms: ['marketing', 'growth', 'campaign', 'brand', 'content', 'seo', 'performance marketing']
+  },
+  {
+    label: 'Data Analyst',
+    jobTitles: ['Data Analyst', 'Financial Analyst'],
+    terms: ['data', 'analytics', 'sql', 'tableau', 'excel', 'python', 'forecasting', 'reporting']
+  },
+  {
+    label: 'Business Operations Manager',
+    jobTitles: ['Business Operations Manager', 'Program Coordinator'],
+    terms: ['operations', 'program', 'process', 'strategy', 'cross-functional', 'business operations']
+  },
+  {
+    label: 'Customer Success Manager',
+    jobTitles: ['Customer Success Manager'],
+    terms: ['customer success', 'account management', 'renewal', 'client', 'onboarding']
+  },
+  {
+    label: 'Recruiting Coordinator',
+    jobTitles: ['Recruiting Coordinator'],
+    terms: ['recruiting', 'talent', 'sourcing', 'candidate', 'hr', 'interview scheduling']
+  }
+];
+
 const PAGE_SIZE = 8;
 
 function pick(list) {
@@ -159,6 +323,149 @@ function repostTagTone(score) {
 
 function buildApplyLabel(domain) {
   return `Apply on ${domain}/careers →`;
+}
+
+function safeParseJSON(value, fallback) {
+  try {
+    return value ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function loadTrackerApplications() {
+  const saved = safeParseJSON(window.localStorage.getItem(TRACKER_STORAGE_KEY), []);
+  if (!Array.isArray(saved) || !saved.length) return DEFAULT_TRACKER_APPLICATIONS.map((application) => ({ ...application }));
+
+  const defaultMap = new Map(DEFAULT_TRACKER_APPLICATIONS.map((application) => [application.id, application]));
+  const merged = saved.map((application) => {
+    const seeded = defaultMap.get(application.id);
+    return seeded ? { ...seeded, ...application } : application;
+  });
+
+  DEFAULT_TRACKER_APPLICATIONS.forEach((application) => {
+    if (!merged.some((entry) => entry.id === application.id)) merged.push({ ...application });
+  });
+
+  return merged;
+}
+
+function saveTrackerApplications() {
+  window.localStorage.setItem(TRACKER_STORAGE_KEY, JSON.stringify(trackerApplications));
+}
+
+function loadResumeProfile() {
+  return safeParseJSON(window.localStorage.getItem(RESUME_STORAGE_KEY), null);
+}
+
+function saveResumeProfile() {
+  if (resumeProfile) window.localStorage.setItem(RESUME_STORAGE_KEY, JSON.stringify(resumeProfile));
+  else window.localStorage.removeItem(RESUME_STORAGE_KEY);
+}
+
+function decodePdfEscapes(value) {
+  return value
+    .replace(/\\([0-7]{3})/g, (_, octal) => String.fromCharCode(parseInt(octal, 8)))
+    .replace(/\\n/g, ' ')
+    .replace(/\\r/g, ' ')
+    .replace(/\\t/g, ' ')
+    .replace(/\\\(/g, '(')
+    .replace(/\\\)/g, ')')
+    .replace(/\\\\/g, '\\');
+}
+
+function extractPdfText(buffer) {
+  const raw = new TextDecoder('latin1').decode(buffer);
+  const collected = [];
+
+  raw.replace(/\(([^()]*(?:\\.[^()]*)*)\)\s*Tj/g, (_match, group) => {
+    collected.push(decodePdfEscapes(group));
+    return _match;
+  });
+
+  raw.replace(/\[(.*?)\]\s*TJ/gs, (_match, group) => {
+    group.replace(/\(([^()]*(?:\\.[^()]*)*)\)/g, (_inner, text) => {
+      collected.push(decodePdfEscapes(text));
+      return _inner;
+    });
+    return _match;
+  });
+
+  return collected.join(' ').replace(/\s+/g, ' ').trim();
+}
+
+async function extractResumeText(file) {
+  const fileName = file.name.toLowerCase();
+  if (file.type.startsWith('text/') || /\.(txt|md|rtf)$/.test(fileName)) {
+    return file.text();
+  }
+
+  if (file.type === 'application/pdf' || /\.pdf$/.test(fileName)) {
+    return extractPdfText(await file.arrayBuffer());
+  }
+
+  throw new Error('Upload a PDF or plain-text resume for now.');
+}
+
+function buildResumeProfile(text, fileName) {
+  const normalized = text.toLowerCase();
+  const roleScores = RESUME_ROLE_PROFILES
+    .map((profile) => ({
+      ...profile,
+      score: profile.terms.reduce((total, term) => total + (normalized.includes(term) ? 2 : 0), 0)
+    }))
+    .filter((profile) => profile.score > 0)
+    .sort((left, right) => right.score - left.score);
+
+  const focusProfiles = roleScores.slice(0, 2);
+  const focusRoles = focusProfiles.flatMap((profile) => profile.jobTitles).filter((value, index, array) => array.indexOf(value) === index);
+  const skills = focusProfiles.flatMap((profile) => profile.terms.slice(0, 4)).filter((value, index, array) => array.indexOf(value) === index).slice(0, 6);
+  const workModes = WORK_MODES.filter((mode) => normalized.includes(mode.toLowerCase()));
+  const locations = LOCATIONS.filter((location) => normalized.includes(location.toLowerCase()));
+
+  if (!focusRoles.length && !skills.length) throw new Error('Could not find clear role signals in that resume yet.');
+
+  return {
+    fileName,
+    focusRoles,
+    skills,
+    workModes,
+    locations,
+    summary: focusRoles.length ? focusRoles.join(' + ') : 'Personalized search',
+    chips: [
+      ...focusRoles,
+      ...workModes,
+      ...locations.slice(0, 1),
+      ...skills.slice(0, 2)
+    ].filter((value, index, array) => value && array.indexOf(value) === index).slice(0, 6)
+  };
+}
+
+function getResumeMatchScore(job, profile) {
+  if (!profile) return 0;
+  const haystack = `${job.title} ${job.company} ${job.location} ${job.description} ${job.requirements.join(' ')}`.toLowerCase();
+  let score = 0;
+
+  profile.focusRoles.forEach((role) => {
+    if (job.title === role) score += 7;
+    else if (job.title.toLowerCase().includes(role.toLowerCase())) score += 5;
+  });
+
+  profile.skills.forEach((skill) => {
+    if (skill && haystack.includes(skill.toLowerCase())) score += 1;
+  });
+
+  profile.workModes.forEach((mode) => {
+    if (job.workMode.toLowerCase() === mode.toLowerCase()) score += 2;
+  });
+
+  profile.locations.forEach((location) => {
+    if (job.location.toLowerCase() === location.toLowerCase()) score += 2;
+  });
+
+  if (job.trustScore >= 85) score += 1;
+  if (job.directCompanyLink) score += 1;
+  return score;
 }
 
 function makeData() {
@@ -246,8 +553,26 @@ const hamburger = document.getElementById('nav-hamburger');
 const homePreviewList = document.getElementById('home-preview-list');
 const mobileFilterToggle = document.getElementById('mobile-filter-toggle');
 const jobsFilters = document.getElementById('jobs-filters');
+const trackerSummaryGrid = document.getElementById('tracker-summary-grid');
+const trackerListEl = document.getElementById('tracker-list');
+const trackerChart = document.getElementById('tracker-chart');
+const trackerChartStat = document.getElementById('tracker-chart-stat');
+const trackerCalloutCard = document.getElementById('tracker-callout-card');
+const trackerToolbarNote = document.getElementById('tracker-toolbar-note');
+const trackerFilterButtons = document.querySelectorAll('[data-tracker-filter]');
+const homeResumeTrigger = document.getElementById('home-resume-trigger');
+const jobsResumeTrigger = document.getElementById('jobs-resume-trigger');
+const homeResumeStatus = document.getElementById('home-resume-status');
+const resumeMatchSummary = document.getElementById('resume-match-summary');
+const resumeMatchChips = document.getElementById('resume-match-chips');
+const clearResumeMatchButton = document.getElementById('clear-resume-match');
+const resumeUploadInput = document.getElementById('resume-upload-input');
 
 let toastTimer;
+let activeTrackerFilter = 'all';
+let expandedTrackerId = null;
+let trackerApplications = loadTrackerApplications();
+let resumeProfile = loadResumeProfile();
 
 function renderHomePreview() {
   if (!homePreviewList) return;
@@ -272,6 +597,424 @@ function renderHomePreview() {
       </article>
     `;
   }).join('');
+}
+
+function companyMark(company) {
+  return company.split(/\s+/).slice(0, 2).map((chunk) => chunk[0]).join('').toUpperCase();
+}
+
+function trackerStatusLabel(status) {
+  if (status === 'needs-action') return 'Follow-up due';
+  if (status === 'interview') return 'Interviewing';
+  if (status === 'offer') return 'Offer in hand';
+  if (status === 'archived') return 'Archived';
+  return 'Active';
+}
+
+function trackerMatchesFilter(application) {
+  if (activeTrackerFilter === 'all') return true;
+  if (activeTrackerFilter === 'interview') return application.stage === 'Interview';
+  return application.status === activeTrackerFilter;
+}
+
+function trackerStageMarkup(stage) {
+  const stageIndex = TRACKER_STAGES.indexOf(stage);
+  return `
+    <div class="tracker-progress">
+      <div class="tracker-stage-labels">
+        ${TRACKER_STAGES.map((label, index) => {
+          const className = index === stageIndex ? 'current' : index < stageIndex ? 'active' : '';
+          return `<span class="${className}">${label}</span>`;
+        }).join('')}
+      </div>
+      <div class="tracker-stage-track">
+        ${TRACKER_STAGES.map((_, index) => {
+          const className = index === stageIndex ? 'current' : index < stageIndex ? 'filled' : '';
+          return `<span class="${className}"></span>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function nextTrackerStage(stage) {
+  const currentIndex = TRACKER_STAGES.indexOf(stage);
+  return TRACKER_STAGES[Math.min(TRACKER_STAGES.length - 1, currentIndex + 1)];
+}
+
+function syncTrackerStatus(application) {
+  if (application.status === 'archived') return application;
+  if (application.stage === 'Offer') return { ...application, status: 'offer' };
+  if (application.stage === 'Interview') return { ...application, status: 'interview' };
+  return application;
+}
+
+function getTrackerPrimaryAction(application) {
+  if (application.status === 'archived') return { label: 'Restore', action: 'restore' };
+  if (application.stage === 'Offer') return { label: 'View Offer', action: 'toggle' };
+  if (application.status === 'needs-action') return { label: 'Send Follow-up', action: 'follow-up' };
+  if (application.stage === 'Interview') return { label: 'Prep Guide', action: 'toggle' };
+  return { label: 'Details', action: 'toggle' };
+}
+
+function getTrackerSecondaryAction(application) {
+  if (application.status === 'archived') return { label: 'Details', action: 'toggle' };
+  return { label: 'Timeline', action: 'toggle' };
+}
+
+function buildTrackerTimeline(application) {
+  return [
+    { time: 'Applied', copy: `Submitted to ${application.company} via ${application.source} ${application.appliedDaysAgo} days ago.` },
+    { time: 'Signal', copy: `${application.trustScore} trust score and ${application.lastActivity.toLowerCase()}.` },
+    { time: 'Next', copy: application.nextAction }
+  ];
+}
+
+function updateTrackerApplication(applicationId, updater) {
+  trackerApplications = trackerApplications.map((application) => {
+    if (application.id !== applicationId) return application;
+    return syncTrackerStatus(updater({ ...application }));
+  });
+  saveTrackerApplications();
+  renderTracker();
+}
+
+function handleTrackerAction(applicationId, action) {
+  const application = trackerApplications.find((entry) => entry.id === applicationId);
+  if (!application) return;
+
+  if (action === 'toggle') {
+    expandedTrackerId = expandedTrackerId === applicationId ? null : applicationId;
+    renderTracker();
+    return;
+  }
+
+  if (action === 'follow-up') {
+    updateTrackerApplication(applicationId, (entry) => ({
+      ...entry,
+      status: 'active',
+      lastActivity: 'Follow-up sent just now',
+      nextAction: 'Wait 3 business days for a reply, then decide whether to keep it active or archive it.'
+    }));
+    showToast('Follow-up logged in your tracker.');
+    return;
+  }
+
+  if (action === 'advance') {
+    updateTrackerApplication(applicationId, (entry) => {
+      const nextStage = nextTrackerStage(entry.stage);
+      return {
+        ...entry,
+        stage: nextStage,
+        lastActivity: `${nextStage} activity logged just now`,
+        nextAction: nextStage === 'Interview'
+          ? 'Prep stories, questions, and role-specific examples before the conversation.'
+          : nextStage === 'Offer'
+            ? 'Review compensation, deadline, and team scope before making a decision.'
+            : 'Keep momentum up and watch for recruiter movement.'
+      };
+    });
+    showToast('Application stage updated.');
+    return;
+  }
+
+  if (action === 'archive') {
+    updateTrackerApplication(applicationId, (entry) => ({
+      ...entry,
+      status: 'archived',
+      lastActivity: 'Archived today',
+      nextAction: 'Archived to keep your board focused on live roles.'
+    }));
+    showToast('Application archived.');
+    return;
+  }
+
+  if (action === 'restore') {
+    updateTrackerApplication(applicationId, (entry) => ({
+      ...entry,
+      status: 'active',
+      stage: entry.stage === 'Applied' ? 'Reviewing' : entry.stage,
+      lastActivity: 'Restored today',
+      nextAction: 'Re-check the role and decide if it still deserves a follow-up.'
+    }));
+    showToast('Application restored.');
+  }
+}
+
+function trackJobApplication(job) {
+  const existing = trackerApplications.find((application) => application.company === job.company && application.role === job.title);
+  if (existing) {
+    updateTrackerApplication(existing.id, (entry) => ({
+      ...entry,
+      lastActivity: 'Opened from search just now'
+    }));
+    return;
+  }
+
+  const status = job.hiringContact ? 'needs-action' : 'active';
+  const application = {
+    id: `tracked-${job.id}`,
+    role: job.title,
+    company: job.company,
+    source: job.source,
+    appliedDaysAgo: 0,
+    stage: 'Applied',
+    status,
+    trustScore: job.trustScore,
+    location: job.location,
+    salary: `${formatSalary(job.salary.min)}-${formatSalary(job.salary.max)}${job.salaryDisclosed ? '' : ' (Est.)'}`,
+    lastActivity: 'Added from search just now',
+    nextAction: job.hiringContact
+      ? 'A recruiter signal was found here. Follow up within 48 hours while the role is still warm.'
+      : 'Give this role 5 business days, then send one concise follow-up if it still looks active.',
+    tags: [
+      job.directCompanyLink ? 'Direct company link' : 'Aggregator posting',
+      job.hiringContact ? 'Hiring contact spotted' : 'No recruiter listed',
+      `${job.workMode} role`
+    ],
+    interviewsThisWeek: false,
+    url: job.url
+  };
+
+  trackerApplications = [application, ...trackerApplications];
+  saveTrackerApplications();
+  renderTracker();
+}
+
+function renderTrackerSummary() {
+  if (!trackerSummaryGrid) return;
+  const activeCount = trackerApplications.filter((application) => application.status !== 'archived').length;
+  const interviewCount = trackerApplications.filter((application) => application.stage === 'Interview').length;
+  const followUpsDue = trackerApplications.filter((application) => application.status === 'needs-action').length;
+  const highTrustCount = trackerApplications.filter((application) => application.status !== 'archived' && application.trustScore >= 85).length;
+
+  const cards = [
+    {
+      label: 'Active Applications',
+      value: activeCount,
+      detail: 'Open roles still worth checking',
+      tone: 'accent-soft'
+    },
+    {
+      label: 'Interviews This Week',
+      value: interviewCount,
+      detail: 'Roles already in conversation',
+      tone: 'accent-orange'
+    },
+    {
+      label: 'Follow-ups Due',
+      value: followUpsDue,
+      detail: 'The board should tell you what to do next',
+      tone: 'accent-navy'
+    },
+    {
+      label: 'High-Trust Roles',
+      value: highTrustCount,
+      detail: 'Best signal-to-effort opportunities',
+      tone: 'accent-green'
+    }
+  ];
+
+  trackerSummaryGrid.innerHTML = cards.map((card) => `
+    <article class="tracker-summary-card ${card.tone}">
+      <span class="tracker-summary-label">${card.label}</span>
+      <div class="tracker-summary-value">${String(card.value).padStart(2, '0')}</div>
+      <p class="tracker-summary-detail">${card.detail}</p>
+    </article>
+  `).join('');
+}
+
+function renderTrackerInsights() {
+  if (!trackerChart || !trackerChartStat || !trackerCalloutCard) return;
+
+  const totalTouches = TRACKER_REPLY_MOMENTUM.reduce((sum, day) => sum + day.value, 0);
+  trackerChartStat.innerHTML = `${String(totalTouches).padStart(2, '0')}<span> touches</span>`;
+
+  trackerChart.innerHTML = TRACKER_REPLY_MOMENTUM.map((day) => `
+    <div class="tracker-bar-col">
+      <span class="tracker-bar-value">${day.value}</span>
+      <div class="tracker-bar${day.highlight ? ' active' : ''}" style="height:${48 + day.value * 24}px;"></div>
+      <span class="tracker-bar-label">${day.label}</span>
+    </div>
+  `).join('');
+
+  const bestOdds = trackerApplications.filter((application) => application.status !== 'archived' && application.trustScore >= 85).slice(0, 2);
+  const interviewRole = trackerApplications.find((application) => application.stage === 'Interview');
+  const lowSignal = trackerApplications.find((application) => application.status === 'archived' || application.trustScore < 55);
+
+  trackerCalloutCard.innerHTML = `
+    <p class="tracker-callout-kicker">This Week</p>
+    <h3>Keep the board honest.</h3>
+    <p class="tracker-callout-copy">
+      ${trackerApplications.filter((application) => application.status === 'needs-action').length} roles need attention.
+      Push on ${bestOdds.map((application) => application.company).join(' and ') || 'your strongest openings'} before they cool off.
+    </p>
+    <div class="tracker-callout-list">
+      <div class="tracker-callout-item"><strong>Push:</strong> ${bestOdds[0] ? bestOdds[0].nextAction : 'No clear priority yet.'}</div>
+      <div class="tracker-callout-item"><strong>Prep:</strong> ${interviewRole ? interviewRole.nextAction : 'No interview prep on deck.'}</div>
+      <div class="tracker-callout-item"><strong>Cut:</strong> ${lowSignal ? lowSignal.nextAction : 'No dead-end roles to cut this week.'}</div>
+    </div>
+    <span class="tracker-callout-link">Use this board instead of a spreadsheet</span>
+  `;
+}
+
+function renderTrackerList() {
+  if (!trackerListEl) return;
+
+  const priorityOrder = {
+    'needs-action': 0,
+    interview: 1,
+    offer: 2,
+    active: 3,
+    archived: 4
+  };
+
+  const filteredApplications = trackerApplications
+    .filter(trackerMatchesFilter)
+    .sort((left, right) => {
+      const leftPriority = priorityOrder[left.status] ?? 99;
+      const rightPriority = priorityOrder[right.status] ?? 99;
+      if (leftPriority !== rightPriority) return leftPriority - rightPriority;
+      if (right.trustScore !== left.trustScore) return right.trustScore - left.trustScore;
+      return left.appliedDaysAgo - right.appliedDaysAgo;
+    });
+
+  if (trackerToolbarNote) {
+    if (activeTrackerFilter === 'all') {
+      trackerToolbarNote.textContent = `${trackerApplications.filter((application) => application.status === 'needs-action').length} roles need attention in the next 48 hours.`;
+    } else if (activeTrackerFilter === 'needs-action') {
+      trackerToolbarNote.textContent = 'Short, well-timed follow-ups beat random extra applications here.';
+    } else if (activeTrackerFilter === 'interview') {
+      trackerToolbarNote.textContent = 'Use this view to prep stories, deadlines, and recruiter asks.';
+    } else if (activeTrackerFilter === 'offer') {
+      trackerToolbarNote.textContent = 'Offers deserve side-by-side comparison, not gut feeling.';
+    } else {
+      trackerToolbarNote.textContent = 'Archive stale roles so your active board stays honest.';
+    }
+  }
+
+  if (!filteredApplications.length) {
+    trackerListEl.innerHTML = '<div class="empty-state"><h3>No applications in this view.</h3><p>Try another filter to see the rest of your pipeline.</p></div>';
+    return;
+  }
+
+  trackerListEl.innerHTML = filteredApplications.map((application) => {
+    const trustInfo = getTrustInfo(application.trustScore);
+    const trustClass = trustInfo.tone === 'high' ? 'trust-high' : trustInfo.tone === 'mid' ? 'trust-mid' : 'trust-low';
+    const primary = getTrackerPrimaryAction(application);
+    const secondary = getTrackerSecondaryAction(application);
+    const metaPills = [application.location, application.salary, ...application.tags.slice(0, 2)];
+    const timeline = buildTrackerTimeline(application);
+
+    return `
+      <article class="tracker-card tone-${trustInfo.tone}">
+        <div class="tracker-card-top">
+          <div class="tracker-company-mark">${companyMark(application.company)}</div>
+
+          <div class="tracker-card-body">
+            <div class="tracker-card-topline">
+              <span class="tracker-chip stage">${trackerStatusLabel(application.status)}</span>
+              <span class="tracker-chip ${trustClass}">${application.trustScore} Trust Score</span>
+            </div>
+            <h3 class="tracker-card-title">${application.role}</h3>
+            <p class="tracker-card-subline">${application.company} · ${buildSourceMarkup(application.source)} · Applied ${application.appliedDaysAgo} days ago</p>
+            ${trackerStageMarkup(application.stage)}
+            <div class="tracker-meta-row">
+              ${metaPills.map((item) => `<span class="tracker-meta-pill">${item}</span>`).join('')}
+            </div>
+            <div class="tracker-note tone-${trustInfo.tone}"><strong>Next move:</strong> ${application.nextAction}</div>
+          </div>
+
+          <div class="tracker-card-actions">
+            <button class="btn btn-primary" type="button" data-tracker-action="${primary.action}" data-tracker-id="${application.id}">${primary.label}</button>
+            <button class="btn btn-secondary tracker-secondary-btn" type="button" data-tracker-action="${secondary.action}" data-tracker-id="${application.id}">${secondary.label}</button>
+          </div>
+        </div>
+        <div class="tracker-expand${expandedTrackerId === application.id ? ' open' : ''}">
+          <div class="tracker-expand-grid">
+            <div class="tracker-expand-card">
+              <h4>Timeline</h4>
+              <div class="tracker-event-list">
+                ${timeline.map((event) => `
+                  <div class="tracker-event-item">
+                    <span class="tracker-event-time">${event.time}</span>
+                    <div class="tracker-event-copy">${event.copy}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            <div class="tracker-expand-card">
+              <h4>Quick actions</h4>
+              <p>Log movement the moment it happens so this board can replace your spreadsheet.</p>
+              <div class="tracker-quick-actions">
+                <button class="btn btn-secondary" type="button" data-tracker-action="advance" data-tracker-id="${application.id}">Log reply / advance</button>
+                <button class="btn btn-secondary" type="button" data-tracker-action="${application.status === 'archived' ? 'restore' : 'archive'}" data-tracker-id="${application.id}">${application.status === 'archived' ? 'Restore to board' : 'Archive role'}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+function renderResumeMatchUI() {
+  if (homeResumeStatus) {
+    homeResumeStatus.textContent = resumeProfile
+      ? `${resumeProfile.fileName}: tailoring around ${resumeProfile.summary}.`
+      : 'Upload your resume and we’ll tailor the search instantly.';
+  }
+
+  if (resumeMatchSummary) {
+    resumeMatchSummary.textContent = resumeProfile
+      ? `Matching for ${resumeProfile.summary}. Uploading a new resume refreshes the results immediately.`
+      : 'Upload a PDF or plain-text resume and we’ll surface the strongest matching roles in this feed.';
+  }
+
+  if (resumeMatchChips) {
+    resumeMatchChips.innerHTML = resumeProfile
+      ? resumeProfile.chips.map((chip) => `<span class="resume-match-chip">${chip}</span>`).join('')
+      : '';
+  }
+
+  if (clearResumeMatchButton) clearResumeMatchButton.classList.toggle('visible', Boolean(resumeProfile));
+}
+
+function renderTracker() {
+  renderTrackerSummary();
+  renderTrackerList();
+  renderTrackerInsights();
+}
+
+function openResumeUpload() {
+  if (resumeUploadInput) resumeUploadInput.click();
+}
+
+async function handleResumeUpload() {
+  const file = resumeUploadInput && resumeUploadInput.files && resumeUploadInput.files[0];
+  if (!file) return;
+
+  try {
+    const text = await extractResumeText(file);
+    resumeProfile = buildResumeProfile(text, file.name);
+    saveResumeProfile();
+    renderResumeMatchUI();
+    navigateTo('jobs');
+    applyFilters();
+    showToast(`Matched your search to ${resumeProfile.summary}.`);
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : 'Could not read that resume yet.');
+  } finally {
+    if (resumeUploadInput) resumeUploadInput.value = '';
+  }
+}
+
+function clearResumeMatch() {
+  resumeProfile = null;
+  saveResumeProfile();
+  renderResumeMatchUI();
+  applyFilters();
+  showToast('Resume match cleared.');
 }
 
 function closeMobileMenu() {
@@ -332,6 +1075,24 @@ if (mobileFilterToggle) {
 }
 if (heroSearch) heroSearch.addEventListener('keypress', (event) => { if (event.key === 'Enter') submitHeroSearch(); });
 if (heroSearchButton) heroSearchButton.addEventListener('click', submitHeroSearch);
+if (homeResumeTrigger) homeResumeTrigger.addEventListener('click', openResumeUpload);
+if (jobsResumeTrigger) jobsResumeTrigger.addEventListener('click', openResumeUpload);
+if (clearResumeMatchButton) clearResumeMatchButton.addEventListener('click', clearResumeMatch);
+if (resumeUploadInput) resumeUploadInput.addEventListener('change', handleResumeUpload);
+trackerFilterButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    activeTrackerFilter = button.dataset.trackerFilter || 'all';
+    trackerFilterButtons.forEach((item) => item.classList.toggle('active', item === button));
+    renderTracker();
+  });
+});
+if (trackerListEl) {
+  trackerListEl.addEventListener('click', (event) => {
+    const target = event.target.closest('[data-tracker-action]');
+    if (!target) return;
+    handleTrackerAction(target.dataset.trackerId, target.dataset.trackerAction);
+  });
+}
 window.addEventListener('resize', () => {
   if (window.innerWidth > 760) {
     if (jobsFilters) jobsFilters.classList.remove('mobile-open');
@@ -348,13 +1109,13 @@ function showToast(message) {
 }
 
 function sortJobs(list, sortValue, query) {
-  if (sortValue === 'trust-desc') return list.sort((a, b) => b.trustScore - a.trustScore || a.daysPosted - b.daysPosted);
-  if (sortValue === 'salary-desc') return list.sort((a, b) => b.salary.max - a.salary.max || b.trustScore - a.trustScore);
-  if (sortValue === 'recent') return list.sort((a, b) => a.daysPosted - b.daysPosted || b.trustScore - a.trustScore);
+  if (sortValue === 'trust-desc') return list.sort((a, b) => b.trustScore - a.trustScore || (b.resumeMatchScore || 0) - (a.resumeMatchScore || 0) || a.daysPosted - b.daysPosted);
+  if (sortValue === 'salary-desc') return list.sort((a, b) => b.salary.max - a.salary.max || (b.resumeMatchScore || 0) - (a.resumeMatchScore || 0) || b.trustScore - a.trustScore);
+  if (sortValue === 'recent') return list.sort((a, b) => a.daysPosted - b.daysPosted || (b.resumeMatchScore || 0) - (a.resumeMatchScore || 0) || b.trustScore - a.trustScore);
   return list.sort((a, b) => {
     const matchA = query && (a.title.toLowerCase().includes(query) || a.company.toLowerCase().includes(query)) ? 1 : 0;
     const matchB = query && (b.title.toLowerCase().includes(query) || b.company.toLowerCase().includes(query)) ? 1 : 0;
-    return matchB - matchA || b.trustScore - a.trustScore;
+    return (b.resumeMatchScore || 0) - (a.resumeMatchScore || 0) || matchB - matchA || b.trustScore - a.trustScore;
   });
 }
 
@@ -369,7 +1130,7 @@ function applyFilters() {
 
   if (trustFilterValue) trustFilterValue.textContent = String(minTrustScore);
 
-  filteredJobs = allJobs.filter((job) => {
+  const baseJobs = allJobs.filter((job) => {
     if (query && ![job.title, job.company, job.location].some((value) => value.toLowerCase().includes(query))) return false;
     if (job.trustScore < minTrustScore) return false;
     if (job.salary.max < minSalary) return false;
@@ -379,6 +1140,16 @@ function applyFilters() {
     if (selectedModes.length && !selectedModes.includes(job.workMode)) return false;
     return true;
   });
+
+  filteredJobs = baseJobs.map((job) => ({
+    ...job,
+    resumeMatchScore: resumeProfile ? getResumeMatchScore(job, resumeProfile) : 0
+  }));
+
+  if (resumeProfile && !query) {
+    const strongMatches = filteredJobs.filter((job) => job.resumeMatchScore >= 4);
+    if (strongMatches.length >= 3) filteredJobs = strongMatches;
+  }
 
   sortJobs(filteredJobs, (sortSelect && sortSelect.value) || 'relevance', query);
   currentPage = 1;
@@ -423,6 +1194,9 @@ function renderJobs() {
   pageJobs.forEach((job) => {
     const trustInfo = getTrustInfo(job.trustScore);
     const salaryLabel = `${formatSalary(job.salary.min)}-${formatSalary(job.salary.max)}${job.salaryDisclosed ? '' : ' (Est.)'}`;
+    const resumeChip = resumeProfile && job.resumeMatchScore > 0
+      ? `<span class="meta-pill meta-pill-highlight">Resume Match ${Math.min(99, 58 + job.resumeMatchScore * 6)}%</span>`
+      : '';
     const card = document.createElement('article');
     card.className = `job-card tone-${trustInfo.tone}`;
     card.innerHTML = `
@@ -434,6 +1208,7 @@ function renderJobs() {
           </div>
           <p class="job-company-line">${job.company} · ${job.location} · ${buildSourceMarkup(job.source)}</p>
           <div class="job-meta-line">
+            ${resumeChip}
             <span class="meta-pill">${salaryLabel}</span>
             <span class="meta-pill">${job.workMode}</span>
             <span class="meta-pill">${job.jobType}</span>
@@ -462,7 +1237,13 @@ function renderJobs() {
         renderJobs();
       });
     }
-    if (applyButton) applyButton.addEventListener('click', (event) => event.stopPropagation());
+    if (applyButton) {
+      applyButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        trackJobApplication(job);
+        showToast('Added to your tracker and opened the application.');
+      });
+    }
     card.addEventListener('click', () => openModal(job.id));
     jobsList.appendChild(card);
   });
@@ -596,11 +1377,18 @@ function openModal(id) {
 
   const closeButton = modalArea.querySelector('#modal-close-trigger');
   const bookmarkButton = modalArea.querySelector('.job-modal-bookmark');
+  const applyButton = modalArea.querySelector('.sidebar-apply-btn');
   if (closeButton) closeButton.addEventListener('click', closeModal);
   if (bookmarkButton) bookmarkButton.addEventListener('click', () => {
     toggleSave(id);
     renderJobs();
   });
+  if (applyButton) {
+    applyButton.addEventListener('click', () => {
+      trackJobApplication(job);
+      showToast('Added to your tracker and opened the application.');
+    });
+  }
 
   overlayEl.classList.add('open');
   document.body.classList.add('modal-open');
@@ -618,4 +1406,6 @@ if (modalArea) modalArea.addEventListener('click', (event) => event.stopPropagat
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && activeModalJobId !== null) closeModal(); });
 
 renderHomePreview();
+renderResumeMatchUI();
+renderTracker();
 applyFilters();
