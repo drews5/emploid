@@ -627,14 +627,24 @@ p {
   max-width: 100%;
 }
 
-.hero-squiggle {
-  padding-bottom: 0.28em;
+.hero-squiggle-line {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.02em;
 }
 
-.hero-squiggle::after {
-  left: 0;
-  right: 0;
-  bottom: 0.05em;
+.hero-squiggle-text {
+  display: block;
+}
+
+.hero-squiggle-mark {
+  width: 100%;
+  height: 0.28em;
+  min-height: 12px;
+  background-image: url("data:image/svg+xml,%3Csvg width='180' height='12' viewBox='0 0 180 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 9C18 3 34 3 50 9C66 15 82 15 98 9C114 3 130 3 146 9C162 15 174 15 178 9' stroke='%23ffbe7f' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
 
 .hero-sub {
