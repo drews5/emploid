@@ -244,6 +244,8 @@ const toastEl = document.getElementById('toast');
 const mobileMenu = document.getElementById('nav-mobile-menu');
 const hamburger = document.getElementById('nav-hamburger');
 const homePreviewList = document.getElementById('home-preview-list');
+const mobileFilterToggle = document.getElementById('mobile-filter-toggle');
+const jobsFilters = document.getElementById('jobs-filters');
 
 let toastTimer;
 
@@ -274,6 +276,16 @@ function renderHomePreview() {
 
 function closeMobileMenu() {
   if (mobileMenu) mobileMenu.classList.remove('open');
+}
+
+function setMobileFiltersOpen(isOpen) {
+  if (!mobileFilterToggle || !jobsFilters) return;
+  mobileFilterToggle.setAttribute('aria-expanded', String(isOpen));
+  jobsFilters.classList.toggle('mobile-open', isOpen);
+}
+
+function closeMobileFilters() {
+  if (window.innerWidth <= 760) setMobileFiltersOpen(false);
 }
 
 function navigateTo(pageId) {
@@ -312,8 +324,20 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 
 if (hamburger) hamburger.addEventListener('click', () => mobileMenu && mobileMenu.classList.toggle('open'));
+if (mobileFilterToggle) {
+  mobileFilterToggle.addEventListener('click', () => {
+    const isOpen = mobileFilterToggle.getAttribute('aria-expanded') === 'true';
+    setMobileFiltersOpen(!isOpen);
+  });
+}
 if (heroSearch) heroSearch.addEventListener('keypress', (event) => { if (event.key === 'Enter') submitHeroSearch(); });
 if (heroSearchButton) heroSearchButton.addEventListener('click', submitHeroSearch);
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 760) {
+    if (jobsFilters) jobsFilters.classList.remove('mobile-open');
+    if (mobileFilterToggle) mobileFilterToggle.setAttribute('aria-expanded', 'false');
+  }
+});
 
 function showToast(message) {
   if (!toastEl) return;
@@ -359,6 +383,7 @@ function applyFilters() {
   sortJobs(filteredJobs, (sortSelect && sortSelect.value) || 'relevance', query);
   currentPage = 1;
   renderJobs();
+  closeMobileFilters();
 }
 
 [searchInput, trustFilter, salaryFilter, sentimentFilter, sortSelect].forEach((el) => el && el.addEventListener('input', applyFilters));

@@ -180,7 +180,20 @@
 
     <section id="page-jobs" class="page">
       <div class="container jobs-shell">
-        <aside class="sidebar-panel">
+        <div class="mobile-filter-bar">
+          <button
+            class="mobile-filter-toggle"
+            id="mobile-filter-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="jobs-filters"
+          >
+            <span>Filters</span>
+            <span class="mobile-filter-toggle-meta">Narrow it down</span>
+          </button>
+        </div>
+
+        <aside class="sidebar-panel" id="jobs-filters">
           <div class="filters-heading">Narrow it down</div>
 
           <div class="filter-group">
