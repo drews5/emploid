@@ -525,6 +525,71 @@
     <div class="modal" id="modal-content-area"></div>
   </div>
 
+  <div class="modal-overlay resume-upload-overlay" id="resume-upload-overlay" aria-hidden="true">
+    <div class="resume-upload-modal" id="resume-upload-modal" role="dialog" aria-modal="true" aria-labelledby="resume-upload-title">
+      <div class="resume-upload-head">
+        <div>
+          <p class="resume-upload-kicker" id="resume-upload-tag">Resume Match</p>
+          <h2 id="resume-upload-title">Uploading your resume</h2>
+          <p class="resume-upload-copy" id="resume-upload-detail">We are securing the file and preparing it for parsing.</p>
+        </div>
+        <button class="btn btn-secondary resume-upload-close" id="resume-upload-close" type="button" hidden>Close</button>
+      </div>
+
+      <div class="resume-upload-file">
+        <div class="resume-upload-file-mark" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="resume-upload-file-copy">
+          <p class="resume-upload-file-label">Selected file</p>
+          <p class="resume-upload-file-name" id="resume-upload-file-name">resume.pdf</p>
+        </div>
+      </div>
+
+      <div class="resume-upload-meter" aria-hidden="true">
+        <div class="resume-upload-meter-bar" id="resume-upload-meter"></div>
+      </div>
+
+      <p class="resume-upload-status" id="resume-upload-status">Uploading securely...</p>
+
+      <div class="resume-upload-steps">
+        <div class="resume-upload-step" data-upload-step="upload" data-step-state="pending">
+          <span class="resume-upload-step-dot" aria-hidden="true"></span>
+          <div class="resume-upload-step-copy">
+            <strong>Upload file</strong>
+            <span>Move the resume into the matcher.</span>
+          </div>
+          <span class="resume-upload-step-state">Waiting</span>
+        </div>
+        <div class="resume-upload-step" data-upload-step="parse" data-step-state="pending">
+          <span class="resume-upload-step-dot" aria-hidden="true"></span>
+          <div class="resume-upload-step-copy">
+            <strong>Parse experience</strong>
+            <span>Pull out roles, skills, and work preferences.</span>
+          </div>
+          <span class="resume-upload-step-state">Waiting</span>
+        </div>
+        <div class="resume-upload-step" data-upload-step="match" data-step-state="pending">
+          <span class="resume-upload-step-dot" aria-hidden="true"></span>
+          <div class="resume-upload-step-copy">
+            <strong>Match jobs</strong>
+            <span>Score the strongest openings against your background.</span>
+          </div>
+          <span class="resume-upload-step-state">Waiting</span>
+        </div>
+      </div>
+
+      <div class="resume-upload-preview" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast"></div>
   <input id="resume-upload-input" type="file" accept=".pdf,.txt,.md,.rtf" hidden />
 

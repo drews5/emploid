@@ -334,6 +334,14 @@ function buildApplyLabel(domain) {
   return `Apply on ${domain}/careers →`;
 }
 
+function trackerActionIcon(action) {
+  if (action === 'restore') {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path></svg>';
+  }
+
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"></path><path d="M9 7V4h6v3"></path><path d="M7 7l1 12h8l1-12"></path></svg>';
+}
+
 function safeParseJSON(value, fallback) {
   try {
     return value ? JSON.parse(value) : fallback;
@@ -370,6 +378,10 @@ function loadResumeProfile() {
 function saveResumeProfile() {
   if (resumeProfile) window.localStorage.setItem(RESUME_STORAGE_KEY, JSON.stringify(resumeProfile));
   else window.localStorage.removeItem(RESUME_STORAGE_KEY);
+}
+
+function wait(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
 function decodePdfEscapes(value) {
@@ -561,6 +573,16 @@ const jobsCountSub = document.getElementById('jobs-count-sub');
 const paginationEl = document.getElementById('jobs-pagination');
 const overlayEl = document.getElementById('job-modal-overlay');
 const modalArea = document.getElementById('modal-content-area');
+const resumeUploadOverlay = document.getElementById('resume-upload-overlay');
+const resumeUploadModal = document.getElementById('resume-upload-modal');
+const resumeUploadCloseButton = document.getElementById('resume-upload-close');
+const resumeUploadTag = document.getElementById('resume-upload-tag');
+const resumeUploadTitle = document.getElementById('resume-upload-title');
+const resumeUploadDetail = document.getElementById('resume-upload-detail');
+const resumeUploadFileName = document.getElementById('resume-upload-file-name');
+const resumeUploadStatus = document.getElementById('resume-upload-status');
+const resumeUploadMeter = document.getElementById('resume-upload-meter');
+const resumeUploadStepEls = document.querySelectorAll('[data-upload-step]');
 const toastEl = document.getElementById('toast');
 const mobileMenu = document.getElementById('nav-mobile-menu');
 const hamburger = document.getElementById('nav-hamburger');
@@ -589,6 +611,7 @@ let trackerApplications = loadTrackerApplications();
 let resumeProfile = loadResumeProfile();
 let waveTrackerId = null;
 let waveTrackerTimer;
+let resumeUploadBusy = false;
 
 function renderHomePreview() {
   if (!homePreviewList) return;
@@ -633,9 +656,13 @@ function trackerMatchesFilter(application) {
   return application.status === activeTrackerFilter;
 }
 
-function trackerStageMarkup(stage, applicationId) {
+function trackerProgressPercent(stageIndex) {
+  return (stageIndex / (TRACKER_STAGES.length - 1)) * 100;
+}
+
+function trackerStageMarkup(stage, applicationId, label, isAnimating = false) {
   const stageIndex = TRACKER_STAGES.indexOf(stage);
-  const progress = (stageIndex / (TRACKER_STAGES.length - 1)) * 100;
+  const progress = trackerProgressPercent(stageIndex);
   return `
     <div class="tracker-progress">
       <div class="tracker-stage-labels">
@@ -644,9 +671,9 @@ function trackerStageMarkup(stage, applicationId) {
           return `<span class="${className}">${label}</span>`;
         }).join('')}
       </div>
-      <div class="tracker-stage-slider-shell">
+      <div class="tracker-stage-slider-shell${isAnimating ? ' is-animating' : ''}" style="--tracker-progress:${progress}%;">
         <div class="tracker-stage-base"></div>
-        <div class="tracker-stage-fill" style="width:${progress}%;"></div>
+        <div class="tracker-stage-fill"></div>
         <div class="tracker-stage-track">
           ${TRACKER_STAGES.map((_, index) => {
             const className = index === stageIndex ? 'current' : index < stageIndex ? 'filled' : '';
@@ -662,11 +689,33 @@ function trackerStageMarkup(stage, applicationId) {
           value="${stageIndex}"
           data-tracker-stage
           data-tracker-id="${applicationId}"
-          aria-label="Update application stage for ${applicationId}"
+          aria-label="Update application stage for ${label}"
+          aria-valuetext="${TRACKER_STAGES[stageIndex]}"
         />
       </div>
     </div>
   `;
+}
+
+function paintTrackerProgress(progressEl, stageIndex) {
+  const progressRoot = progressEl && progressEl.classList.contains('tracker-progress')
+    ? progressEl
+    : progressEl && progressEl.closest('.tracker-progress');
+  if (!progressRoot) return;
+
+  const clampedStage = Math.max(0, Math.min(TRACKER_STAGES.length - 1, stageIndex));
+  const sliderShell = progressRoot.querySelector('.tracker-stage-slider-shell');
+  if (sliderShell) sliderShell.style.setProperty('--tracker-progress', `${trackerProgressPercent(clampedStage)}%`);
+
+  progressRoot.querySelectorAll('.tracker-stage-labels span').forEach((labelEl, index) => {
+    labelEl.classList.toggle('current', index === clampedStage);
+    labelEl.classList.toggle('active', index < clampedStage);
+  });
+
+  progressRoot.querySelectorAll('.tracker-stage-track span').forEach((dotEl, index) => {
+    dotEl.classList.toggle('current', index === clampedStage);
+    dotEl.classList.toggle('filled', index < clampedStage);
+  });
 }
 
 function nextTrackerStage(stage) {
@@ -682,7 +731,7 @@ function syncTrackerStatus(application) {
 }
 
 function getTrackerPrimaryAction(application) {
-  if (application.status === 'archived') return { label: 'Restore', action: 'restore' };
+  if (application.status === 'archived') return { label: 'Details', action: 'toggle' };
   if (application.stage === 'Offer') return { label: 'View Offer', action: 'toggle' };
   if (application.status === 'needs-action') return { label: 'Send Follow-up', action: 'follow-up' };
   if (application.stage === 'Interview') return { label: 'Prep Guide', action: 'toggle' };
@@ -690,8 +739,15 @@ function getTrackerPrimaryAction(application) {
 }
 
 function getTrackerSecondaryAction(application) {
-  if (application.status === 'archived') return { label: 'Details', action: 'toggle' };
   return { label: 'Timeline', action: 'toggle' };
+}
+
+function getTrackerTertiaryAction(application) {
+  if (application.status === 'archived') {
+    return { label: 'Restore', action: 'restore', className: 'btn btn-secondary tracker-danger-btn' };
+  }
+
+  return { label: 'Reject', action: 'archive', className: 'btn btn-danger tracker-danger-btn' };
 }
 
 function buildTrackerTimeline(application) {
@@ -722,7 +778,12 @@ function triggerTrackerWave(applicationId) {
 }
 
 function setTrackerStage(applicationId, stageIndex) {
+  const application = trackerApplications.find((entry) => entry.id === applicationId);
+  if (!application) return;
+
   const nextStage = TRACKER_STAGES[Math.max(0, Math.min(TRACKER_STAGES.length - 1, stageIndex))];
+  if (application.stage === nextStage) return;
+
   updateTrackerApplication(applicationId, (entry) => ({
     ...entry,
     stage: nextStage,
@@ -786,11 +847,11 @@ function handleTrackerAction(applicationId, action) {
     updateTrackerApplication(applicationId, (entry) => ({
       ...entry,
       status: 'archived',
-      lastActivity: 'Archived today',
-      nextAction: 'Archived to keep your board focused on live roles.'
+      lastActivity: 'Rejected today',
+      nextAction: 'Removed from the active board so you can focus on live roles.'
     }));
     triggerTrackerWave(applicationId);
-    showToast('Application archived.');
+    showToast('Application removed from your active board.');
     return;
   }
 
@@ -970,11 +1031,12 @@ function renderTrackerList() {
     const trustClass = trustInfo.tone === 'high' ? 'trust-high' : trustInfo.tone === 'mid' ? 'trust-mid' : 'trust-low';
     const primary = getTrackerPrimaryAction(application);
     const secondary = getTrackerSecondaryAction(application);
+    const tertiary = getTrackerTertiaryAction(application);
     const metaPills = [application.location, application.salary, ...application.tags.slice(0, 2)];
     const timeline = buildTrackerTimeline(application);
 
     return `
-      <article class="tracker-card tone-${trustInfo.tone}${waveTrackerId === application.id ? ' wave' : ''}">
+      <article class="tracker-card tone-${trustInfo.tone}">
         <div class="tracker-card-top">
           <div class="tracker-company-mark">${companyMark(application.company)}</div>
 
@@ -985,7 +1047,7 @@ function renderTrackerList() {
             </div>
             <h3 class="tracker-card-title">${application.role}</h3>
             <p class="tracker-card-subline">${application.company} · ${buildSourceMarkup(application.source)} · Applied ${application.appliedDaysAgo} days ago</p>
-            ${trackerStageMarkup(application.stage, application.id)}
+            ${trackerStageMarkup(application.stage, application.id, `${application.role} at ${application.company}`, waveTrackerId === application.id)}
             <div class="tracker-meta-row">
               ${metaPills.map((item) => `<span class="tracker-meta-pill">${item}</span>`).join('')}
             </div>
@@ -995,6 +1057,7 @@ function renderTrackerList() {
           <div class="tracker-card-actions">
             <button class="btn btn-primary" type="button" data-tracker-action="${primary.action}" data-tracker-id="${application.id}">${primary.label}</button>
             <button class="btn btn-secondary tracker-secondary-btn" type="button" data-tracker-action="${secondary.action}" data-tracker-id="${application.id}">${secondary.label}</button>
+            <button class="${tertiary.className}" type="button" data-tracker-action="${tertiary.action}" data-tracker-id="${application.id}">${trackerActionIcon(tertiary.action)}<span>${tertiary.label}</span></button>
           </div>
         </div>
         <div class="tracker-expand${expandedTrackerId === application.id ? ' open' : ''}">
@@ -1015,7 +1078,7 @@ function renderTrackerList() {
               <p>Log movement the moment it happens so this board can replace your spreadsheet.</p>
               <div class="tracker-quick-actions">
                 <button class="btn btn-secondary" type="button" data-tracker-action="advance" data-tracker-id="${application.id}">Log reply / advance</button>
-                <button class="btn btn-secondary" type="button" data-tracker-action="${application.status === 'archived' ? 'restore' : 'archive'}" data-tracker-id="${application.id}">${application.status === 'archived' ? 'Restore to board' : 'Archive role'}</button>
+                <button class="${application.status === 'archived' ? 'btn btn-secondary' : 'btn btn-danger'}" type="button" data-tracker-action="${application.status === 'archived' ? 'restore' : 'archive'}" data-tracker-id="${application.id}">${application.status === 'archived' ? 'Restore to board' : 'Reject role'}</button>
               </div>
             </div>
           </div>
@@ -1053,7 +1116,115 @@ function renderTracker() {
   renderTrackerInsights();
 }
 
+function syncModalLock() {
+  const hasJobModal = Boolean(overlayEl && overlayEl.classList.contains('open'));
+  const hasResumeModal = Boolean(resumeUploadOverlay && resumeUploadOverlay.classList.contains('open'));
+  document.body.classList.toggle('modal-open', hasJobModal || hasResumeModal);
+}
+
+function setResumeUploadState(phase, overrides = {}) {
+  if (!resumeUploadModal) return;
+
+  const states = {
+    uploading: {
+      tag: 'Resume Match',
+      title: 'Uploading your resume',
+      detail: 'We are securing the file and preparing it for parsing.',
+      status: 'Uploading securely...',
+      progress: 28,
+      allowClose: false,
+      steps: { upload: 'active', parse: 'pending', match: 'pending' }
+    },
+    parsing: {
+      tag: 'Resume Match',
+      title: 'Parsing experience and skills',
+      detail: 'We are pulling out roles, skills, and work preferences from your file.',
+      status: 'Parsing your resume...',
+      progress: 68,
+      allowClose: false,
+      steps: { upload: 'complete', parse: 'active', match: 'pending' }
+    },
+    matching: {
+      tag: 'Resume Match',
+      title: 'Matching the best roles',
+      detail: 'We are scoring openings against your background so the feed can update.',
+      status: 'Ranking the strongest matches...',
+      progress: 92,
+      allowClose: false,
+      steps: { upload: 'complete', parse: 'complete', match: 'active' }
+    },
+    matched: {
+      tag: 'Resume Ready',
+      title: 'Resume match complete',
+      detail: 'Your tailored job feed is ready.',
+      status: 'Opening your matches...',
+      progress: 100,
+      allowClose: false,
+      steps: { upload: 'complete', parse: 'complete', match: 'complete' }
+    },
+    error: {
+      tag: 'Upload issue',
+      title: 'We could not parse that resume',
+      detail: 'Try another PDF or a plain-text resume and we can run it again.',
+      status: 'Parsing stopped before we found usable signals.',
+      progress: 100,
+      allowClose: true,
+      steps: { upload: 'complete', parse: 'error', match: 'pending' }
+    }
+  };
+
+  const state = { ...(states[phase] || states.uploading), ...overrides };
+  const stateLabel = {
+    pending: 'Waiting',
+    active: 'In progress',
+    complete: 'Done',
+    error: 'Needs attention'
+  };
+
+  resumeUploadModal.dataset.uploadPhase = phase;
+  if (resumeUploadTag) resumeUploadTag.textContent = state.tag;
+  if (resumeUploadTitle) resumeUploadTitle.textContent = state.title;
+  if (resumeUploadDetail) resumeUploadDetail.textContent = state.detail;
+  if (resumeUploadStatus) resumeUploadStatus.textContent = state.status;
+  if (resumeUploadMeter) resumeUploadMeter.style.width = `${state.progress}%`;
+
+  if (resumeUploadCloseButton) {
+    resumeUploadCloseButton.hidden = !state.allowClose;
+    resumeUploadCloseButton.disabled = !state.allowClose;
+  }
+
+  resumeUploadStepEls.forEach((stepEl) => {
+    const step = stepEl.dataset.uploadStep;
+    const stepState = state.steps[step] || 'pending';
+    stepEl.dataset.stepState = stepState;
+
+    const stateEl = stepEl.querySelector('.resume-upload-step-state');
+    if (stateEl) stateEl.textContent = stateLabel[stepState] || stateLabel.pending;
+  });
+}
+
+function openResumeUploadModal(fileName) {
+  if (!resumeUploadOverlay || !resumeUploadModal) return;
+
+  if (resumeUploadFileName) resumeUploadFileName.textContent = fileName;
+  resumeUploadOverlay.classList.add('open');
+  resumeUploadOverlay.setAttribute('aria-hidden', 'false');
+  setResumeUploadState('uploading');
+  syncModalLock();
+}
+
+function closeResumeUploadModal(force = false) {
+  if (!resumeUploadOverlay) return;
+  if (resumeUploadBusy && !force) return;
+
+  resumeUploadOverlay.classList.remove('open');
+  resumeUploadOverlay.setAttribute('aria-hidden', 'true');
+  if (resumeUploadModal) resumeUploadModal.dataset.uploadPhase = 'idle';
+  syncModalLock();
+}
+
 function openResumeUpload() {
+  if (resumeUploadBusy) return;
   if (resumeUploadInput) resumeUploadInput.click();
 }
 
@@ -1061,16 +1232,51 @@ async function handleResumeUpload() {
   const file = resumeUploadInput && resumeUploadInput.files && resumeUploadInput.files[0];
   if (!file) return;
 
+  let parsingComplete = false;
+
+  resumeUploadBusy = true;
+  openResumeUploadModal(file.name);
+
   try {
-    const text = await extractResumeText(file);
+    const textPromise = extractResumeText(file);
+
+    await wait(420);
+    setResumeUploadState('parsing', {
+      detail: `Pulling out role signals from ${file.name}.`
+    });
+
+    const text = await textPromise;
+    parsingComplete = true;
     resumeProfile = buildResumeProfile(text, file.name);
     saveResumeProfile();
     renderResumeMatchUI();
+
+    setResumeUploadState('matching', {
+      detail: `Scoring openings around ${resumeProfile.summary}.`
+    });
+    await wait(420);
+
     navigateTo('jobs');
     applyFilters();
+    setResumeUploadState('matched', {
+      detail: `We found the strongest roles around ${resumeProfile.summary}.`
+    });
+    await wait(520);
+
+    resumeUploadBusy = false;
+    closeResumeUploadModal();
     showToast(`Matched your search to ${resumeProfile.summary}.`);
   } catch (error) {
-    showToast(error instanceof Error ? error.message : 'Could not read that resume yet.');
+    const message = error instanceof Error ? error.message : 'Could not read that resume yet.';
+    resumeUploadBusy = false;
+    setResumeUploadState('error', {
+      detail: message,
+      status: message,
+      steps: parsingComplete
+        ? { upload: 'complete', parse: 'complete', match: 'error' }
+        : { upload: 'complete', parse: 'error', match: 'pending' }
+    });
+    showToast(message);
   } finally {
     if (resumeUploadInput) resumeUploadInput.value = '';
   }
@@ -1146,6 +1352,9 @@ if (homeResumeTrigger) homeResumeTrigger.addEventListener('click', openResumeUpl
 if (jobsResumeTrigger) jobsResumeTrigger.addEventListener('click', openResumeUpload);
 if (clearResumeMatchButton) clearResumeMatchButton.addEventListener('click', clearResumeMatch);
 if (resumeUploadInput) resumeUploadInput.addEventListener('change', handleResumeUpload);
+if (resumeUploadOverlay) resumeUploadOverlay.addEventListener('click', () => closeResumeUploadModal());
+if (resumeUploadModal) resumeUploadModal.addEventListener('click', (event) => event.stopPropagation());
+if (resumeUploadCloseButton) resumeUploadCloseButton.addEventListener('click', () => closeResumeUploadModal());
 trackerFilterButtons.forEach((button) => {
   button.addEventListener('click', () => {
     activeTrackerFilter = button.dataset.trackerFilter || 'all';
@@ -1160,6 +1369,12 @@ if (trackerListEl) {
     handleTrackerAction(target.dataset.trackerId, target.dataset.trackerAction);
   });
   trackerListEl.addEventListener('input', (event) => {
+    const target = event.target.closest('[data-tracker-stage]');
+    if (!target) return;
+    target.setAttribute('aria-valuetext', TRACKER_STAGES[Number(target.value)]);
+    paintTrackerProgress(target.closest('.tracker-stage-slider-shell'), Number(target.value));
+  });
+  trackerListEl.addEventListener('change', (event) => {
     const target = event.target.closest('[data-tracker-stage]');
     if (!target) return;
     setTrackerStage(target.dataset.trackerId, Number(target.value));
@@ -1463,19 +1678,26 @@ function openModal(id) {
   }
 
   overlayEl.classList.add('open');
-  document.body.classList.add('modal-open');
+  syncModalLock();
 }
 
 function closeModal() {
   if (!overlayEl) return;
   overlayEl.classList.remove('open');
-  document.body.classList.remove('modal-open');
   activeModalJobId = null;
+  syncModalLock();
 }
 
 if (overlayEl) overlayEl.addEventListener('click', closeModal);
 if (modalArea) modalArea.addEventListener('click', (event) => event.stopPropagation());
-document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && activeModalJobId !== null) closeModal(); });
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape') return;
+  if (resumeUploadOverlay && resumeUploadOverlay.classList.contains('open')) {
+    closeResumeUploadModal();
+    return;
+  }
+  if (activeModalJobId !== null) closeModal();
+});
 
 renderHomePreview();
 renderResumeMatchUI();
