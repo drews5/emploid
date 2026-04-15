@@ -596,12 +596,8 @@ const trackerChartStat = document.getElementById('tracker-chart-stat');
 const trackerCalloutCard = document.getElementById('tracker-callout-card');
 const trackerToolbarNote = document.getElementById('tracker-toolbar-note');
 const trackerFilterButtons = document.querySelectorAll('[data-tracker-filter]');
-const homeResumeTrigger = document.getElementById('home-resume-trigger');
+const heroResumeTrigger = document.getElementById('hero-resume-trigger');
 const jobsResumeTrigger = document.getElementById('jobs-resume-trigger');
-const homeResumeStatus = document.getElementById('home-resume-status');
-const resumeMatchSummary = document.getElementById('resume-match-summary');
-const resumeMatchChips = document.getElementById('resume-match-chips');
-const clearResumeMatchButton = document.getElementById('clear-resume-match');
 const resumeUploadInput = document.getElementById('resume-upload-input');
 
 let toastTimer;
@@ -1089,25 +1085,14 @@ function renderTrackerList() {
 }
 
 function renderResumeMatchUI() {
-  if (homeResumeStatus) {
-    homeResumeStatus.textContent = resumeProfile
-      ? `${resumeProfile.fileName}: simulating an IT intern profile around ${resumeProfile.summary}.`
-      : 'Upload your resume and we’ll tailor the search instantly.';
-  }
-
-  if (resumeMatchSummary) {
-    resumeMatchSummary.textContent = resumeProfile
-      ? `Simulating an IT intern resume and matching for ${resumeProfile.summary}. Uploading a new resume refreshes the results immediately.`
-      : 'Upload a PDF or plain-text resume and we’ll surface the strongest matching roles in this feed.';
-  }
-
-  if (resumeMatchChips) {
-    resumeMatchChips.innerHTML = resumeProfile
-      ? resumeProfile.chips.map((chip) => `<span class="resume-match-chip">${chip}</span>`).join('')
-      : '';
-  }
-
-  if (clearResumeMatchButton) clearResumeMatchButton.classList.toggle('visible', Boolean(resumeProfile));
+  if (!heroResumeTrigger) return;
+  heroResumeTrigger.classList.toggle('has-resume', Boolean(resumeProfile));
+  heroResumeTrigger.setAttribute(
+    'aria-label',
+    resumeProfile
+      ? `Upload a new resume. Current match profile: ${resumeProfile.summary}.`
+      : 'Upload resume'
+  );
 }
 
 function renderTracker() {
@@ -1287,7 +1272,6 @@ function clearResumeMatch() {
   saveResumeProfile();
   renderResumeMatchUI();
   applyFilters();
-  showToast('Resume match cleared.');
 }
 
 function closeMobileMenu() {
@@ -1348,9 +1332,8 @@ if (mobileFilterToggle) {
 }
 if (heroSearch) heroSearch.addEventListener('keypress', (event) => { if (event.key === 'Enter') submitHeroSearch(); });
 if (heroSearchButton) heroSearchButton.addEventListener('click', submitHeroSearch);
-if (homeResumeTrigger) homeResumeTrigger.addEventListener('click', openResumeUpload);
+if (heroResumeTrigger) heroResumeTrigger.addEventListener('click', openResumeUpload);
 if (jobsResumeTrigger) jobsResumeTrigger.addEventListener('click', openResumeUpload);
-if (clearResumeMatchButton) clearResumeMatchButton.addEventListener('click', clearResumeMatch);
 if (resumeUploadInput) resumeUploadInput.addEventListener('change', handleResumeUpload);
 if (resumeUploadOverlay) resumeUploadOverlay.addEventListener('click', () => closeResumeUploadModal());
 if (resumeUploadModal) resumeUploadModal.addEventListener('click', (event) => event.stopPropagation());
