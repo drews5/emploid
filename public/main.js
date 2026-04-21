@@ -84,6 +84,24 @@ const PREVIEW_LISTINGS = [
   { title: 'Software Engineer', company: 'Google', location: 'Chicago, IL', source: 'Company Direct', trustScore: 95, salary: '$135k-$168k', workMode: 'Hybrid', jobType: 'Full-time', age: '4d ago' }
 ];
 
+const CURATED_TRACKER_JOBS = [
+  { id: 'tracker-linear-jpd', title: 'Junior Product Designer', company: 'Linear', location: 'Remote / US', source: 'Company Direct', workMode: 'Remote', jobType: 'Full-time', trustScore: 94, daysPosted: 4, domain: 'linear.app', sentiment: 'growing', description: 'Join the product design team shaping polished workflows for a fast-growing product used by modern software teams.', requirements: REQUIREMENTS_POOL[1], salary: { min: 110000, max: 140000 }, salaryDisclosed: true, repostCount: 0, recentHiringActivity: true, directCompanyLink: true, hiringContact: true, saved: false },
+  { id: 'tracker-stripe-growth-pm', title: 'Associate PM, Growth', company: 'Stripe', location: 'SF / Hybrid', source: 'Company Direct', workMode: 'Hybrid', jobType: 'Full-time', trustScore: 91, daysPosted: 5, domain: 'stripe.com', sentiment: 'growing', description: 'Partner with growth, marketing, and product teams to run experiments that improve activation and retention.', requirements: REQUIREMENTS_POOL[0], salary: { min: 135000, max: 160000 }, salaryDisclosed: true, repostCount: 0, recentHiringActivity: true, directCompanyLink: true, hiringContact: true, saved: false },
+  { id: 'tracker-ramp-product-analyst', title: 'Product Analyst', company: 'Ramp', location: 'New York, NY', source: 'Company Direct', workMode: 'Hybrid', jobType: 'Full-time', trustScore: 88, daysPosted: 7, domain: 'ramp.com', sentiment: 'growing', description: 'Support product and go-to-market teams with structured analytics, SQL-based analysis, and decision support.', requirements: REQUIREMENTS_POOL[2], salary: { min: 120000, max: 135000 }, salaryDisclosed: true, repostCount: 0, recentHiringActivity: true, directCompanyLink: true, hiringContact: true, saved: false },
+  { id: 'tracker-figma-associate-designer', title: 'Associate Designer', company: 'Figma', location: 'SF / Hybrid', source: 'Company Direct', workMode: 'Hybrid', jobType: 'Full-time', trustScore: 86, daysPosted: 6, domain: 'figma.com', sentiment: 'growing', description: 'Work with product teams to craft interaction details, visual systems, and prototyping flows used by millions.', requirements: REQUIREMENTS_POOL[1], salary: { min: 115000, max: 135000 }, salaryDisclosed: true, repostCount: 0, recentHiringActivity: true, directCompanyLink: true, hiringContact: true, saved: false },
+  { id: 'tracker-vercel-frontend', title: 'Jr Frontend Engineer', company: 'Vercel', location: 'Remote / Global', source: 'Company Direct', workMode: 'Remote', jobType: 'Full-time', trustScore: 92, daysPosted: 13, domain: 'vercel.com', sentiment: 'growing', description: 'Build polished frontend experiences for developer tooling and platform workflows with strong attention to performance.', requirements: REQUIREMENTS_POOL[0], salary: { min: 125000, max: 145000 }, salaryDisclosed: true, repostCount: 1, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
+  { id: 'tracker-databricks-ds', title: 'Data Scientist, New Grad', company: 'Databricks', location: 'Mountain View', source: 'Company Direct', workMode: 'On-site', jobType: 'Full-time', trustScore: 81, daysPosted: 8, domain: 'databricks.com', sentiment: 'growing', description: 'Solve product and business problems using experimentation, analytics, and applied modeling on large-scale data.', requirements: REQUIREMENTS_POOL[2], salary: { min: 140000, max: 155000 }, salaryDisclosed: true, repostCount: 0, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
+  { id: 'tracker-notion-product-designer', title: 'Product Designer I', company: 'Notion', location: 'Remote / US-CA', source: 'Company Direct', workMode: 'Remote', jobType: 'Full-time', trustScore: 89, daysPosted: 5, domain: 'notion.so', sentiment: 'stable', description: 'Design end-to-end product experiences with strong systems thinking and close collaboration across product and engineering.', requirements: REQUIREMENTS_POOL[1], salary: { min: 120000, max: 145000 }, salaryDisclosed: true, repostCount: 0, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
+  { id: 'tracker-plaid-backend', title: 'Software Engineer, Backend', company: 'Plaid', location: 'NYC / Hybrid', source: 'Company Direct', workMode: 'Hybrid', jobType: 'Full-time', trustScore: 84, daysPosted: 9, domain: 'plaid.com', sentiment: 'stable', description: 'Build backend systems for data products and developer infrastructure with a focus on reliability and scale.', requirements: REQUIREMENTS_POOL[0], salary: { min: 135000, max: 155000 }, salaryDisclosed: true, repostCount: 1, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
+  { id: 'tracker-airtable-growth-designer', title: 'Growth Designer', company: 'Airtable', location: 'SF', source: 'Company Direct', workMode: 'Hybrid', jobType: 'Full-time', trustScore: 76, daysPosted: 10, domain: 'airtable.com', sentiment: 'stable', description: 'Shape acquisition and onboarding journeys with clear UX writing, experimentation, and growth collaboration.', requirements: REQUIREMENTS_POOL[1], salary: { min: 115000, max: 130000 }, salaryDisclosed: true, repostCount: 1, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
+  { id: 'tracker-cloudflare-apm', title: 'Associate Product Manager', company: 'Cloudflare', location: 'Austin / Hybrid', source: 'Company Direct', workMode: 'Hybrid', jobType: 'Full-time', trustScore: 87, daysPosted: 3, domain: 'cloudflare.com', sentiment: 'growing', description: 'Support roadmap execution and product discovery for platform and developer-facing offerings.', requirements: REQUIREMENTS_POOL[2], salary: { min: 130000, max: 145000 }, salaryDisclosed: true, repostCount: 0, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
+  { id: 'tracker-anthropic-brand-designer', title: 'Brand Designer, New Grad', company: 'Anthropic', location: 'SF', source: 'Company Direct', workMode: 'On-site', jobType: 'Full-time', trustScore: 90, daysPosted: 4, domain: 'anthropic.com', sentiment: 'growing', description: 'Create long-form brand and editorial design work that helps explain frontier AI products clearly and responsibly.', requirements: REQUIREMENTS_POOL[1], salary: { min: 120000, max: 135000 }, salaryDisclosed: true, repostCount: 0, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
+  { id: 'tracker-snowflake-data-analyst', title: 'Data Analyst', company: 'Snowflake', location: 'Denver', source: 'Company Direct', workMode: 'Hybrid', jobType: 'Full-time', trustScore: 78, daysPosted: 6, domain: 'snowflake.com', sentiment: 'growing', description: 'Partner with operations and leadership teams to build reporting, uncover trends, and improve decision quality.', requirements: REQUIREMENTS_POOL[2], salary: { min: 105000, max: 120000 }, salaryDisclosed: true, repostCount: 0, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
+  { id: 'tracker-coinbase-business-analyst', title: 'Business Analyst', company: 'Coinbase', location: 'Remote / US', source: 'Company Direct', workMode: 'Remote', jobType: 'Full-time', trustScore: 66, daysPosted: 14, domain: 'coinbase.com', sentiment: 'stable', description: 'Support business planning with analytical rigor, cross-functional communication, and operational modeling.', requirements: REQUIREMENTS_POOL[2], salary: { min: 110000, max: 125000 }, salaryDisclosed: true, repostCount: 1, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
+  { id: 'tracker-datadog-ux-researcher', title: 'UX Researcher I', company: 'Datadog', location: 'NYC', source: 'Company Direct', workMode: 'Hybrid', jobType: 'Full-time', trustScore: 72, daysPosted: 11, domain: 'datadoghq.com', sentiment: 'growing', description: 'Run foundational and evaluative research to help product teams make better experience decisions.', requirements: REQUIREMENTS_POOL[1], salary: { min: 115000, max: 130000 }, salaryDisclosed: true, repostCount: 1, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
+  { id: 'tracker-scale-marketing-analyst', title: 'Marketing Analyst', company: 'Scale AI', location: 'SF', source: 'Company Direct', workMode: 'Hybrid', jobType: 'Full-time', trustScore: 60, daysPosted: 18, domain: 'scale.com', sentiment: 'stable', description: 'Analyze growth and campaign performance while helping the team prioritize the highest-leverage opportunities.', requirements: REQUIREMENTS_POOL[0], salary: { min: 95000, max: 110000 }, salaryDisclosed: true, repostCount: 2, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
+];
+
 const TRACKER_STAGES = ['Applied', 'Reviewing', 'Interview', 'Offer'];
 
 const DEFAULT_TRACKER_APPLICATIONS = [
@@ -357,7 +375,7 @@ function todayIso() {
 
 function buildInternalListingUrl(job) {
   const query = encodeURIComponent([job.title, job.company].filter(Boolean).join(' '));
-  return `/index.html?page=jobs&q=${query}`;
+  return `/index.html?page=jobs&job=${encodeURIComponent(String(job.id))}&q=${query}`;
 }
 
 function buildReactTrackerRecord(job) {
@@ -553,7 +571,7 @@ function getResumeMatchScore(job, profile) {
 }
 
 function makeData() {
-  return Array.from({ length: 72 }, (_, index) => {
+  const generated = Array.from({ length: 240 }, (_, index) => {
     const company = pick(COMPANIES);
     const title = pick(JOB_TITLES);
     const workMode = pick(WORK_MODES);
@@ -582,7 +600,7 @@ function makeData() {
     trustScore = clamp(trustScore, 8, 99);
 
     return {
-      id: index,
+      id: `generated-${index + 1}`,
       title,
       company: company.name,
       companyContext: company.context,
@@ -606,6 +624,8 @@ function makeData() {
       saved: false
     };
   });
+
+  return [...CURATED_TRACKER_JOBS, ...generated];
 }
 
 const allJobs = makeData();
@@ -662,7 +682,9 @@ let toastTimer;
 let activeTrackerFilter = 'all';
 let expandedTrackerId = null;
 let trackerApplications = loadTrackerApplications();
-let resumeProfile = loadResumeProfile();
+let resumeProfile = null;
+let resumeMatchActive = false;
+let pendingInitialJobId = null;
 let waveTrackerId = null;
 let waveTrackerTimer;
 let resumeUploadBusy = false;
@@ -1291,6 +1313,7 @@ async function handleResumeUpload() {
     const text = await textPromise;
     parsingComplete = true;
     resumeProfile = buildResumeProfile(text, file.name);
+    resumeMatchActive = true;
     saveResumeProfile();
     renderResumeMatchUI();
 
@@ -1327,6 +1350,7 @@ async function handleResumeUpload() {
 
 function clearResumeMatch() {
   resumeProfile = null;
+  resumeMatchActive = false;
   saveResumeProfile();
   renderResumeMatchUI();
   applyFilters();
@@ -1363,9 +1387,11 @@ function applyInitialPageState() {
   const params = new URLSearchParams(window.location.search);
   const page = params.get('page');
   const query = params.get('q');
+  const jobId = params.get('job');
 
   if (page) navigateTo(page);
   if (query && searchInput) searchInput.value = query;
+  if (jobId) pendingInitialJobId = jobId;
 }
 
 function submitHeroSearch() {
@@ -1483,14 +1509,24 @@ function applyFilters() {
     resumeMatchScore: resumeProfile ? getResumeMatchScore(job, resumeProfile) : 0
   }));
 
-  if (resumeProfile && !query) {
+  if (resumeMatchActive && resumeProfile && !query) {
     const strongMatches = filteredJobs.filter((job) => job.resumeMatchScore >= 4);
     if (strongMatches.length >= 3) filteredJobs = strongMatches;
   }
 
   sortJobs(filteredJobs, (sortSelect && sortSelect.value) || 'relevance', query);
+  if (resumeMatchActive && resumeProfile && !query && filteredJobs.length > 13) {
+    filteredJobs = filteredJobs.slice(0, 13);
+  }
   currentPage = 1;
   renderJobs();
+  if (pendingInitialJobId) {
+    const matchedJob = filteredJobs.find((job) => String(job.id) === String(pendingInitialJobId));
+    if (matchedJob) {
+      openModal(matchedJob.id);
+      pendingInitialJobId = null;
+    }
+  }
   closeMobileFilters();
 }
 

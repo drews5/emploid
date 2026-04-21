@@ -139,10 +139,14 @@ function fromLegacyApplication(legacy) {
 
 function loadTrackerBoard(initialApps) {
   const defaults = (initialApps || []).map(normalizeApp);
+  const findDefaultMatch = (app) => defaults.find((defaultApp) => defaultApp.id === app.id || (defaultApp.company === app.company && defaultApp.role === app.role));
 
   const saved = trackerSafeParseJSON(window.localStorage.getItem(TRACKER_BOARD_STORAGE_KEY), null);
   if (Array.isArray(saved) && saved.length) {
-    const merged = saved.map(normalizeApp);
+    const merged = saved.map((savedApp) => {
+      const matchedDefault = findDefaultMatch(savedApp);
+      return normalizeApp(matchedDefault ? { ...matchedDefault, ...savedApp, listingUrl: savedApp.listingUrl || matchedDefault.listingUrl } : savedApp);
+    });
     defaults.forEach((defaultApp) => {
       const exists = merged.some((app) => app.id === defaultApp.id || (app.company === defaultApp.company && app.role === defaultApp.role));
       if (!exists) merged.push(defaultApp);
@@ -152,7 +156,11 @@ function loadTrackerBoard(initialApps) {
 
   const legacy = trackerSafeParseJSON(window.localStorage.getItem(TRACKER_LEGACY_STORAGE_KEY), null);
   if (Array.isArray(legacy) && legacy.length) {
-    const merged = legacy.map(fromLegacyApplication);
+    const merged = legacy.map((legacyApp) => {
+      const converted = fromLegacyApplication(legacyApp);
+      const matchedDefault = findDefaultMatch(converted);
+      return normalizeApp(matchedDefault ? { ...matchedDefault, ...converted, listingUrl: converted.listingUrl || matchedDefault.listingUrl } : converted);
+    });
     defaults.forEach((defaultApp) => {
       const exists = merged.some((app) => app.id === defaultApp.id || (app.company === defaultApp.company && app.role === defaultApp.role));
       if (!exists) merged.push(defaultApp);
