@@ -1,0 +1,30 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{margin:0;padding:24px;background:#fff;font-family:var(--font-body)}
+  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;font-weight:700;cursor:pointer;transition:180ms ease;border:1px solid transparent;font-family:var(--font-body);font-size:15px}
+  .primary{background:var(--orange-500);color:#fff;box-shadow:var(--shadow-cta)}
+  .primary:hover{background:var(--orange-600);transform:translateY(-1px)}
+  .secondary{background:#fff;color:var(--text-primary);border-color:rgba(188,201,216,0.85)}
+  .secondary:hover{background:var(--bg-light)}
+  .danger{background:#fff1f1;color:#9b3131;border-color:rgba(179,58,58,0.18)}
+  .sq{border-radius:6px}
+  .pill-active{background:var(--orange-500);color:#fff;border-color:var(--orange-500)}
+  .pill{background:rgba(255,255,255,0.8);color:var(--text-body);border-color:rgba(188,201,216,0.8);min-height:42px}
+  h5{font-family:var(--font-heading);font-size:12px;margin:0 0 8px;color:var(--text-primary);text-transform:uppercase;letter-spacing:0.06em}
+</style></head><body>
+<h5>Buttons</h5>
+<div class="row">
+  <button class="btn primary">Search</button>
+  <button class="btn secondary">Upload Resume</button>
+  <button class="btn primary sq">Apply on stripe.com/careers →</button>
+  <button class="btn danger">Remove</button>
+</div>
+<h5>Filter pills</h5>
+<div class="row">
+  <button class="btn pill pill-active">All Status</button>
+  <button class="btn pill">Need Attention</button>
+  <button class="btn pill">Interviewing</button>
+  <button class="btn pill">Offers</button>
+</div>
+</body></html>

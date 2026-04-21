@@ -1,0 +1,37 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{margin:0;padding:24px;background:#fff;font-family:var(--font-body);color:var(--text-body)}
+  .row{display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap}
+  .item{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .tile{width:88px;height:88px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid rgba(188,201,216,0.5);border-radius:12px;padding:14px;box-sizing:border-box}
+  .tile img{max-width:100%;max-height:100%;object-fit:contain}
+  .tile.dark{background:var(--navy-900);border-color:transparent}
+  .tile.dark img{filter:brightness(0) invert(1)}
+  .tile.fav{padding:0;background:var(--bg);border-color:var(--border)}
+  .tile.fav img{width:32px;height:32px}
+  .label{font-size:11px;color:var(--text-muted);font-family:var(--font-mono);letter-spacing:0.02em;text-align:center}
+  .name{font-size:12px;color:var(--text-primary);font-weight:700}
+</style></head><body>
+<div class="row">
+  <div class="item">
+    <div class="tile"><img src="../assets/logoicon.svg?v=2"></div>
+    <div class="name">logoicon.svg</div>
+    <div class="label">primary mark · orange</div>
+  </div>
+  <div class="item">
+    <div class="tile dark"><img src="../assets/logoicon.svg?v=2"></div>
+    <div class="name">on navy</div>
+    <div class="label">white tint</div>
+  </div>
+  <div class="item">
+    <div class="tile fav"><img src="../assets/favicon.svg?v=2"></div>
+    <div class="name">favicon.svg</div>
+    <div class="label">32×32 · orange logoicon</div>
+  </div>
+  <div class="item">
+    <div class="tile"><img src="../assets/ghost-pixel.svg"></div>
+    <div class="name">ghost-pixel.svg</div>
+    <div class="label">mascot · empty states only</div>
+  </div>
+</div>
+</body></html>

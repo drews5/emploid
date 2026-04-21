@@ -6,6 +6,11 @@
   <title>Emploid | Listing Trust Score job search</title>
   <link rel="icon" type="image/svg+xml" href="/images/logoicon.svg" />
   <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/colors_and_type.css" />
+  <link rel="stylesheet" href="/tracker.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 </head>
 <body data-page="home">
   <header>
@@ -443,58 +448,7 @@
     </section>
 
     <section id="page-tracker" class="page">
-      <section class="tracker-page">
-        <div class="container tracker-shell">
-          <div class="tracker-header">
-            <div class="tracker-copy">
-              <p class="section-kicker">Portal</p>
-              <h1>Application Tracker</h1>
-              <p class="tracker-sub">
-                Know what’s active, what’s stalled, and what needs a follow-up next.
-              </p>
-            </div>
-
-            <div class="tracker-summary-grid" id="tracker-summary-grid"></div>
-          </div>
-
-          <div class="tracker-toolbar">
-            <div class="tracker-filter-pills" id="tracker-filter-pills">
-              <button class="tracker-filter-pill active" type="button" data-tracker-filter="all">All Status</button>
-              <button class="tracker-filter-pill" type="button" data-tracker-filter="needs-action">Need Attention</button>
-              <button class="tracker-filter-pill" type="button" data-tracker-filter="interview">Interviewing</button>
-              <button class="tracker-filter-pill" type="button" data-tracker-filter="offer">Offers</button>
-              <button class="tracker-filter-pill" type="button" data-tracker-filter="archived">Archived</button>
-            </div>
-
-            <p class="tracker-toolbar-note" id="tracker-toolbar-note"></p>
-          </div>
-
-          <div class="tracker-list" id="tracker-list"></div>
-
-          <section class="tracker-insights">
-            <div class="tracker-insights-heading">
-              <p class="section-kicker">Weekly Insights</p>
-              <h2>Where momentum is real.</h2>
-            </div>
-
-            <div class="tracker-insights-grid">
-              <article class="tracker-chart-card">
-                <div class="tracker-chart-header">
-                  <div>
-                    <h3>Reply Momentum</h3>
-                    <p class="tracker-chart-copy">Recruiter replies, interview movement, and follow-up traction over the last week.</p>
-                  </div>
-                  <div class="tracker-chart-stat" id="tracker-chart-stat"></div>
-                </div>
-
-                <div class="tracker-chart" id="tracker-chart"></div>
-              </article>
-
-              <article class="tracker-callout-card" id="tracker-callout-card"></article>
-            </div>
-          </section>
-        </div>
-      </section>
+      <div id="tracker-app-root"></div>
     </section>
   </main>
 
@@ -601,5 +555,8 @@
   <input id="resume-upload-input" type="file" accept=".pdf,.txt,.md,.rtf" hidden />
 
   <script src="/main.js"></script>
+  <script src="/tracker-data.js"></script>
+  <script type="text/babel" src="/tracker-components.jsx"></script>
+  <script type="text/babel" src="/tracker-app.jsx"></script>
 </body>
 </html>

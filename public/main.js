@@ -1096,9 +1096,7 @@ function renderResumeMatchUI() {
 }
 
 function renderTracker() {
-  renderTrackerSummary();
-  renderTrackerList();
-  renderTrackerInsights();
+  // disabled as we use React now
 }
 
 function syncModalLock() {

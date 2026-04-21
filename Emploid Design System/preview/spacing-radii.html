@@ -1,0 +1,29 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{margin:0;padding:22px;background:#fff;font-family:var(--font-body);color:var(--text-body)}
+  .row{display:flex;gap:24px;align-items:flex-end;flex-wrap:wrap}
+  .card{display:flex;flex-direction:column;gap:8px;align-items:center}
+  .box{border-radius:12px;background:var(--bg-white);border:1px solid rgba(188,201,216,0.7);box-shadow:var(--shadow-sm)}
+  .label{font-size:11px;color:var(--text-muted);font-family:var(--font-mono)}
+  .s4{width:16px;height:16px} .s8{width:32px;height:32px} .s16{width:64px;height:64px} .s24{width:96px;height:96px}
+  .radii{display:flex;gap:14px;align-items:center;margin-top:16px}
+  .r{width:56px;height:56px;background:var(--orange-500);display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-mono);font-size:11px}
+  h5{font-family:var(--font-heading);font-size:12px;margin:0 0 6px;color:var(--text-primary);text-transform:uppercase;letter-spacing:0.06em}
+</style></head><body>
+<h5>Spacing (4/8/16/24)</h5>
+<div class="row">
+  <div class="card"><div class="box s4"></div><div class="label">4px · space-1</div></div>
+  <div class="card"><div class="box s8"></div><div class="label">8px · space-2</div></div>
+  <div class="card"><div class="box s16"></div><div class="label">16px · space-4</div></div>
+  <div class="card"><div class="box s24"></div><div class="label">24px · space-6</div></div>
+</div>
+<h5 style="margin-top:20px">Radii</h5>
+<div class="radii">
+  <div class="r" style="border-radius:6px">6</div>
+  <div class="r" style="border-radius:8px">8</div>
+  <div class="r" style="border-radius:12px">12</div>
+  <div class="r" style="border-radius:18px">18</div>
+  <div class="r" style="border-radius:24px">24</div>
+  <div class="r" style="border-radius:999px">pill</div>
+</div>
+</body></html>

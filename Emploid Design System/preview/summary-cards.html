@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{margin:0;padding:22px;background:var(--bg);font-family:var(--font-body)}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:720px}
+  .card{padding:16px;border-radius:16px;border:1px solid rgba(188,201,216,0.72);box-shadow:var(--shadow-sm)}
+  .soft{background:linear-gradient(180deg,#fff,#edf3fb)}
+  .orange{background:linear-gradient(180deg,#fff4ec,#ffe5d3)}
+  .navy{background:linear-gradient(145deg,#122035,#1d3048);color:#fff;border-color:rgba(18,32,53,0.2)}
+  .green{background:linear-gradient(180deg,#eff8f3,#dff0e6)}
+  .label{font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted)}
+  .navy .label{color:#fff}
+  .val{margin-top:8px;font-family:var(--font-heading);font-weight:900;font-size:1.8rem;line-height:1;color:var(--text-primary)}
+  .navy .val{color:#fff}
+  .d{margin-top:6px;font-size:0.82rem;color:var(--text-muted)}
+  .navy .d{color:#fff}
+</style></head><body>
+<div class="grid">
+  <div class="card soft"><div class="label">Active</div><div class="val">7</div><div class="d">this week</div></div>
+  <div class="card orange"><div class="label">Needs action</div><div class="val">3</div><div class="d">reply overdue</div></div>
+  <div class="card navy"><div class="label">Interviews</div><div class="val">2</div><div class="d">on the calendar</div></div>
+  <div class="card green"><div class="label">Offers</div><div class="val">1</div><div class="d">open offer</div></div>
+</div>
+</body></html>

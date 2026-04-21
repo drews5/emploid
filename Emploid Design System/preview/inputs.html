@@ -1,0 +1,24 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{margin:0;padding:24px;background:#fff;font-family:var(--font-body)}
+  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;max-width:560px}
+  .input{min-height:46px;border-radius:12px;border:1px solid rgba(188,201,216,0.8);background:#fff;padding:0 16px;font:inherit;flex:1;min-width:200px;color:var(--text-primary)}
+  .input:focus{outline:none;border-color:var(--orange-500);box-shadow:0 0 0 4px rgba(200,91,36,0.14)}
+  .input.focus{border-color:var(--orange-500);box-shadow:0 0 0 4px rgba(200,91,36,0.14)}
+  .select{min-height:46px;border-radius:12px;border:1px solid rgba(188,201,216,0.8);background:#fff;padding:0 42px 0 16px;color:var(--text-primary);appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='7' viewBox='0 0 12 7' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23223247' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+  .switch{position:relative;width:38px;height:22px;display:inline-block}
+  .switch-bg{position:absolute;inset:0;border-radius:999px;background:var(--orange-500)}
+  .switch-bg::before{content:'';position:absolute;top:3px;left:19px;width:16px;height:16px;border-radius:50%;background:#fff}
+  .row2{display:flex;align-items:center;gap:10px;margin-top:12px;color:var(--text-body);font-size:0.94rem}
+  h5{font-family:var(--font-heading);font-size:12px;margin:0 0 8px;color:var(--text-primary);text-transform:uppercase;letter-spacing:0.06em}
+</style></head><body>
+<h5>Inputs</h5>
+<div class="row">
+  <input class="input" placeholder="Role, company, or keyword">
+  <input class="input focus" value="Marketing, Target">
+</div>
+<div class="row" style="margin-top:12px">
+  <select class="select"><option>Relevance</option></select>
+  <div class="row2"><span class="switch"><span class="switch-bg"></span></span><span>Direct Company Links only</span></div>
+</div>
+</body></html>
