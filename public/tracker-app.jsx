@@ -71,6 +71,12 @@ function App() {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
+  useEffect(() => {
+    const hasOverlay = Boolean(detailId || composerOpen);
+    document.body.classList.toggle('tracker-overlay-open', hasOverlay);
+    return () => document.body.classList.remove('tracker-overlay-open');
+  }, [detailId, composerOpen]);
+
   const selectedApp = useMemo(
     () => apps.find((app) => app.id === detailId) || null,
     [apps, detailId]
@@ -181,13 +187,22 @@ function App() {
         return app;
       }));
     });
-    setToast(flag === 'hot' ? 'Hot flag updated.' : 'Stalled flag updated.');
+    setToast(flag === 'hot' ? 'Star updated.' : 'Stalled flag updated.');
   };
 
   const handleOpenListing = (app) => {
     window.open(buildListingUrl(app), '_blank', 'noopener,noreferrer');
     updateOneApp(app.id, (entry) => ({ ...entry }));
     setToast('Opened the listing in a new tab.');
+  };
+
+  const handleNotesSave = (appId, notes) => {
+    const nextNotes = String(notes || '').replace(/\r\n/g, '\n').trim();
+    updateOneApp(appId, (app) => ({
+      ...app,
+      notes: nextNotes,
+    }));
+    setToast(nextNotes ? 'Notes saved.' : 'Notes cleared.');
   };
 
   const handleDraftChange = (key, value) => {
@@ -285,6 +300,7 @@ function App() {
         onStageChange={handleStageChange}
         onToggleFlag={handleToggleFlag}
         onOpenListing={handleOpenListing}
+        onUpdateNotes={handleNotesSave}
       />
 
       <ComposerModal

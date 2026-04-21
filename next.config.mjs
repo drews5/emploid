@@ -13,6 +13,22 @@ const nextConfig = {
         source: '/',
         destination: '/index.html',
       },
+      {
+        source: '/search',
+        destination: '/index.html',
+      },
+      {
+        source: '/browse',
+        destination: '/index.html',
+      },
+      {
+        source: '/tracker',
+        destination: '/index.html',
+      },
+      {
+        source: '/about',
+        destination: '/index.html',
+      },
     ]
   },
 };

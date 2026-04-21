@@ -373,9 +373,50 @@ function todayIso() {
   return new Date().toISOString().slice(0, 10);
 }
 
+const PAGE_ROUTES = {
+  home: '/search',
+  jobs: '/browse',
+  tracker: '/tracker',
+  about: '/about',
+};
+
+const ROUTE_TO_PAGE = {
+  '/': 'home',
+  '/index.html': 'home',
+  '/search': 'home',
+  '/browse': 'jobs',
+  '/tracker': 'tracker',
+  '/about': 'about',
+};
+
+function normalizePageId(pageId) {
+  if (pageId === 'search') return 'home';
+  if (pageId === 'browse') return 'jobs';
+  if (pageId === 'home' || pageId === 'jobs' || pageId === 'tracker' || pageId === 'about') return pageId;
+  return 'home';
+}
+
+function getPagePath(pageId) {
+  return PAGE_ROUTES[normalizePageId(pageId)] || PAGE_ROUTES.home;
+}
+
+function getPageIdFromPath(pathname) {
+  const normalizedPath = pathname && pathname !== '/'
+    ? pathname.replace(/\/+$/, '') || '/'
+    : '/';
+  return ROUTE_TO_PAGE[normalizedPath] || 'home';
+}
+
+function buildPageUrl(pageId, params = new URLSearchParams()) {
+  const nextParams = new URLSearchParams(params);
+  nextParams.delete('page');
+  const query = nextParams.toString();
+  return `${getPagePath(pageId)}${query ? `?${query}` : ''}`;
+}
+
 function buildInternalListingUrl(job) {
   const query = encodeURIComponent([job.title, job.company].filter(Boolean).join(' '));
-  return `/index.html?page=jobs&job=${encodeURIComponent(String(job.id))}&q=${query}`;
+  return `/browse?job=${encodeURIComponent(String(job.id))}&q=${query}`;
 }
 
 function buildReactTrackerRecord(job) {
@@ -454,6 +495,132 @@ function loadResumeProfile() {
 function saveResumeProfile() {
   if (resumeProfile) window.localStorage.setItem(RESUME_STORAGE_KEY, JSON.stringify(resumeProfile));
   else window.localStorage.removeItem(RESUME_STORAGE_KEY);
+}
+
+function loadAuthSession() {
+  const stored = safeParseJSON(window.localStorage.getItem(AUTH_SESSION_STORAGE_KEY), null);
+  if (!stored || typeof stored.email !== 'string') return null;
+  const email = stored.email.trim();
+  if (!email) return null;
+  return {
+    email,
+    mode: stored.mode === 'login' ? 'login' : 'signup',
+    createdAt: stored.createdAt || null,
+  };
+}
+
+function saveAuthSession(session) {
+  if (session) window.localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(session));
+  else window.localStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
+}
+
+function loadRememberedAuthEmail() {
+  return window.localStorage.getItem(AUTH_LAST_EMAIL_STORAGE_KEY) || '';
+}
+
+function rememberAuthEmail(email) {
+  if (email) window.localStorage.setItem(AUTH_LAST_EMAIL_STORAGE_KEY, email);
+}
+
+function authDisplayEmail(session) {
+  return session && session.email ? session.email : 'you@example.com';
+}
+
+function renderAuthState() {
+  const signedIn = Boolean(authSession);
+  const email = authDisplayEmail(authSession);
+
+  if (navAuthGuest) navAuthGuest.hidden = signedIn;
+  if (navAuthUser) navAuthUser.hidden = !signedIn;
+  if (navUserEmail) navUserEmail.textContent = email;
+
+  if (navMobileAuthGuest) navMobileAuthGuest.hidden = signedIn;
+  if (navMobileAuthUser) navMobileAuthUser.hidden = !signedIn;
+  if (navMobileUserEmail) navMobileUserEmail.textContent = email;
+}
+
+function setAuthMode(mode) {
+  currentAuthMode = mode === 'login' ? 'login' : 'signup';
+
+  if (authTabSignUp) authTabSignUp.classList.toggle('is-active', currentAuthMode === 'signup');
+  if (authTabLogin) authTabLogin.classList.toggle('is-active', currentAuthMode === 'login');
+
+  if (currentAuthMode === 'signup') {
+    if (authKicker) authKicker.textContent = 'Sign up';
+    if (authTitle) authTitle.textContent = 'Create your Emploid account';
+    if (authSubtitle) authSubtitle.textContent = 'Save jobs, keep your tracker in sync, and get back in instantly. This demo accepts any email and password.';
+    if (authSubmit) authSubmit.textContent = 'Sign up';
+    if (authNote) authNote.textContent = 'No verification or password rules in this demo. Just enter any email and password to continue.';
+    if (authSwitchCopy) authSwitchCopy.textContent = 'Already have an account?';
+    if (authSwitchMode) authSwitchMode.textContent = 'Log in';
+  } else {
+    if (authKicker) authKicker.textContent = 'Log in';
+    if (authTitle) authTitle.textContent = 'Welcome back';
+    if (authSubtitle) authSubtitle.textContent = 'Pick up where you left off. Use any email and password and we will sign you right in.';
+    if (authSubmit) authSubmit.textContent = 'Log in';
+    if (authNote) authNote.textContent = 'Your saved jobs and tracker stay on this device for the demo.';
+    if (authSwitchCopy) authSwitchCopy.textContent = 'Need an account?';
+    if (authSwitchMode) authSwitchMode.textContent = 'Sign up';
+  }
+
+  if (authPasswordInput) {
+    authPasswordInput.setAttribute('autocomplete', currentAuthMode === 'signup' ? 'new-password' : 'current-password');
+  }
+}
+
+function openAuthModal(mode = 'signup') {
+  if (!authOverlay) return;
+  setAuthMode(mode);
+  if (authEmailInput) authEmailInput.value = authSession ? authSession.email : loadRememberedAuthEmail();
+  if (authPasswordInput) authPasswordInput.value = '';
+  authOverlay.classList.add('open');
+  authOverlay.setAttribute('aria-hidden', 'false');
+  closeMobileMenu();
+  syncModalLock();
+  window.setTimeout(() => {
+    if (authEmailInput) authEmailInput.focus();
+  }, 0);
+}
+
+function closeAuthModal() {
+  if (!authOverlay) return;
+  authOverlay.classList.remove('open');
+  authOverlay.setAttribute('aria-hidden', 'true');
+  syncModalLock();
+}
+
+function submitAuthForm(event) {
+  event.preventDefault();
+  const email = String(authEmailInput && authEmailInput.value ? authEmailInput.value : '').trim();
+  const password = String(authPasswordInput && authPasswordInput.value ? authPasswordInput.value : '');
+
+  if (!email || !password) {
+    showToast('Enter any email and password to continue.');
+    if (!email && authEmailInput) authEmailInput.focus();
+    else if (authPasswordInput) authPasswordInput.focus();
+    return;
+  }
+
+  authSession = {
+    email,
+    mode: currentAuthMode,
+    createdAt: new Date().toISOString(),
+  };
+
+  saveAuthSession(authSession);
+  rememberAuthEmail(email);
+  renderAuthState();
+  closeAuthModal();
+  showToast(currentAuthMode === 'signup' ? `Account created for ${email}.` : `Logged in as ${email}.`);
+}
+
+function signOutAuth() {
+  authSession = null;
+  saveAuthSession(null);
+  renderAuthState();
+  closeAuthModal();
+  closeMobileMenu();
+  showToast('Signed out.');
 }
 
 function wait(ms) {
@@ -662,11 +829,41 @@ const resumeUploadStatus = document.getElementById('resume-upload-status');
 const resumeUploadMeter = document.getElementById('resume-upload-meter');
 const resumeUploadStepEls = document.querySelectorAll('[data-upload-step]');
 const toastEl = document.getElementById('toast');
+const navAuthGuest = document.getElementById('nav-auth-guest');
+const navAuthUser = document.getElementById('nav-auth-user');
+const navLoginTrigger = document.getElementById('nav-login-trigger');
+const navSignUpTrigger = document.getElementById('nav-sign-up-trigger');
+const navUserEmail = document.getElementById('nav-user-email');
+const navSignOutTrigger = document.getElementById('nav-sign-out-trigger');
 const mobileMenu = document.getElementById('nav-mobile-menu');
+const navMobileAuthGuest = document.getElementById('nav-mobile-auth-guest');
+const navMobileAuthUser = document.getElementById('nav-mobile-auth-user');
+const navMobileLoginTrigger = document.getElementById('nav-mobile-login-trigger');
+const navMobileSignUpTrigger = document.getElementById('nav-mobile-sign-up-trigger');
+const navMobileUserEmail = document.getElementById('nav-mobile-user-email');
+const navMobileOpenTracker = document.getElementById('nav-mobile-open-tracker');
+const navMobileSignOutTrigger = document.getElementById('nav-mobile-sign-out-trigger');
 const hamburger = document.getElementById('nav-hamburger');
 const homePreviewList = document.getElementById('home-preview-list');
 const mobileFilterToggle = document.getElementById('mobile-filter-toggle');
+const mobileFilterScrim = document.getElementById('mobile-filter-scrim');
+const mobileFilterClose = document.getElementById('mobile-filter-close');
 const jobsFilters = document.getElementById('jobs-filters');
+const authOverlay = document.getElementById('auth-overlay');
+const authModal = document.getElementById('auth-modal');
+const authCloseButton = document.getElementById('auth-close');
+const authForm = document.getElementById('auth-form');
+const authEmailInput = document.getElementById('auth-email');
+const authPasswordInput = document.getElementById('auth-password');
+const authKicker = document.getElementById('auth-kicker');
+const authTitle = document.getElementById('auth-title');
+const authSubtitle = document.getElementById('auth-subtitle');
+const authSubmit = document.getElementById('auth-submit');
+const authNote = document.getElementById('auth-note');
+const authSwitchCopy = document.getElementById('auth-switch-copy');
+const authSwitchMode = document.getElementById('auth-switch-mode');
+const authTabSignUp = document.getElementById('auth-tab-signup');
+const authTabLogin = document.getElementById('auth-tab-login');
 const trackerSummaryGrid = document.getElementById('tracker-summary-grid');
 const trackerListEl = document.getElementById('tracker-list');
 const trackerChart = document.getElementById('tracker-chart');
@@ -688,6 +885,10 @@ let pendingInitialJobId = null;
 let waveTrackerId = null;
 let waveTrackerTimer;
 let resumeUploadBusy = false;
+const AUTH_SESSION_STORAGE_KEY = 'emploid-auth-session-v1';
+const AUTH_LAST_EMAIL_STORAGE_KEY = 'emploid-auth-last-email-v1';
+let authSession = loadAuthSession();
+let currentAuthMode = 'signup';
 
 function renderHomePreview() {
   if (!homePreviewList) return;
@@ -1184,7 +1385,13 @@ function renderTracker() {
 function syncModalLock() {
   const hasJobModal = Boolean(overlayEl && overlayEl.classList.contains('open'));
   const hasResumeModal = Boolean(resumeUploadOverlay && resumeUploadOverlay.classList.contains('open'));
-  document.body.classList.toggle('modal-open', hasJobModal || hasResumeModal);
+  const hasAuthModal = Boolean(authOverlay && authOverlay.classList.contains('open'));
+  const hasMobileFilters = Boolean(
+    jobsFilters
+    && jobsFilters.classList.contains('mobile-open')
+    && window.innerWidth <= 760
+  );
+  document.body.classList.toggle('modal-open', hasJobModal || hasResumeModal || hasAuthModal || hasMobileFilters);
 }
 
 function setResumeUploadState(phase, overrides = {}) {
@@ -1364,41 +1571,73 @@ function setMobileFiltersOpen(isOpen) {
   if (!mobileFilterToggle || !jobsFilters) return;
   mobileFilterToggle.setAttribute('aria-expanded', String(isOpen));
   jobsFilters.classList.toggle('mobile-open', isOpen);
+  if (mobileFilterScrim) {
+    mobileFilterScrim.hidden = !isOpen;
+    mobileFilterScrim.classList.toggle('open', isOpen);
+  }
+  syncModalLock();
 }
 
 function closeMobileFilters() {
   if (window.innerWidth <= 760) setMobileFiltersOpen(false);
 }
 
-function navigateTo(pageId) {
+function navigateTo(pageId, options = {}) {
+  const {
+    params = null,
+    replace = false,
+    scroll = true,
+    syncLocation = true,
+  } = options;
+  const normalizedPageId = normalizePageId(pageId);
+
   document.querySelectorAll('.page').forEach((pageEl) => pageEl.classList.remove('active'));
   document.querySelectorAll('.nav-link, .nav-mobile-link').forEach((linkEl) => linkEl.classList.remove('active'));
-  const pageEl = document.getElementById(`page-${pageId}`);
+  const pageEl = document.getElementById(`page-${normalizedPageId}`);
   if (pageEl) pageEl.classList.add('active');
-  document.querySelectorAll(`[data-page="${pageId}"]`).forEach((linkEl) => {
+  document.querySelectorAll(`[data-page="${normalizedPageId}"]`).forEach((linkEl) => {
     if (linkEl.classList.contains('nav-link') || linkEl.classList.contains('nav-mobile-link')) linkEl.classList.add('active');
   });
-  document.body.dataset.page = pageId;
+  document.body.dataset.page = normalizedPageId;
   closeMobileMenu();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  closeMobileFilters();
+
+  if (syncLocation) {
+    const targetUrl = buildPageUrl(normalizedPageId, params || new URLSearchParams());
+    const currentUrl = `${window.location.pathname}${window.location.search}`;
+    if (targetUrl !== currentUrl) {
+      const historyMethod = replace ? 'replaceState' : 'pushState';
+      window.history[historyMethod]({}, '', targetUrl);
+    }
+  }
+
+  if (scroll) window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function applyInitialPageState() {
   const params = new URLSearchParams(window.location.search);
-  const page = params.get('page');
+  const legacyPage = params.get('page');
   const query = params.get('q');
   const jobId = params.get('job');
+  const page = normalizePageId(legacyPage || getPageIdFromPath(window.location.pathname));
 
-  if (page) navigateTo(page);
-  if (query && searchInput) searchInput.value = query;
-  if (jobId) pendingInitialJobId = jobId;
+  if (legacyPage) params.delete('page');
+
+  navigateTo(page, {
+    params,
+    replace: Boolean(legacyPage) || window.location.pathname === '/' || window.location.pathname === '/index.html',
+    scroll: false,
+  });
+
+  if (searchInput) searchInput.value = query || '';
+  pendingInitialJobId = jobId || null;
 }
 
 function submitHeroSearch() {
   const query = heroSearch && heroSearch.value.trim();
   if (!query || !searchInput) return;
   searchInput.value = query;
-  navigateTo('jobs');
+  navigateTo('jobs', { params: new URLSearchParams({ q: query }) });
   applyFilters();
 }
 
@@ -1412,6 +1651,11 @@ document.querySelectorAll('[data-page]').forEach((el) => {
   }
 });
 
+window.addEventListener('popstate', () => {
+  applyInitialPageState();
+  applyFilters();
+});
+
 window.addEventListener('scroll', () => {
   if (mainNav) mainNav.classList.toggle('scrolled', window.scrollY > 8);
 }, { passive: true });
@@ -1423,6 +1667,31 @@ if (mobileFilterToggle) {
     setMobileFiltersOpen(!isOpen);
   });
 }
+if (mobileFilterScrim) mobileFilterScrim.addEventListener('click', closeMobileFilters);
+if (mobileFilterClose) mobileFilterClose.addEventListener('click', closeMobileFilters);
+if (navLoginTrigger) navLoginTrigger.addEventListener('click', () => openAuthModal('login'));
+if (navSignUpTrigger) navSignUpTrigger.addEventListener('click', () => openAuthModal('signup'));
+if (navSignOutTrigger) navSignOutTrigger.addEventListener('click', signOutAuth);
+if (navMobileLoginTrigger) navMobileLoginTrigger.addEventListener('click', () => openAuthModal('login'));
+if (navMobileSignUpTrigger) navMobileSignUpTrigger.addEventListener('click', () => openAuthModal('signup'));
+if (navMobileOpenTracker) {
+  navMobileOpenTracker.addEventListener('click', () => {
+    navigateTo('tracker');
+    closeMobileMenu();
+  });
+}
+if (navMobileSignOutTrigger) navMobileSignOutTrigger.addEventListener('click', signOutAuth);
+if (authTabSignUp) authTabSignUp.addEventListener('click', () => setAuthMode('signup'));
+if (authTabLogin) authTabLogin.addEventListener('click', () => setAuthMode('login'));
+if (authSwitchMode) {
+  authSwitchMode.addEventListener('click', () => {
+    setAuthMode(currentAuthMode === 'signup' ? 'login' : 'signup');
+  });
+}
+if (authForm) authForm.addEventListener('submit', submitAuthForm);
+if (authOverlay) authOverlay.addEventListener('click', closeAuthModal);
+if (authModal) authModal.addEventListener('click', (event) => event.stopPropagation());
+if (authCloseButton) authCloseButton.addEventListener('click', closeAuthModal);
 if (heroSearch) heroSearch.addEventListener('keypress', (event) => { if (event.key === 'Enter') submitHeroSearch(); });
 if (heroSearchButton) heroSearchButton.addEventListener('click', submitHeroSearch);
 if (heroResumeTrigger) heroResumeTrigger.addEventListener('click', openResumeUpload);
@@ -1460,6 +1729,11 @@ window.addEventListener('resize', () => {
   if (window.innerWidth > 760) {
     if (jobsFilters) jobsFilters.classList.remove('mobile-open');
     if (mobileFilterToggle) mobileFilterToggle.setAttribute('aria-expanded', 'false');
+    if (mobileFilterScrim) {
+      mobileFilterScrim.classList.remove('open');
+      mobileFilterScrim.hidden = true;
+    }
+    syncModalLock();
   }
 });
 
@@ -1840,13 +2114,23 @@ if (overlayEl) overlayEl.addEventListener('click', closeModal);
 if (modalArea) modalArea.addEventListener('click', (event) => event.stopPropagation());
 document.addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return;
+  if (authOverlay && authOverlay.classList.contains('open')) {
+    closeAuthModal();
+    return;
+  }
   if (resumeUploadOverlay && resumeUploadOverlay.classList.contains('open')) {
     closeResumeUploadModal();
+    return;
+  }
+  if (jobsFilters && jobsFilters.classList.contains('mobile-open') && window.innerWidth <= 760) {
+    closeMobileFilters();
     return;
   }
   if (activeModalJobId !== null) closeModal();
 });
 
+renderAuthState();
+setAuthMode('signup');
 renderHomePreview();
 renderResumeMatchUI();
 renderTracker();

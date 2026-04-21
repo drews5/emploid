@@ -16,21 +16,27 @@
   <header>
     <nav class="nav" id="main-nav">
       <div class="container nav-inner">
-        <a href="#" class="nav-logo" data-page="home" aria-label="Emploid home">
+        <a href="/search" class="nav-logo" data-page="home" aria-label="Emploid home">
           <img src="/images/logoicon.svg" alt="Emploid logo mark" />
           <span class="nav-logo-word">emploid</span>
         </a>
 
         <div class="nav-links">
-          <a href="#" class="nav-link active" data-page="home" id="nav-home">Search</a>
-          <a href="#" class="nav-link" data-page="jobs" id="nav-jobs">Browse Jobs</a>
-          <a href="#" class="nav-link" data-page="tracker" id="nav-tracker">Tracker</a>
-          <a href="#" class="nav-link" data-page="about" id="nav-about">About</a>
+          <a href="/search" class="nav-link active" data-page="home" id="nav-home">Search</a>
+          <a href="/browse" class="nav-link" data-page="jobs" id="nav-jobs">Browse Jobs</a>
+          <a href="/tracker" class="nav-link" data-page="tracker" id="nav-tracker">Tracker</a>
+          <a href="/about" class="nav-link" data-page="about" id="nav-about">About</a>
         </div>
 
         <div class="nav-auth">
-          <button class="nav-login" type="button">Log in</button>
-          <button class="btn btn-secondary" type="button" id="nav-early-access">Early Access</button>
+          <div class="nav-auth-guest" id="nav-auth-guest">
+            <button class="nav-login" type="button" id="nav-login-trigger">Log in</button>
+            <button class="btn btn-secondary" type="button" id="nav-sign-up-trigger">Sign up</button>
+          </div>
+          <div class="nav-auth-user" id="nav-auth-user" hidden>
+            <span class="nav-account-pill" id="nav-user-email">you@example.com</span>
+            <button class="btn btn-secondary" type="button" id="nav-sign-out-trigger">Sign out</button>
+          </div>
         </div>
 
         <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu" type="button">
@@ -39,11 +45,21 @@
       </div>
 
       <div class="nav-mobile-menu" id="nav-mobile-menu">
-        <a href="#" class="nav-mobile-link active" data-page="home">Search</a>
-        <a href="#" class="nav-mobile-link" data-page="jobs">Browse Jobs</a>
-        <a href="#" class="nav-mobile-link" data-page="tracker">Tracker</a>
-        <a href="#" class="nav-mobile-link" data-page="about">About</a>
-        <a href="#" class="nav-mobile-link">Log in</a>
+        <a href="/search" class="nav-mobile-link active" data-page="home">Search</a>
+        <a href="/browse" class="nav-mobile-link" data-page="jobs">Browse Jobs</a>
+        <a href="/tracker" class="nav-mobile-link" data-page="tracker">Tracker</a>
+        <a href="/about" class="nav-mobile-link" data-page="about">About</a>
+        <div class="nav-mobile-auth">
+          <div class="nav-mobile-auth-guest" id="nav-mobile-auth-guest">
+            <button class="nav-mobile-link" type="button" id="nav-mobile-login-trigger">Log in</button>
+            <button class="nav-mobile-link nav-mobile-link-strong" type="button" id="nav-mobile-sign-up-trigger">Sign up</button>
+          </div>
+          <div class="nav-mobile-auth-user" id="nav-mobile-auth-user" hidden>
+            <div class="nav-mobile-account-pill" id="nav-mobile-user-email">you@example.com</div>
+            <button class="nav-mobile-link nav-mobile-link-strong" type="button" id="nav-mobile-open-tracker">Open tracker</button>
+            <button class="nav-mobile-link" type="button" id="nav-mobile-sign-out-trigger">Sign out</button>
+          </div>
+        </div>
       </div>
     </nav>
   </header>
@@ -218,9 +234,13 @@
             <span class="mobile-filter-toggle-meta">Narrow it down</span>
           </button>
         </div>
+        <div class="mobile-filter-scrim" id="mobile-filter-scrim" hidden></div>
 
         <aside class="sidebar-panel" id="jobs-filters">
-          <div class="filters-heading">Narrow it down</div>
+          <div class="filters-heading">
+            <span>Narrow it down</span>
+            <button class="filters-close" id="mobile-filter-close" type="button">Close</button>
+          </div>
 
           <div class="filter-group">
             <label class="filter-label" for="search-input">Keyword search</label>
@@ -465,10 +485,10 @@
 
         <div class="footer-col">
           <h5>Platform Utilities</h5>
-          <span class="footer-link" data-page="jobs">Database Query</span>
-          <span class="footer-link" data-page="tracker">Application Tracker</span>
-          <span class="footer-link" data-page="home">Listing Trust Score Engine</span>
-          <span class="footer-link" data-page="about">Methodology</span>
+          <a href="/browse" class="footer-link" data-page="jobs">Database Query</a>
+          <a href="/tracker" class="footer-link" data-page="tracker">Application Tracker</a>
+          <a href="/search" class="footer-link" data-page="home">Listing Trust Score Engine</a>
+          <a href="/about" class="footer-link" data-page="about">Methodology</a>
         </div>
 
         <div class="footer-col">
@@ -548,6 +568,44 @@
         <span></span>
         <span></span>
       </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay auth-overlay" id="auth-overlay" aria-hidden="true">
+    <div class="auth-modal" id="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+      <div class="auth-head">
+        <div class="auth-copy">
+          <p class="auth-kicker" id="auth-kicker">Sign up</p>
+          <h2 id="auth-title">Create your Emploid account</h2>
+          <p class="auth-sub" id="auth-subtitle">Save jobs, keep your tracker in sync, and get back in instantly. This demo accepts any email and password.</p>
+        </div>
+        <button class="btn btn-secondary auth-close" id="auth-close" type="button">Close</button>
+      </div>
+
+      <div class="auth-tabs" role="tablist" aria-label="Authentication mode">
+        <button class="auth-tab is-active" id="auth-tab-signup" type="button">Sign up</button>
+        <button class="auth-tab" id="auth-tab-login" type="button">Log in</button>
+      </div>
+
+      <form class="auth-form" id="auth-form">
+        <label class="auth-field">
+          <span>Email</span>
+          <input id="auth-email" type="text" inputmode="email" autocomplete="email" placeholder="you@example.com" />
+        </label>
+
+        <label class="auth-field">
+          <span>Password</span>
+          <input id="auth-password" type="password" autocomplete="current-password" placeholder="Enter any password" />
+        </label>
+
+        <button class="btn btn-primary auth-submit" id="auth-submit" type="submit">Sign up</button>
+      </form>
+
+      <p class="auth-note" id="auth-note">No verification or password rules in this demo. Just enter any email and password to continue.</p>
+      <p class="auth-switch-row">
+        <span id="auth-switch-copy">Already have an account?</span>
+        <button class="auth-switch-btn" id="auth-switch-mode" type="button">Log in</button>
+      </p>
     </div>
   </div>
 

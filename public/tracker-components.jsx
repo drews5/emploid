@@ -53,16 +53,26 @@ function createAppId(app) {
 }
 
 function buildListingUrl(app) {
-  if (app.listingUrl && app.listingUrl.includes('page=jobs')) return app.listingUrl;
+  if (app.listingUrl) {
+    if (app.listingUrl.includes('/browse')) return app.listingUrl;
+    if (app.listingUrl.includes('page=jobs')) {
+      const [, queryString = ''] = app.listingUrl.split('?');
+      const params = new URLSearchParams(queryString);
+      params.delete('page');
+      const query = params.toString();
+      return `/browse${query ? `?${query}` : ''}`;
+    }
+    return app.listingUrl;
+  }
   const query = encodeURIComponent([app.role, app.company].filter(Boolean).join(' '));
-  return `/index.html?page=jobs&q=${query}`;
+  return `/browse?q=${query}`;
 }
 
 function buildDefaultTags(app) {
   const tags = [];
   if (app.location) tags.push(app.location);
   if (app.salary) tags.push(app.salary);
-  if (app.hot) tags.push('Hot role');
+  if (app.hot) tags.push('Starred');
   if (app.stall) tags.push('Stalled');
   return tags.slice(0, 4);
 }
@@ -269,7 +279,7 @@ const I = {
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   close: '<path d="M18 6L6 18M6 6l12 12"/>',
   sliders: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
-  flame: '<path d="M12 3s3 2.4 3 5.1c0 1.8-1 2.7-2.4 3.9-1.2 1-2.1 1.9-2.1 3.6A3.5 3.5 0 0 0 14 19c1.9 0 3.5-1.6 3.5-3.5 0-4.3-3.2-6.9-5.5-12.5z"/><path d="M8.5 14.5A4.5 4.5 0 0 0 13 21a4.5 4.5 0 0 0 4.5-4.5"/>',
+  star: '<path d="m12 3 2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20.9l1.1-6.5-4.7-4.6 6.5-.9L12 3z"/>',
   pause: '<path d="M9 5h3v14H9zM15 5h3v14h-3z"/>',
   external: '<path d="M14 5h5v5"/><path d="M10 14 19 5"/><path d="M19 14v5H5V5h5"/>',
   chevron: '<path d="m6 9 6 6 6-6"/>',
@@ -316,7 +326,7 @@ function CompanyMark({ name }) {
 
 function FlagPill({ kind, active }) {
   if (!active) return null;
-  return <span className={`flag-pill ${kind}`}>{kind === 'hot' ? 'Hot' : 'Stalled'}</span>;
+  return <span className={`flag-pill ${kind}`}>{kind === 'hot' ? 'Starred' : 'Stalled'}</span>;
 }
 
 function Card({ app, onOpen, onDragStart, onDragEnd }) {
@@ -361,7 +371,7 @@ function Toolbar({ filter, setFilter, groupBy, setGroupBy, counts, search, setSe
   const filters = [
     { id: 'all', label: 'All' },
     { id: 'week', label: 'This week' },
-    { id: 'hot', label: 'Hot' },
+    { id: 'hot', label: 'Starred' },
     { id: 'stall', label: 'Stalled' },
   ];
 
@@ -429,7 +439,6 @@ function Funnel({ data, period, setPeriod }) {
     <div className="funnel-hero">
       <div className="funnel-head">
         <div>
-          <div className="label">Pipeline Funnel</div>
           <h2>Your conversion, saved to offer</h2>
         </div>
         <div className="funnel-period">
@@ -489,7 +498,7 @@ function ColumnMenu({ stage, apps, menuOpen, onToggle, onAdd, onSetSortBy, onSet
           <button onClick={() => { onSetSortBy('recent'); onToggle(false); }}>Sort by recent</button>
           <button onClick={() => { onSetSortBy('trust'); onToggle(false); }}>Sort by trust</button>
           <button onClick={() => { onSetSortBy('company'); onToggle(false); }}>Sort by company</button>
-          {apps.some(isHotApp) && <button onClick={() => { onSetFilter('hot'); onToggle(false); }}>Show hot only</button>}
+          {apps.some(isHotApp) && <button onClick={() => { onSetFilter('hot'); onToggle(false); }}>Show starred only</button>}
           {apps.some(isStalledApp) && <button onClick={() => { onSetFilter('stall'); onToggle(false); }}>Show stalled only</button>}
         </div>
       )}
@@ -599,7 +608,7 @@ function ComposerModal({ open, draft, onClose, onChange, onSubmit }) {
           </label>
           <label>
             <span>Emploid listing URL</span>
-            <input value={draft.listingUrl} onChange={(event) => onChange('listingUrl', event.target.value)} placeholder="/index.html?page=jobs&q=Product%20Designer%20Figma" />
+            <input value={draft.listingUrl} onChange={(event) => onChange('listingUrl', event.target.value)} placeholder="/browse?q=Product%20Designer%20Figma" />
           </label>
           <label>
             <span>Location</span>
@@ -623,7 +632,7 @@ function ComposerModal({ open, draft, onClose, onChange, onSubmit }) {
           </label>
           <label className="tracker-check">
             <input type="checkbox" checked={Boolean(draft.hot)} onChange={(event) => onChange('hot', event.target.checked)} />
-            <span>Mark as hot</span>
+            <span>Star this listing</span>
           </label>
           <label className="tracker-check">
             <input type="checkbox" checked={Boolean(draft.stall)} onChange={(event) => onChange('stall', event.target.checked)} />
@@ -639,13 +648,20 @@ function ComposerModal({ open, draft, onClose, onChange, onSubmit }) {
   );
 }
 
-function DetailPanel({ app, onClose, onStageChange, onToggleFlag, onOpenListing }) {
+function DetailPanel({ app, onClose, onStageChange, onToggleFlag, onOpenListing, onUpdateNotes }) {
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [noteDraft, setNoteDraft] = useState('');
   const menuRef = useRef(null);
 
   useEffect(() => {
     setStatusMenuOpen(false);
   }, [app && app.id]);
+
+  useEffect(() => {
+    setEditingNotes(false);
+    setNoteDraft(app && app.notes ? app.notes : '');
+  }, [app && app.id, app && app.notes]);
 
   useEffect(() => {
     if (!statusMenuOpen) return undefined;
@@ -661,6 +677,22 @@ function DetailPanel({ app, onClose, onStageChange, onToggleFlag, onOpenListing 
   const hot = isHotApp(app);
   const stalled = isStalledApp(app);
   const trustTone = app.trust >= 85 ? 'High Trust' : app.trust >= 70 ? 'Review Carefully' : 'Low Trust';
+  const currentNotes = app.notes || '';
+  const noteChanged = noteDraft !== currentNotes;
+
+  const handleNotesCancel = () => {
+    setNoteDraft(currentNotes);
+    setEditingNotes(false);
+  };
+
+  const handleNotesSave = () => {
+    if (!noteChanged) {
+      setEditingNotes(false);
+      return;
+    }
+    onUpdateNotes(app.id, noteDraft);
+    setEditingNotes(false);
+  };
 
   return (
     <>
@@ -696,7 +728,7 @@ function DetailPanel({ app, onClose, onStageChange, onToggleFlag, onOpenListing 
             </div>
             <div className="detail-chip-row detail-chip-row-flags">
               <button className={`flag-action ${hot ? 'on hot' : ''}`} onClick={() => onToggleFlag(app.id, 'hot')}>
-                <Icon d={I.flame} size={13} />{hot ? 'Hot' : 'Mark hot'}
+                <Icon d={I.star} size={13} />{hot ? 'Starred' : 'Star'}
               </button>
               <button className={`flag-action ${stalled ? 'on stalled' : ''}`} onClick={() => onToggleFlag(app.id, 'stall')}>
                 <Icon d={I.pause} size={11} />{stalled ? 'Stalled' : 'Mark stalled'}
@@ -713,8 +745,49 @@ function DetailPanel({ app, onClose, onStageChange, onToggleFlag, onOpenListing 
             <div className="detail-row" style={{ borderBottom: 0 }}><div className="k">Signals</div><div className="v">{app.tags.join(', ') || 'No extra signals yet'}</div></div>
           </div>
           <div className="detail-section">
-            <h4>Notes</h4>
-            <div className="detail-notes">{app.notes || 'No notes yet. Use the tracker to capture follow-ups, prep, and context.'}</div>
+            <div className="detail-section-head">
+              <h4>Notes</h4>
+              {!editingNotes ? (
+                <button className="detail-text-action" type="button" onClick={() => setEditingNotes(true)}>
+                  {currentNotes ? 'Edit notes' : 'Add notes'}
+                </button>
+              ) : (
+                <div className="detail-inline-actions">
+                  <button className="detail-text-action muted" type="button" onClick={handleNotesCancel}>
+                    Cancel
+                  </button>
+                  <button className="detail-text-action primary" type="button" onClick={handleNotesSave} disabled={!noteChanged}>
+                    Save
+                  </button>
+                </div>
+              )}
+            </div>
+            {editingNotes ? (
+              <div className="detail-notes-editor">
+                <textarea
+                  className="detail-notes-input"
+                  value={noteDraft}
+                  onChange={(event) => setNoteDraft(event.target.value)}
+                  onKeyDown={(event) => {
+                    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+                      event.preventDefault();
+                      handleNotesSave();
+                    }
+                    if (event.key === 'Escape') {
+                      event.preventDefault();
+                      handleNotesCancel();
+                    }
+                  }}
+                  placeholder="Follow-up, recruiter notes, interview prep, or context for later..."
+                  rows="5"
+                />
+                <p className="detail-notes-hint">Press Cmd/Ctrl+Enter to save.</p>
+              </div>
+            ) : (
+              <div className={`detail-notes${currentNotes ? '' : ' empty'}`}>
+                {currentNotes || 'No notes yet. Use the tracker to capture follow-ups, prep, and context.'}
+              </div>
+            )}
           </div>
         </div>
         <div className="detail-foot">
