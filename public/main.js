@@ -1471,19 +1471,80 @@ function showToast(message) {
   toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
 }
 
+function normalizeSearchText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function getQueryTokens(query) {
+  const normalized = normalizeSearchText(query);
+  return normalized ? normalized.split(' ').filter(Boolean) : [];
+}
+
+function buildJobSearchIndex(job) {
+  return normalizeSearchText([
+    job.title,
+    job.company,
+    job.location,
+    job.source,
+    job.workMode,
+    job.jobType,
+    job.description,
+    ...(job.requirements || []),
+  ].join(' '));
+}
+
+function getJobQueryMatchScore(job, query) {
+  if (!query) return 0;
+
+  const normalizedQuery = normalizeSearchText(query);
+  if (!normalizedQuery) return 0;
+
+  const haystack = buildJobSearchIndex(job);
+  const title = normalizeSearchText(job.title);
+  const company = normalizeSearchText(job.company);
+  const titleCompany = normalizeSearchText(`${job.title} ${job.company}`);
+  const companyTitle = normalizeSearchText(`${job.company} ${job.title}`);
+  const tokens = getQueryTokens(query);
+
+  let score = 0;
+
+  if (title === normalizedQuery) score += 180;
+  if (company === normalizedQuery) score += 160;
+  if (titleCompany === normalizedQuery || companyTitle === normalizedQuery) score += 320;
+  if (title.includes(normalizedQuery)) score += 140;
+  if (company.includes(normalizedQuery)) score += 120;
+  if (titleCompany.includes(normalizedQuery) || companyTitle.includes(normalizedQuery)) score += 220;
+  if (haystack.includes(normalizedQuery)) score += 90;
+
+  const matchedTokens = tokens.filter((token) => haystack.includes(token));
+  if (matchedTokens.length !== tokens.length) return 0;
+
+  score += matchedTokens.length * 18;
+  if (tokens.some((token) => title.includes(token))) score += 24;
+  if (tokens.some((token) => company.includes(token))) score += 24;
+  if (tokens.every((token) => titleCompany.includes(token))) score += 36;
+
+  return score;
+}
+
 function sortJobs(list, sortValue, query) {
   if (sortValue === 'trust-desc') return list.sort((a, b) => b.trustScore - a.trustScore || (b.resumeMatchScore || 0) - (a.resumeMatchScore || 0) || a.daysPosted - b.daysPosted);
   if (sortValue === 'salary-desc') return list.sort((a, b) => b.salary.max - a.salary.max || (b.resumeMatchScore || 0) - (a.resumeMatchScore || 0) || b.trustScore - a.trustScore);
   if (sortValue === 'recent') return list.sort((a, b) => a.daysPosted - b.daysPosted || (b.resumeMatchScore || 0) - (a.resumeMatchScore || 0) || b.trustScore - a.trustScore);
   return list.sort((a, b) => {
-    const matchA = query && (a.title.toLowerCase().includes(query) || a.company.toLowerCase().includes(query)) ? 1 : 0;
-    const matchB = query && (b.title.toLowerCase().includes(query) || b.company.toLowerCase().includes(query)) ? 1 : 0;
-    return (b.resumeMatchScore || 0) - (a.resumeMatchScore || 0) || matchB - matchA || b.trustScore - a.trustScore;
+    return (b.resumeMatchScore || 0) - (a.resumeMatchScore || 0)
+      || (b.queryMatchScore || 0) - (a.queryMatchScore || 0)
+      || b.trustScore - a.trustScore
+      || a.daysPosted - b.daysPosted;
   });
 }
 
 function applyFilters() {
-  const query = (searchInput && searchInput.value.trim().toLowerCase()) || '';
+  const query = (searchInput && searchInput.value.trim()) || '';
   const minTrustScore = parseInt((trustFilter && trustFilter.value) || '0', 10);
   const minSalary = parseInt((salaryFilter && salaryFilter.value) || '0', 10);
   const sentiment = (sentimentFilter && sentimentFilter.value) || 'all';
@@ -1494,7 +1555,7 @@ function applyFilters() {
   if (trustFilterValue) trustFilterValue.textContent = String(minTrustScore);
 
   const baseJobs = allJobs.filter((job) => {
-    if (query && ![job.title, job.company, job.location].some((value) => value.toLowerCase().includes(query))) return false;
+    if (query && getJobQueryMatchScore(job, query) === 0) return false;
     if (job.trustScore < minTrustScore) return false;
     if (job.salary.max < minSalary) return false;
     if (sentiment !== 'all' && job.sentiment !== sentiment) return false;
@@ -1506,7 +1567,8 @@ function applyFilters() {
 
   filteredJobs = baseJobs.map((job) => ({
     ...job,
-    resumeMatchScore: resumeProfile ? getResumeMatchScore(job, resumeProfile) : 0
+    resumeMatchScore: resumeProfile ? getResumeMatchScore(job, resumeProfile) : 0,
+    queryMatchScore: query ? getJobQueryMatchScore(job, query) : 0,
   }));
 
   if (resumeMatchActive && resumeProfile && !query) {
