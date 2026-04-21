@@ -208,6 +208,7 @@ const TRACKER_REPLY_MOMENTUM = [
 ];
 
 const TRACKER_STORAGE_KEY = 'emploid-tracker-applications-v1';
+const REACT_TRACKER_STORAGE_KEY = 'emploid-tracker-board-v2';
 const RESUME_STORAGE_KEY = 'emploid-resume-profile-v1';
 
 const RESUME_ROLE_PROFILES = [
@@ -348,6 +349,58 @@ function safeParseJSON(value, fallback) {
   } catch {
     return fallback;
   }
+}
+
+function todayIso() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function buildReactTrackerRecord(job) {
+  return {
+    id: `tracked-${job.id}`,
+    role: job.title,
+    company: job.company,
+    source: job.source,
+    stage: 'applied',
+    trust: job.trustScore,
+    salary: `${formatSalary(job.salary.min)}-${formatSalary(job.salary.max)}${job.salaryDisclosed ? '' : ' (Est.)'}`,
+    location: job.location,
+    applied: todayIso(),
+    updatedAt: todayIso(),
+    notes: job.hiringContact
+      ? 'Hiring contact spotted. Follow up quickly while this listing is still warm.'
+      : 'Added from search. Revisit within 5 business days if the listing still looks active.',
+    hot: false,
+    stall: false,
+    listingUrl: job.url,
+    tags: [
+      job.directCompanyLink ? 'Direct company link' : 'Aggregator posting',
+      job.hiringContact ? 'Hiring contact spotted' : 'No recruiter listed',
+      `${job.workMode} role`
+    ]
+  };
+}
+
+function syncReactTrackerStorage(job) {
+  const current = safeParseJSON(window.localStorage.getItem(REACT_TRACKER_STORAGE_KEY), []);
+  const tracker = Array.isArray(current) ? current : [];
+  const existingIndex = tracker.findIndex((application) => application.company === job.company && application.role === job.title);
+  const nextRecord = buildReactTrackerRecord(job);
+
+  if (existingIndex >= 0) {
+    tracker[existingIndex] = {
+      ...tracker[existingIndex],
+      listingUrl: tracker[existingIndex].listingUrl || nextRecord.listingUrl,
+      updatedAt: nextRecord.updatedAt,
+      applied: tracker[existingIndex].applied || nextRecord.applied,
+      notes: tracker[existingIndex].notes || nextRecord.notes,
+    };
+  } else {
+    tracker.unshift(nextRecord);
+  }
+
+  window.localStorage.setItem(REACT_TRACKER_STORAGE_KEY, JSON.stringify(tracker));
+  window.dispatchEvent(new CustomEvent('emploid:tracker-updated'));
 }
 
 function loadTrackerApplications() {
@@ -871,6 +924,7 @@ function trackJobApplication(job) {
       ...entry,
       lastActivity: 'Opened from search just now'
     }));
+    syncReactTrackerStorage(job);
     return;
   }
 
@@ -901,6 +955,7 @@ function trackJobApplication(job) {
 
   trackerApplications = [application, ...trackerApplications];
   saveTrackerApplications();
+  syncReactTrackerStorage(job);
   renderTracker();
   triggerTrackerWave(application.id);
 }

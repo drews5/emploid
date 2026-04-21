@@ -1,215 +1,282 @@
 /* global React, ReactDOM */
-const { useState, useMemo, useRef, useEffect } = React;
+const { useEffect, useMemo, useState } = React;
 const APP_STAGES = window.TRACKER.STAGES;
-const { Icon, I, Card, DetailPanel } = window.TrackerUI;
+const {
+  Column,
+  ComposerModal,
+  DetailPanel,
+  Funnel,
+  Icon,
+  I,
+  Toolbar,
+  buildListingUrl,
+  isHotApp,
+  isStalledApp,
+  loadTrackerBoard,
+  matchesSearch,
+  normalizeApp,
+  saveTrackerBoard,
+  sortApps,
+  todayStr,
+  withinPeriod,
+} = window.TrackerUI;
 
-const VISIBLE_STAGES = APP_STAGES.filter(s => s.id !== 'rejected');
-
-const FILTERS = [
-  { id:'all', label:'All' },
-  { id:'week', label:'This week' },
-  { id:'hot', label:'Hot' },
-  { id:'stall', label:'Stalled' },
-];
-
-function Funnel({ data }) {
-  const counts = APP_STAGES.map(s => data.filter(d => d.stage === s.id).length);
-  const [saved, applied, interview, offer, rejected] = counts;
-  const conv = (a, b) => a === 0 ? 0 : Math.round((b / a) * 100);
-  const conversions = [
-    { from:0, to:1, pct: conv(saved+applied, applied) },
-    { from:1, to:2, pct: conv(applied, interview) },
-    { from:2, to:3, pct: conv(interview, offer) },
-  ];
-  return (
-    <div className="funnel-hero">
-      <div className="funnel">
-        {APP_STAGES.map((s, i) => (
-          <React.Fragment key={s.id}>
-            <div className={`funnel-stage ${s.id === 'rejected' ? 'rejected' : ''}`}>
-              <div className="top"><span>{s.label}</span></div>
-              <div className="count">{counts[i]}</div>
-            </div>
-            {i < APP_STAGES.length - 1 && (
-              <div className="funnel-arrow">
-                {i < 3 && (
-                  <span className="pct"><span className="emp">{conversions[i]?.pct || 0}%</span></span>
-                )}
-                <svg width="28" height="12" viewBox="0 0 28 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                  <path d="M2 6h22M18 2l4 4-4 4"/>
-                </svg>
-              </div>
-            )}
-          </React.Fragment>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function Column({ stage, apps, groupBy, onDragOver, onDrop, drop, onOpen, onDragStart, onDragEnd }) {
-  const grouped = useMemo(() => {
-    if (groupBy === 'none') return [{ label: null, items: apps }];
-    if (groupBy === 'company') {
-      const m = {};
-      apps.forEach(a => { (m[a.company] ||= []).push(a); });
-      return Object.entries(m).sort((a,b)=>b[1].length-a[1].length).map(([label,items]) => ({label,items}));
-    }
-    if (groupBy === 'week') {
-      const bins = { 'This week':[], 'Last week':[], 'Older':[], 'Not applied':[] };
-      apps.forEach(a => {
-        if (!a.applied) bins['Not applied'].push(a);
-        else {
-          const d = Math.round((new Date('2026-04-18') - new Date(a.applied))/86400000);
-          if (d <= 7) bins['This week'].push(a);
-          else if (d <= 14) bins['Last week'].push(a);
-          else bins['Older'].push(a);
-        }
-      });
-      return Object.entries(bins).filter(([,v])=>v.length).map(([label,items])=>({label,items}));
-    }
-    return [{ label: null, items: apps }];
-  }, [apps, groupBy]);
-
-  return (
-    <div
-      className={`col ${drop ? 'drop' : ''}`}
-      data-stage={stage.id}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
-    >
-      <div className="col-head">
-        <div className="col-head-left">
-          <span className="col-dot"/>
-          <span className="col-title">{stage.label}</span>
-          <span className="col-count">{apps.length}</span>
-        </div>
-        <button className="col-menu"><Icon d={I.dots}/></button>
-      </div>
-      <div className="card-list">
-        {grouped.map((g, gi) => (
-          <React.Fragment key={gi}>
-            {g.label && <div className="group-header">{g.label} · {g.items.length}</div>}
-            {g.items.map(app => (
-              <Card key={app.id} app={app} onOpen={onOpen} onDragStart={onDragStart} onDragEnd={onDragEnd}/>
-            ))}
-          </React.Fragment>
-        ))}
-        {apps.length === 0 && <div className="col-empty">No apps here yet.<br/>Drag a card over, or quick-add below.</div>}
-      </div>
-      <button className="add-card"><Icon d={I.plus} size={14}/> Add</button>
-    </div>
-  );
-}
-
-function Toolbar({ filter, setFilter, groupBy, setGroupBy, counts }) {
-  return (
-    <div className="toolbar">
-      <div className="tool-chips">
-        {FILTERS.map(f => {
-          const n = counts[f.id];
-          const cls = filter === f.id ? 'chip on' : `chip ${f.alert && n>0 ? 'alert' : ''}`;
-          return (
-            <button key={f.id} className={cls} onClick={()=>setFilter(f.id)}>
-              {f.label}{n !== undefined && <span className="num">{n}</span>}
-            </button>
-          );
-        })}
-      </div>
-      <div className="tool-right">
-        <div className="tool-search">
-          <Icon d={I.search} size={14}/>
-          <input placeholder="Search role, company…"/>
-        </div>
-        <div className="tool-divider"/>
-        <div className="group-by">
-          <span>Group by</span>
-          <select value={groupBy} onChange={e=>setGroupBy(e.target.value)}>
-            <option value="none">None</option>
-            <option value="company">Company</option>
-            <option value="week">Week</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  );
+function emptyDraft(stageId) {
+  return {
+    role: '',
+    company: '',
+    stage: stageId || 'saved',
+    listingUrl: '',
+    location: '',
+    salary: '',
+    trust: 80,
+    applied: '',
+    notes: '',
+    hot: false,
+    stall: false,
+  };
 }
 
 function App() {
-  const [apps, setApps] = useState(window.TRACKER.initial);
+  const [apps, setApps] = useState(() => loadTrackerBoard(window.TRACKER.initial));
   const [filter, setFilter] = useState('all');
-  const [groupByUi, setGroupByUi] = useState('none');
-  const effectiveGroupBy = groupByUi;
+  const [search, setSearch] = useState('');
+  const [groupBy, setGroupBy] = useState('none');
+  const [sortBy, setSortBy] = useState('priority');
+  const [period, setPeriod] = useState('30');
   const [dragId, setDragId] = useState(null);
   const [dropCol, setDropCol] = useState(null);
-  const [detail, setDetail] = useState(null);
+  const [detailId, setDetailId] = useState(null);
+  const [menuStageId, setMenuStageId] = useState(null);
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [draft, setDraft] = useState(emptyDraft('saved'));
+  const [toast, setToast] = useState('');
 
-  const filtered = useMemo(() => {
-    if (filter === 'all') return apps;
-    if (filter === 'week') return apps.filter(a => a.applied && (new Date('2026-04-18') - new Date(a.applied))/86400000 <= 7);
-    if (filter === 'hot') return apps.filter(a => a.hot);
-    if (filter === 'stall') return apps.filter(a => a.stall);
-    return apps;
-  }, [apps, filter]);
+  useEffect(() => {
+    saveTrackerBoard(apps);
+  }, [apps]);
+
+  useEffect(() => {
+    function handleSync() {
+      setApps(loadTrackerBoard(window.TRACKER.initial));
+    }
+    window.addEventListener('emploid:tracker-updated', handleSync);
+    return () => window.removeEventListener('emploid:tracker-updated', handleSync);
+  }, []);
+
+  useEffect(() => {
+    if (!toast) return undefined;
+    const timer = window.setTimeout(() => setToast(''), 2200);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
+  const selectedApp = useMemo(
+    () => apps.find((app) => app.id === detailId) || null,
+    [apps, detailId]
+  );
 
   const counts = useMemo(() => ({
-    all: apps.filter(a => a.stage !== 'rejected').length,
-    week: apps.filter(a => a.applied && (new Date('2026-04-18') - new Date(a.applied))/86400000 <= 7).length,
-    hot: apps.filter(a => a.hot).length,
-    stall: apps.filter(a => a.stall).length,
+    all: apps.length,
+    week: apps.filter((app) => withinPeriod(app, '7')).length,
+    hot: apps.filter((app) => isHotApp(app)).length,
+    stall: apps.filter((app) => isStalledApp(app)).length,
   }), [apps]);
 
-  const onDragStart = (e, app) => {
-    setDragId(app.id);
-    e.dataTransfer.effectAllowed = 'move';
-    e.currentTarget.classList.add('dragging');
-  };
-  const onDragEnd = e => { e.currentTarget.classList.remove('dragging'); setDragId(null); setDropCol(null); };
-  const onDragOver = (stageId) => (e) => { e.preventDefault(); if (dropCol !== stageId) setDropCol(stageId); };
-  const onDrop = (stageId) => (e) => {
-    e.preventDefault();
-    if (dragId) setApps(prev => prev.map(a => a.id === dragId ? { ...a, stage: stageId } : a));
-    setDropCol(null); setDragId(null);
+  const filteredApps = useMemo(() => {
+    return apps.filter((app) => {
+      if (!matchesSearch(app, search)) return false;
+      if (filter === 'week' && !withinPeriod(app, '7')) return false;
+      if (filter === 'hot' && !isHotApp(app)) return false;
+      if (filter === 'stall' && !isStalledApp(app)) return false;
+      return true;
+    });
+  }, [apps, filter, search]);
+
+  const updateApps = (updater) => {
+    setApps((previous) => updater(previous).map((app) => normalizeApp(app)));
   };
 
-  const onStageChange = (id, stageId) => {
-    setApps(prev => prev.map(a => a.id === id ? { ...a, stage: stageId } : a));
-    if (detail?.id === id) setDetail(d => ({ ...d, stage: stageId }));
+  const updateOneApp = (appId, updater) => {
+    updateApps((previous) => previous.map((app) => {
+      if (app.id !== appId) return app;
+      return {
+        ...updater(app),
+        updatedAt: todayStr,
+      };
+    }));
   };
+
+  const openComposer = (stageId) => {
+    setDraft(emptyDraft(stageId || 'saved'));
+    setComposerOpen(true);
+    setMenuStageId(null);
+  };
+
+  const clearFilters = () => {
+    setFilter('all');
+    setSearch('');
+    setGroupBy('none');
+    setSortBy('priority');
+    setToast('Tracker filters cleared.');
+  };
+
+  const onDragStart = (event, app) => {
+    setDragId(app.id);
+    event.dataTransfer.effectAllowed = 'move';
+    event.currentTarget.classList.add('dragging');
+  };
+
+  const onDragEnd = (event) => {
+    event.currentTarget.classList.remove('dragging');
+    setDragId(null);
+    setDropCol(null);
+  };
+
+  const onDragOver = (stageId) => (event) => {
+    event.preventDefault();
+    if (dropCol !== stageId) setDropCol(stageId);
+  };
+
+  const onDrop = (stageId) => (event) => {
+    event.preventDefault();
+    if (!dragId) return;
+    updateOneApp(dragId, (app) => ({ ...app, stage: stageId }));
+    setDropCol(null);
+    setDragId(null);
+    setToast(`Moved application to ${APP_STAGES.find((stage) => stage.id === stageId).label}.`);
+  };
+
+  const handleStageChange = (appId, stageId) => {
+    updateOneApp(appId, (app) => ({
+      ...app,
+      stage: stageId,
+      applied: stageId === 'saved' ? app.applied : (app.applied || todayStr),
+      stall: stageId === 'interview' || stageId === 'offer' ? false : app.stall,
+    }));
+    setToast(`Status updated to ${APP_STAGES.find((stage) => stage.id === stageId).label}.`);
+  };
+
+  const handleToggleFlag = (appId, flag) => {
+    updateOneApp(appId, (app) => ({ ...app, [flag]: !app[flag] }));
+    setToast(flag === 'hot' ? 'Hot flag updated.' : 'Stalled flag updated.');
+  };
+
+  const handleOpenListing = (app) => {
+    window.open(buildListingUrl(app), '_blank', 'noopener,noreferrer');
+    updateOneApp(app.id, (entry) => ({ ...entry }));
+    setToast('Opened the listing in a new tab.');
+  };
+
+  const handleDraftChange = (key, value) => {
+    setDraft((previous) => ({ ...previous, [key]: value }));
+  };
+
+  const handleDraftSubmit = (event) => {
+    event.preventDefault();
+    const nextApp = normalizeApp({
+      id: undefined,
+      role: draft.role.trim(),
+      company: draft.company.trim(),
+      stage: draft.stage,
+      trust: Math.max(0, Math.min(100, Number(draft.trust) || 0)),
+      salary: draft.salary.trim() || 'Comp not listed',
+      location: draft.location.trim() || 'Location not listed',
+      applied: draft.applied || null,
+      notes: draft.notes.trim(),
+      hot: Boolean(draft.hot),
+      stall: Boolean(draft.stall),
+      listingUrl: draft.listingUrl.trim(),
+      updatedAt: todayStr,
+      source: 'Manual',
+    });
+
+    updateApps((previous) => [nextApp, ...previous]);
+    setComposerOpen(false);
+    setDraft(emptyDraft('saved'));
+    setToast(`Added ${nextApp.role} at ${nextApp.company}.`);
+  };
+
+  const stageApps = (stageId) => sortApps(
+    filteredApps.filter((app) => app.stage === stageId),
+    sortBy
+  );
+
+  const hasActiveFilters = filter !== 'all' || search || groupBy !== 'none' || sortBy !== 'priority';
 
   return (
     <div className="shell" data-screen-label="Tracker">
       <div className="topbar">
         <div className="title-block">
-          <h1>Application Tracker</h1>
+          <span className="kicker-label">Portal / Application Tracker</span>
+          <h1>Your pipeline, end to end.</h1>
+          <div className="sub">Search, triage, and update every role from one board instead of juggling notes and spreadsheets.</div>
         </div>
         <div className="topbar-actions">
-          <button className="btn btn-primary"><Icon d={I.plus}/>Add</button>
+          <button className="btn btn-ghost" onClick={() => setGroupBy(groupBy === 'none' ? 'company' : groupBy === 'company' ? 'week' : 'none')}>
+            <Icon d={I.sliders} />View: {groupBy === 'none' ? 'Board' : groupBy === 'company' ? 'Company' : 'Recency'}
+          </button>
+          <button className="btn btn-secondary" onClick={clearFilters}>
+            <Icon d={I.filter} />{hasActiveFilters ? 'Reset filters' : 'Refresh view'}
+          </button>
+          <button className="btn btn-primary" onClick={() => openComposer('saved')}>
+            <Icon d={I.plus} />Add app
+          </button>
         </div>
       </div>
 
-      <Funnel data={apps}/>
+      <Funnel data={apps} period={period} setPeriod={setPeriod} />
 
-      <Toolbar filter={filter} setFilter={setFilter} groupBy={groupByUi} setGroupBy={setGroupByUi} counts={counts}/>
+      <Toolbar
+        filter={filter}
+        setFilter={setFilter}
+        groupBy={groupBy}
+        setGroupBy={setGroupBy}
+        counts={counts}
+        search={search}
+        setSearch={setSearch}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+      />
 
       <div className="board">
-        {VISIBLE_STAGES.map(stage => (
+        {APP_STAGES.map((stage) => (
           <Column
             key={stage.id}
             stage={stage}
-            apps={filtered.filter(a => a.stage === stage.id)}
-            groupBy={effectiveGroupBy}
+            apps={stageApps(stage.id)}
+            groupBy={groupBy}
             drop={dropCol === stage.id}
             onDragOver={onDragOver(stage.id)}
             onDrop={onDrop(stage.id)}
-            onOpen={setDetail}
+            onOpen={setDetailId}
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
+            menuOpen={menuStageId === stage.id}
+            setMenuOpen={(open) => setMenuStageId(open ? stage.id : null)}
+            onAddToStage={() => openComposer(stage.id)}
+            onSetSortBy={setSortBy}
+            onSetFilter={setFilter}
           />
         ))}
       </div>
 
-      <DetailPanel app={detail} onClose={()=>setDetail(null)} onStageChange={onStageChange}/>
+      <DetailPanel
+        app={selectedApp}
+        onClose={() => setDetailId(null)}
+        onStageChange={handleStageChange}
+        onToggleFlag={handleToggleFlag}
+        onOpenListing={handleOpenListing}
+      />
+
+      <ComposerModal
+        open={composerOpen}
+        draft={draft}
+        onClose={() => setComposerOpen(false)}
+        onChange={handleDraftChange}
+        onSubmit={handleDraftSubmit}
+      />
+
+      <div className={`tracker-toast ${toast ? 'show' : ''}`}>{toast}</div>
     </div>
   );
 }
