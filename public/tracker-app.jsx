@@ -10,6 +10,7 @@ const {
   I,
   Toolbar,
   buildListingUrl,
+  enforceExclusiveFlags,
   isHotApp,
   isStalledApp,
   loadTrackerBoard,
@@ -93,7 +94,7 @@ function App() {
   }, [apps, filter, search]);
 
   const updateApps = (updater) => {
-    setApps((previous) => updater(previous).map((app) => normalizeApp(app)));
+    setApps((previous) => enforceExclusiveFlags(updater(previous).map((app) => normalizeApp(app))));
   };
 
   const updateOneApp = (appId, updater) => {
@@ -157,7 +158,29 @@ function App() {
   };
 
   const handleToggleFlag = (appId, flag) => {
-    updateOneApp(appId, (app) => ({ ...app, [flag]: !app[flag] }));
+    setApps((previous) => {
+      const current = previous.find((app) => app.id === appId);
+      const nextValue = current ? !current[flag] : false;
+
+      return enforceExclusiveFlags(previous.map((app) => {
+        if (app.id === appId) {
+          return normalizeApp({
+            ...app,
+            [flag]: nextValue,
+            updatedAt: todayStr,
+          });
+        }
+
+        if (nextValue) {
+          return normalizeApp({
+            ...app,
+            [flag]: false,
+          });
+        }
+
+        return app;
+      }));
+    });
     setToast(flag === 'hot' ? 'Hot flag updated.' : 'Stalled flag updated.');
   };
 
@@ -201,22 +224,18 @@ function App() {
     sortBy
   );
 
-  const hasActiveFilters = filter !== 'all' || search || groupBy !== 'none' || sortBy !== 'priority';
-
   return (
     <div className="shell" data-screen-label="Tracker">
       <div className="topbar">
         <div className="title-block">
-          <span className="kicker-label">Portal / Application Tracker</span>
-          <h1>Your pipeline, end to end.</h1>
-          <div className="sub">Search, triage, and update every role from one board instead of juggling notes and spreadsheets.</div>
+          <h1>Application Tracker</h1>
         </div>
         <div className="topbar-actions">
           <button className="btn btn-ghost" onClick={() => setGroupBy(groupBy === 'none' ? 'company' : groupBy === 'company' ? 'week' : 'none')}>
             <Icon d={I.sliders} />View: {groupBy === 'none' ? 'Board' : groupBy === 'company' ? 'Company' : 'Recency'}
           </button>
           <button className="btn btn-secondary" onClick={clearFilters}>
-            <Icon d={I.filter} />{hasActiveFilters ? 'Reset filters' : 'Refresh view'}
+            <Icon d={I.filter} />Reset filters
           </button>
           <button className="btn btn-primary" onClick={() => openComposer('saved')}>
             <Icon d={I.plus} />Add app

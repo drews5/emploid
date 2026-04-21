@@ -355,6 +355,11 @@ function todayIso() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function buildInternalListingUrl(job) {
+  const query = encodeURIComponent([job.title, job.company].filter(Boolean).join(' '));
+  return `/index.html?page=jobs&q=${query}`;
+}
+
 function buildReactTrackerRecord(job) {
   return {
     id: `tracked-${job.id}`,
@@ -372,7 +377,7 @@ function buildReactTrackerRecord(job) {
       : 'Added from search. Revisit within 5 business days if the listing still looks active.',
     hot: false,
     stall: false,
-    listingUrl: job.url,
+    listingUrl: buildInternalListingUrl(job),
     tags: [
       job.directCompanyLink ? 'Direct company link' : 'Aggregator posting',
       job.hiringContact ? 'Hiring contact spotted' : 'No recruiter listed',
@@ -1354,6 +1359,15 @@ function navigateTo(pageId) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+function applyInitialPageState() {
+  const params = new URLSearchParams(window.location.search);
+  const page = params.get('page');
+  const query = params.get('q');
+
+  if (page) navigateTo(page);
+  if (query && searchInput) searchInput.value = query;
+}
+
 function submitHeroSearch() {
   const query = heroSearch && heroSearch.value.trim();
   if (!query || !searchInput) return;
@@ -1738,4 +1752,5 @@ document.addEventListener('keydown', (event) => {
 renderHomePreview();
 renderResumeMatchUI();
 renderTracker();
+applyInitialPageState();
 applyFilters();

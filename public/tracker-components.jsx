@@ -11,14 +11,6 @@ const PERIOD_OPTIONS = [
   { id: '90', label: '90d', days: 90 },
   { id: 'all', label: 'All', days: Infinity },
 ];
-const STALL_THRESHOLDS = {
-  saved: 21,
-  applied: 10,
-  interview: 7,
-  offer: 5,
-  rejected: Infinity,
-};
-
 function getTodayString() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -61,19 +53,17 @@ function createAppId(app) {
 }
 
 function buildListingUrl(app) {
-  if (app.listingUrl) return app.listingUrl;
-  const query = encodeURIComponent([app.company, app.role, 'careers'].filter(Boolean).join(' '));
-  return `https://www.google.com/search?q=${query}`;
+  if (app.listingUrl && app.listingUrl.includes('page=jobs')) return app.listingUrl;
+  const query = encodeURIComponent([app.role, app.company].filter(Boolean).join(' '));
+  return `/index.html?page=jobs&q=${query}`;
 }
 
 function buildDefaultTags(app) {
   const tags = [];
   if (app.location) tags.push(app.location);
   if (app.salary) tags.push(app.salary);
-  if (app.trust >= 90) tags.push('High trust');
-  if (app.stage === 'interview') tags.push('Interview active');
-  if (app.stage === 'offer') tags.push('Offer stage');
   if (app.hot) tags.push('Hot role');
+  if (app.stall) tags.push('Stalled');
   return tags.slice(0, 4);
 }
 
@@ -140,9 +130,9 @@ function fromLegacyApplication(legacy) {
     applied: legacyDaysAgoToDate(legacy.appliedDaysAgo),
     updatedAt: todayStr,
     notes,
-    hot: legacy.interviewsThisWeek || legacy.status === 'offer',
-    stall: legacy.status === 'needs-action' && legacy.appliedDaysAgo >= 10,
-    listingUrl: legacy.url,
+    hot: Boolean(legacy.hot),
+    stall: Boolean(legacy.stall),
+    listingUrl: legacy.listingUrl,
     tags: legacy.tags,
   });
 }
@@ -157,7 +147,7 @@ function loadTrackerBoard(initialApps) {
       const exists = merged.some((app) => app.id === defaultApp.id || (app.company === defaultApp.company && app.role === defaultApp.role));
       if (!exists) merged.push(defaultApp);
     });
-    return merged;
+    return enforceExclusiveFlags(merged);
   }
 
   const legacy = trackerSafeParseJSON(window.localStorage.getItem(TRACKER_LEGACY_STORAGE_KEY), null);
@@ -167,14 +157,35 @@ function loadTrackerBoard(initialApps) {
       const exists = merged.some((app) => app.id === defaultApp.id || (app.company === defaultApp.company && app.role === defaultApp.role));
       if (!exists) merged.push(defaultApp);
     });
-    return merged;
+    return enforceExclusiveFlags(merged);
   }
 
-  return defaults;
+  return enforceExclusiveFlags(defaults);
 }
 
 function saveTrackerBoard(apps) {
-  window.localStorage.setItem(TRACKER_BOARD_STORAGE_KEY, JSON.stringify(apps));
+  window.localStorage.setItem(TRACKER_BOARD_STORAGE_KEY, JSON.stringify(enforceExclusiveFlags(apps)));
+}
+
+function enforceExclusiveFlags(apps) {
+  let seenHot = false;
+  let seenStall = false;
+
+  return apps.map((app) => {
+    const next = { ...app };
+
+    if (next.hot) {
+      if (seenHot) next.hot = false;
+      else seenHot = true;
+    }
+
+    if (next.stall) {
+      if (seenStall) next.stall = false;
+      else seenStall = true;
+    }
+
+    return next;
+  });
 }
 
 function withinPeriod(app, periodId) {
@@ -187,16 +198,11 @@ function withinPeriod(app, periodId) {
 }
 
 function isHotApp(app) {
-  return Boolean(app.hot) || app.stage === 'interview' || app.stage === 'offer' || app.trust >= 92;
+  return Boolean(app.hot);
 }
 
 function isStalledApp(app) {
-  if (app.stage === 'rejected') return false;
-  if (app.stall) return true;
-  if (!app.applied) return false;
-  const age = daysBetween(app.applied, todayStr);
-  const threshold = STALL_THRESHOLDS[app.stage] || 10;
-  return age !== null && age >= threshold && app.stage !== 'offer';
+  return Boolean(app.stall);
 }
 
 function matchesSearch(app, query) {
@@ -515,8 +521,6 @@ function Column({ stage, apps, groupBy, drop, onDragOver, onDrop, onOpen, onDrag
     return [{ label: null, items: apps }];
   }, [apps, groupBy]);
 
-  const spark = apps.length ? apps.map((app, index) => Math.max(1, app.trust - index * 6)).slice(0, 6) : [0, 0, 0, 0];
-
   return (
     <div className={`col ${drop ? 'drop' : ''}`} data-stage={stage.id} onDragOver={onDragOver} onDrop={onDrop}>
       <div className="col-head">
@@ -534,11 +538,6 @@ function Column({ stage, apps, groupBy, drop, onDragOver, onDrop, onOpen, onDrag
           onSetSortBy={onSetSortBy}
           onSetFilter={onSetFilter}
         />
-      </div>
-      <div className="col-throughput">
-        <span>Live</span>
-        <Sparkline data={spark} color={stage.color} />
-        <span className="delta-pill">{apps.length} active</span>
       </div>
       <div className="card-list">
         {grouped.map((group, index) => (
@@ -591,8 +590,8 @@ function ComposerModal({ open, draft, onClose, onChange, onSubmit }) {
             </select>
           </label>
           <label>
-            <span>Listing URL</span>
-            <input value={draft.listingUrl} onChange={(event) => onChange('listingUrl', event.target.value)} placeholder="https://company.com/careers" />
+            <span>Emploid listing URL</span>
+            <input value={draft.listingUrl} onChange={(event) => onChange('listingUrl', event.target.value)} placeholder="/index.html?page=jobs&q=Product%20Designer%20Figma" />
           </label>
           <label>
             <span>Location</span>
@@ -719,7 +718,7 @@ function DetailPanel({ app, onClose, onStageChange, onToggleFlag, onOpenListing 
               Update status <Icon d={I.chevron} size={12} />
             </button>
             {statusMenuOpen && (
-              <div className="tracker-menu tracker-menu-right">
+              <div className="tracker-menu tracker-menu-up">
                 {TR_STAGES.map((stage) => (
                   <button
                     key={stage.id}
@@ -762,6 +761,7 @@ window.TrackerUI = {
   normalizeApp,
   loadTrackerBoard,
   saveTrackerBoard,
+  enforceExclusiveFlags,
   withinPeriod,
   isHotApp,
   isStalledApp,
