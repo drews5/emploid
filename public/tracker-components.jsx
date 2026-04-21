@@ -3,8 +3,8 @@ const { useEffect, useMemo, useRef, useState } = React;
 const TR_STAGES = window.TRACKER.STAGES;
 const TR_COMPANY_TINTS = window.TRACKER.COMPANY_TINTS;
 
-const TRACKER_STORAGE_KEY = 'emploid-tracker-board-v2';
-const LEGACY_TRACKER_STORAGE_KEY = 'emploid-tracker-applications-v1';
+const TRACKER_BOARD_STORAGE_KEY = 'emploid-tracker-board-v2';
+const TRACKER_LEGACY_STORAGE_KEY = 'emploid-tracker-applications-v1';
 const PERIOD_OPTIONS = [
   { id: '7', label: '7d', days: 7 },
   { id: '30', label: '30d', days: 30 },
@@ -36,7 +36,7 @@ function fmtDate(value) {
   return new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-function safeParseJSON(value, fallback) {
+function trackerSafeParseJSON(value, fallback) {
   try {
     return value ? JSON.parse(value) : fallback;
   } catch (_error) {
@@ -150,7 +150,7 @@ function fromLegacyApplication(legacy) {
 function loadTrackerBoard(initialApps) {
   const defaults = (initialApps || []).map(normalizeApp);
 
-  const saved = safeParseJSON(window.localStorage.getItem(TRACKER_STORAGE_KEY), null);
+  const saved = trackerSafeParseJSON(window.localStorage.getItem(TRACKER_BOARD_STORAGE_KEY), null);
   if (Array.isArray(saved) && saved.length) {
     const merged = saved.map(normalizeApp);
     defaults.forEach((defaultApp) => {
@@ -160,7 +160,7 @@ function loadTrackerBoard(initialApps) {
     return merged;
   }
 
-  const legacy = safeParseJSON(window.localStorage.getItem(LEGACY_TRACKER_STORAGE_KEY), null);
+  const legacy = trackerSafeParseJSON(window.localStorage.getItem(TRACKER_LEGACY_STORAGE_KEY), null);
   if (Array.isArray(legacy) && legacy.length) {
     const merged = legacy.map(fromLegacyApplication);
     defaults.forEach((defaultApp) => {
@@ -174,7 +174,7 @@ function loadTrackerBoard(initialApps) {
 }
 
 function saveTrackerBoard(apps) {
-  window.localStorage.setItem(TRACKER_STORAGE_KEY, JSON.stringify(apps));
+  window.localStorage.setItem(TRACKER_BOARD_STORAGE_KEY, JSON.stringify(apps));
 }
 
 function withinPeriod(app, periodId) {
@@ -741,8 +741,8 @@ function DetailPanel({ app, onClose, onStageChange, onToggleFlag, onOpenListing 
 }
 
 window.TrackerUI = {
-  TRACKER_STORAGE_KEY,
-  LEGACY_TRACKER_STORAGE_KEY,
+  TRACKER_BOARD_STORAGE_KEY,
+  TRACKER_LEGACY_STORAGE_KEY,
   PERIOD_OPTIONS,
   Icon,
   I,
