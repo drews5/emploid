@@ -1455,6 +1455,10 @@ p {
   color: var(--text-primary);
 }
 
+.preview-trust .trust-ring-value {
+  color: #ffffff;
+}
+
 .trust-ring-large {
   width: 72px;
   height: 72px;
