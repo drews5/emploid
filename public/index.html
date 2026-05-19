@@ -609,6 +609,33 @@
     </div>
   </div>
 
+  <button class="assistant-trigger" id="assistant-trigger" type="button" aria-expanded="false" aria-controls="assistant-drawer">
+    <span class="assistant-trigger-mark" aria-hidden="true">AI</span>
+    <span>Ask Emploid</span>
+  </button>
+
+  <section class="assistant-drawer" id="assistant-drawer" aria-hidden="true" aria-label="Emploid assistant">
+    <div class="assistant-panel">
+      <div class="assistant-head">
+        <div>
+          <p class="assistant-kicker">Groq Cloud</p>
+          <h2>Emploid Assistant</h2>
+        </div>
+        <button class="btn btn-secondary assistant-close" id="assistant-close" type="button">Close</button>
+      </div>
+
+      <div class="assistant-messages" id="assistant-messages" aria-live="polite">
+        <div class="assistant-message assistant">Ask about matching jobs, tracker next steps, or how to read a listing's trust signals.</div>
+      </div>
+
+      <form class="assistant-form" id="assistant-form">
+        <input id="assistant-input" type="text" autocomplete="off" placeholder="Ask about jobs or applications..." />
+        <button class="btn btn-primary" type="submit">Send</button>
+      </form>
+      <p class="assistant-status" id="assistant-status">Ready</p>
+    </div>
+  </section>
+
   <div id="toast" class="toast"></div>
   <input id="resume-upload-input" type="file" accept=".pdf,.txt,.md,.rtf" hidden />
 

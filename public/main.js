@@ -228,6 +228,7 @@ const TRACKER_REPLY_MOMENTUM = [
 const TRACKER_STORAGE_KEY = 'emploid-tracker-applications-v1';
 const REACT_TRACKER_STORAGE_KEY = 'emploid-tracker-board-v2';
 const RESUME_STORAGE_KEY = 'emploid-resume-profile-v1';
+const AI_INSIGHTS_STORAGE_KEY = 'emploid-ai-insights-v1';
 
 const RESUME_ROLE_PROFILES = [
   {
@@ -273,6 +274,7 @@ const RESUME_ROLE_PROFILES = [
 ];
 
 const PAGE_SIZE = 8;
+const MAX_ASSISTANT_MESSAGES = 10;
 
 function pick(list) {
   return list[Math.floor(Math.random() * list.length)];
@@ -359,6 +361,15 @@ function trackerActionIcon(action) {
   }
 
   return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"></path><path d="M9 7V4h6v3"></path><path d="M7 7l1 12h8l1-12"></path></svg>';
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function safeParseJSON(value, fallback) {
@@ -495,6 +506,14 @@ function loadResumeProfile() {
 function saveResumeProfile() {
   if (resumeProfile) window.localStorage.setItem(RESUME_STORAGE_KEY, JSON.stringify(resumeProfile));
   else window.localStorage.removeItem(RESUME_STORAGE_KEY);
+}
+
+function loadInsightsCache() {
+  return safeParseJSON(window.sessionStorage.getItem(AI_INSIGHTS_STORAGE_KEY), {});
+}
+
+function saveInsightsCache(cache) {
+  window.sessionStorage.setItem(AI_INSIGHTS_STORAGE_KEY, JSON.stringify(cache));
 }
 
 function loadAuthSession() {
@@ -710,6 +729,29 @@ function buildResumeProfile(text, fileName) {
   };
 }
 
+async function parseResumeProfile(text, fileName) {
+  try {
+    const response = await fetch('/api/resume/parse', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, fileName })
+    });
+
+    if (!response.ok) throw new Error('Groq resume parsing is unavailable.');
+
+    const profile = await response.json();
+    return {
+      ...profile,
+      fileName,
+      workModes: Array.isArray(profile.workModes) ? profile.workModes : (profile.preferredWorkModes || []),
+      locations: Array.isArray(profile.locations) ? profile.locations : (profile.preferredLocations || [])
+    };
+  } catch (error) {
+    console.warn('[RESUME_PARSE_FALLBACK]', error);
+    return buildResumeProfile(text, fileName);
+  }
+}
+
 function getResumeMatchScore(job, profile) {
   if (!profile) return 0;
   const haystack = `${job.title} ${job.company} ${job.location} ${job.description} ${job.requirements.join(' ')}`.toLowerCase();
@@ -864,6 +906,13 @@ const authSwitchCopy = document.getElementById('auth-switch-copy');
 const authSwitchMode = document.getElementById('auth-switch-mode');
 const authTabSignUp = document.getElementById('auth-tab-signup');
 const authTabLogin = document.getElementById('auth-tab-login');
+const assistantTrigger = document.getElementById('assistant-trigger');
+const assistantDrawer = document.getElementById('assistant-drawer');
+const assistantClose = document.getElementById('assistant-close');
+const assistantMessagesEl = document.getElementById('assistant-messages');
+const assistantForm = document.getElementById('assistant-form');
+const assistantInput = document.getElementById('assistant-input');
+const assistantStatus = document.getElementById('assistant-status');
 const trackerSummaryGrid = document.getElementById('tracker-summary-grid');
 const trackerListEl = document.getElementById('tracker-list');
 const trackerChart = document.getElementById('tracker-chart');
@@ -885,6 +934,8 @@ let pendingInitialJobId = null;
 let waveTrackerId = null;
 let waveTrackerTimer;
 let resumeUploadBusy = false;
+let assistantMessages = [];
+let assistantBusy = false;
 const AUTH_SESSION_STORAGE_KEY = 'emploid-auth-session-v1';
 const AUTH_LAST_EMAIL_STORAGE_KEY = 'emploid-auth-last-email-v1';
 let authSession = loadAuthSession();
@@ -1519,7 +1570,7 @@ async function handleResumeUpload() {
 
     const text = await textPromise;
     parsingComplete = true;
-    resumeProfile = buildResumeProfile(text, file.name);
+    resumeProfile = await parseResumeProfile(text, file.name);
     resumeMatchActive = true;
     saveResumeProfile();
     renderResumeMatchUI();
@@ -2021,6 +2072,110 @@ function buildBreakdownRow(label, value) {
   `;
 }
 
+function compactJobForAi(job) {
+  return {
+    id: job.id,
+    title: job.title,
+    company: job.company,
+    companyContext: job.companyContext,
+    location: job.location,
+    source: job.source,
+    jobType: job.jobType,
+    workMode: job.workMode,
+    salaryDisclosed: job.salaryDisclosed,
+    daysPosted: job.daysPosted,
+    repostCount: job.repostCount,
+    trustScore: job.trustScore,
+    recentHiringActivity: job.recentHiringActivity,
+    directCompanyLink: job.directCompanyLink,
+    hiringContact: job.hiringContact,
+    sentiment: job.sentiment,
+    description: job.description,
+    requirements: job.requirements
+  };
+}
+
+function buildInsightsList(items, className) {
+  if (!items || !items.length) return '<p class="ai-insights-empty">No clear signal found.</p>';
+  return `<ul class="${className}">${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
+}
+
+function renderInsightsLoading() {
+  return `
+    <div class="ai-insights ai-insights-loading" id="ai-insights-section">
+      <div class="ai-insights-head">
+        <p class="intel-card-label">Groq AI Insights</p>
+        <span>Analyzing</span>
+      </div>
+      <div class="ai-insights-skeleton"></div>
+      <div class="ai-insights-skeleton short"></div>
+      <div class="ai-insights-grid">
+        <div class="ai-insights-skeleton"></div>
+        <div class="ai-insights-skeleton"></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderInsights(jobId, insights) {
+  if (activeModalJobId !== jobId || !modalArea) return;
+  const container = modalArea.querySelector('#ai-insights-section');
+  if (!container) return;
+
+  container.className = 'ai-insights';
+  container.innerHTML = `
+    <div class="ai-insights-head">
+      <p class="intel-card-label">Groq AI Insights</p>
+      <span>Live read</span>
+    </div>
+    <p class="ai-insights-verdict">${escapeHtml(insights.verdict)}</p>
+    <div class="ai-insights-grid">
+      <div>
+        <h4>Green flags</h4>
+        ${buildInsightsList(insights.greenFlags, 'ai-insights-list positive')}
+      </div>
+      <div>
+        <h4>Red flags</h4>
+        ${buildInsightsList(insights.redFlags, 'ai-insights-list warning')}
+      </div>
+    </div>
+    <h4>Key requirements</h4>
+    ${buildInsightsList(insights.keyRequirements, 'ai-insights-list')}
+    <div class="ai-insights-advice">
+      <p><strong>Interview angle</strong>${escapeHtml(insights.interviewAngle)}</p>
+      <p><strong>Apply advice</strong>${escapeHtml(insights.applyAdvice)}</p>
+    </div>
+  `;
+}
+
+async function loadJobInsights(job) {
+  const cache = loadInsightsCache();
+  if (cache[job.id]) {
+    renderInsights(job.id, cache[job.id]);
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/jobs/${encodeURIComponent(job.id)}/insights`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ job: compactJobForAi(job) })
+    });
+
+    if (!response.ok) throw new Error('Insights unavailable.');
+
+    const insights = await response.json();
+    cache[job.id] = insights;
+    saveInsightsCache(cache);
+    renderInsights(job.id, insights);
+  } catch (error) {
+    console.warn('[JOB_INSIGHTS]', error);
+    if (activeModalJobId !== job.id || !modalArea) return;
+    const container = modalArea.querySelector('#ai-insights-section');
+    if (container) container.remove();
+  }
+}
+
 function openModal(id) {
   if (!overlayEl || !modalArea) return;
   const job = allJobs.find((entry) => entry.id === id);
@@ -2058,6 +2213,7 @@ function openModal(id) {
         </div>
         <h3>Qualifications</h3>
         <ul>${job.requirements.map((requirement) => `<li>${requirement}</li>`).join('')}</ul>
+        ${renderInsightsLoading()}
       </div>
       <aside class="modal-sidebar">
         <div class="sidebar-apply-block">
@@ -2101,6 +2257,7 @@ function openModal(id) {
 
   overlayEl.classList.add('open');
   syncModalLock();
+  loadJobInsights(job);
 }
 
 function closeModal() {
@@ -2112,8 +2269,143 @@ function closeModal() {
 
 if (overlayEl) overlayEl.addEventListener('click', closeModal);
 if (modalArea) modalArea.addEventListener('click', (event) => event.stopPropagation());
+
+function getAssistantJobContext() {
+  const jobs = (filteredJobs.length ? filteredJobs : allJobs)
+    .slice(0, 50)
+    .map((job) => ({
+      title: job.title,
+      company: job.company,
+      location: job.location,
+      workMode: job.workMode,
+      trustScore: job.trustScore,
+      source: job.source,
+      salary: `${formatSalary(job.salary.min)}-${formatSalary(job.salary.max)}${job.salaryDisclosed ? '' : ' est.'}`,
+      requirements: job.requirements.slice(0, 3)
+    }));
+
+  return jobs;
+}
+
+function getAssistantFilters() {
+  return {
+    query: (searchInput && searchInput.value.trim()) || '',
+    trustScoreMinimum: trustFilter ? Number(trustFilter.value) : null,
+    salaryMinimum: salaryFilter ? Number(salaryFilter.value) * 1000 : null,
+    sentiment: sentimentFilter ? sentimentFilter.value : 'all',
+    sort: sortSelect ? sortSelect.value : 'relevance',
+    directOnly: directToggle ? directToggle.checked : false,
+    recruiterOnly: recruiterToggle ? recruiterToggle.checked : false,
+    workModes: Array.from(workModeCheckboxes).filter((input) => input.checked).map((input) => input.value)
+  };
+}
+
+function setAssistantOpen(isOpen) {
+  if (!assistantDrawer || !assistantTrigger) return;
+  assistantDrawer.classList.toggle('open', isOpen);
+  assistantDrawer.setAttribute('aria-hidden', String(!isOpen));
+  assistantTrigger.setAttribute('aria-expanded', String(isOpen));
+  if (isOpen && assistantInput) assistantInput.focus();
+}
+
+function appendAssistantMessage(role, content = '') {
+  if (!assistantMessagesEl) return null;
+  const messageEl = document.createElement('div');
+  messageEl.className = `assistant-message ${role}`;
+  messageEl.textContent = content;
+  assistantMessagesEl.appendChild(messageEl);
+  assistantMessagesEl.scrollTop = assistantMessagesEl.scrollHeight;
+  return messageEl;
+}
+
+function setAssistantStatus(text) {
+  if (assistantStatus) assistantStatus.textContent = text;
+}
+
+async function sendAssistantMessage(event) {
+  event.preventDefault();
+  if (assistantBusy || !assistantInput) return;
+
+  const content = assistantInput.value.trim();
+  if (!content) return;
+
+  assistantInput.value = '';
+  assistantMessages.push({ role: 'user', content });
+  assistantMessages = assistantMessages.slice(-MAX_ASSISTANT_MESSAGES);
+  appendAssistantMessage('user', content);
+
+  const assistantMessageEl = appendAssistantMessage('assistant', '');
+  assistantBusy = true;
+  setAssistantStatus('Groq is reading your context...');
+
+  try {
+    const response = await fetch('/api/assistant', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: assistantMessages,
+        resumeProfile,
+        currentPage: document.body.dataset.page || 'home',
+        trackerApplications,
+        jobs: getAssistantJobContext(),
+        filters: getAssistantFilters()
+      })
+    });
+
+    if (!response.ok || !response.body) throw new Error('Assistant unavailable.');
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let answer = '';
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const events = buffer.split('\n\n');
+      buffer = events.pop() || '';
+
+      events.forEach((eventChunk) => {
+        const line = eventChunk.split('\n').find((item) => item.startsWith('data: '));
+        if (!line) return;
+        const payload = safeParseJSON(line.slice(6), null);
+        if (!payload) return;
+        if (payload.error) throw new Error(payload.error);
+        if (payload.delta) {
+          answer += payload.delta;
+          if (assistantMessageEl) assistantMessageEl.textContent = answer;
+          if (assistantMessagesEl) assistantMessagesEl.scrollTop = assistantMessagesEl.scrollHeight;
+        }
+      });
+    }
+
+    const finalAnswer = answer.trim() || 'I could not find enough context to answer that cleanly yet.';
+    if (assistantMessageEl) assistantMessageEl.textContent = finalAnswer;
+    assistantMessages.push({ role: 'assistant', content: finalAnswer });
+    assistantMessages = assistantMessages.slice(-MAX_ASSISTANT_MESSAGES);
+    setAssistantStatus('Ready');
+  } catch (error) {
+    console.warn('[ASSISTANT]', error);
+    const message = 'I could not reach Groq right now. Try again in a moment.';
+    if (assistantMessageEl) assistantMessageEl.textContent = message;
+    assistantMessages.push({ role: 'assistant', content: message });
+    setAssistantStatus('Offline');
+  } finally {
+    assistantBusy = false;
+  }
+}
+
+if (assistantTrigger) assistantTrigger.addEventListener('click', () => setAssistantOpen(!assistantDrawer.classList.contains('open')));
+if (assistantClose) assistantClose.addEventListener('click', () => setAssistantOpen(false));
+if (assistantForm) assistantForm.addEventListener('submit', sendAssistantMessage);
+
 document.addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return;
+  if (assistantDrawer && assistantDrawer.classList.contains('open')) {
+    setAssistantOpen(false);
+    return;
+  }
   if (authOverlay && authOverlay.classList.contains('open')) {
     closeAuthModal();
     return;
