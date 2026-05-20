@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { groq, GROQ_MODEL } from '@/lib/groq';
+import { getGroqClient, GROQ_MODEL } from '@/lib/groq';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +17,7 @@ const AssistantRequest = z.object({
 });
 
 function sse(data: unknown) {
-  return `data: ${JSON.stringify(data)}\n\n`;
+  return 'data: ' + JSON.stringify(data) + '\n\n';
 }
 
 export async function POST(req: Request) {
@@ -30,6 +30,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Groq is not configured.' }, { status: 503 });
   }
 
+  const groq = getGroqClient();
   const encoder = new TextEncoder();
   const body = new ReadableStream({
     async start(controller) {
@@ -52,13 +53,13 @@ export async function POST(req: Request) {
             },
             {
               role: 'user',
-              content: `Current Emploid context:\n${JSON.stringify({
+              content: 'Current Emploid context:\n' + JSON.stringify({
                 currentPage: parsed.data.currentPage || 'home',
                 resumeProfile: parsed.data.resumeProfile || null,
                 filters: parsed.data.filters || {},
                 jobs: parsed.data.jobs || [],
                 trackerApplications: parsed.data.trackerApplications || [],
-              })}`,
+              }),
             },
             ...parsed.data.messages.map((message) => ({
               role: message.role,
