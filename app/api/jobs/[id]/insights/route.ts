@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { withPublic } from '@/lib/middleware';
-import { groq, GROQ_MODEL, parseGroqJson } from '@/lib/groq';
+import { assistant, ASSISTANT_MODEL, parseAssistantJson } from '@/lib/assistant';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,13 +61,13 @@ const emptyInsights: JobInsights = {
 };
 
 async function buildInsights(job: unknown) {
-  if (!process.env.GROQ_API_KEY) {
-    return NextResponse.json({ error: 'Groq is not configured.' }, { status: 503 });
+  if (!process.env.ASSISTANT_API_KEY) {
+    return NextResponse.json({ error: 'Assistant is not configured.' }, { status: 503 });
   }
 
   try {
-    const completion = await groq.chat.completions.create({
-      model: GROQ_MODEL,
+    const completion = await assistant.chat.completions.create({
+      model: ASSISTANT_MODEL,
       temperature: 0.2,
       max_completion_tokens: 900,
       messages: [
@@ -88,7 +88,7 @@ async function buildInsights(job: unknown) {
       response_format: { type: 'json_object' },
     });
 
-    const insights = parseGroqJson<JobInsights>(completion.choices[0]?.message?.content, emptyInsights);
+    const insights = parseAssistantJson<JobInsights>(completion.choices[0]?.message?.content, emptyInsights);
     return NextResponse.json({
       verdict: insights.verdict,
       greenFlags: insights.greenFlags.slice(0, 4),
@@ -98,7 +98,7 @@ async function buildInsights(job: unknown) {
       applyAdvice: insights.applyAdvice,
     });
   } catch (error) {
-    console.error('[GROQ_JOB_INSIGHTS]', error);
+    console.error('[JOB_INSIGHTS_ERROR]', error);
     return NextResponse.json({ error: 'Could not generate job insights.' }, { status: 502 });
   }
 }

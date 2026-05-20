@@ -737,7 +737,7 @@ async function parseResumeProfile(text, fileName) {
       body: JSON.stringify({ text, fileName })
     });
 
-    if (!response.ok) throw new Error('Groq resume parsing is unavailable.');
+    if (!response.ok) throw new Error('Resume parsing is unavailable.');
 
     const profile = await response.json();
     return {
@@ -2104,7 +2104,7 @@ function renderInsightsLoading() {
   return `
     <div class="ai-insights ai-insights-loading" id="ai-insights-section">
       <div class="ai-insights-head">
-        <p class="intel-card-label">Groq AI Insights</p>
+        <p class="intel-card-label">Assistant insights</p>
         <span>Analyzing</span>
       </div>
       <div class="ai-insights-skeleton"></div>
@@ -2125,7 +2125,7 @@ function renderInsights(jobId, insights) {
   container.className = 'ai-insights';
   container.innerHTML = `
     <div class="ai-insights-head">
-      <p class="intel-card-label">Groq AI Insights</p>
+      <p class="intel-card-label">Assistant insights</p>
       <span>Live read</span>
     </div>
     <p class="ai-insights-verdict">${escapeHtml(insights.verdict)}</p>
@@ -2281,7 +2281,8 @@ function getAssistantJobContext() {
       trustScore: job.trustScore,
       source: job.source,
       salary: `${formatSalary(job.salary.min)}-${formatSalary(job.salary.max)}${job.salaryDisclosed ? '' : ' est.'}`,
-      requirements: job.requirements.slice(0, 3)
+      requirements: job.requirements.slice(0, 3),
+      url: job.url,
     }));
 
   return jobs;
@@ -2322,6 +2323,54 @@ function setAssistantStatus(text) {
   if (assistantStatus) assistantStatus.textContent = text;
 }
 
+function buildAssistantJobCard(job) {
+  const trustInfo = getTrustInfo(job.trustScore);
+  const salaryLabel = job.salary || `${formatSalary(job.salary.min)}-${formatSalary(job.salary.max)}${job.salaryDisclosed ? '' : ' est.'}`;
+  const directUrl = job.url || (job.company ? `https://www.google.com/search?q=${encodeURIComponent(`${job.company} careers ${job.title}`)}` : '#');
+  return `
+    <article class="assistant-job-card tone-${trustInfo.tone}">
+      <div class="assistant-job-card-head">
+        <div class="assistant-job-copy">
+          <p class="assistant-job-kicker">Job posting</p>
+          <h3 class="assistant-job-title">${escapeHtml(job.title)}</h3>
+          <p class="assistant-job-company">${escapeHtml(job.company)} · ${escapeHtml(job.location || '')} · ${escapeHtml(job.source || 'Direct')}</p>
+        </div>
+        <div class="assistant-job-score">
+          <div class="trust-ring trust-ring-large">${buildTrustRing(job.trustScore, 'large')}</div>
+          <span>${trustInfo.label}</span>
+        </div>
+      </div>
+      <div class="assistant-job-meta">
+        <span class="assistant-job-pill">${escapeHtml(salaryLabel)}</span>
+        <span class="assistant-job-pill">${escapeHtml(job.workMode || 'Flexible')}</span>
+        <span class="assistant-job-pill">${escapeHtml(job.jobType || 'Full-time')}</span>
+      </div>
+      <div class="assistant-job-actions">
+        <a class="btn btn-primary assistant-job-link" href="${directUrl}" target="_blank" rel="noopener noreferrer">Open posting</a>
+      </div>
+    </article>
+  `;
+}
+
+function buildAssistantReply(content) {
+  if (!content) return '';
+  const lower = content.toLowerCase();
+  const candidates = (filteredJobs.length ? filteredJobs : allJobs)
+    .slice(0, 10)
+    .filter((job) => {
+      const haystack = `${job.title} ${job.company} ${job.location} ${job.workMode} ${job.source}`.toLowerCase();
+      return lower.split(/\s+/).some((token) => token.length > 2 && haystack.includes(token));
+    })
+    .slice(0, 3);
+
+  if (!candidates.length) {
+    return '';
+  }
+
+  const cards = candidates.map((job) => buildAssistantJobCard(job)).join('');
+  return `<div class="assistant-job-card-stack">${cards}</div>`;
+}
+
 async function sendAssistantMessage(event) {
   event.preventDefault();
   if (assistantBusy || !assistantInput) return;
@@ -2336,7 +2385,7 @@ async function sendAssistantMessage(event) {
 
   const assistantMessageEl = appendAssistantMessage('assistant', '');
   assistantBusy = true;
-  setAssistantStatus('Groq is reading your context...');
+  setAssistantStatus('Reading your context...');
 
   try {
     const response = await fetch('/api/assistant', {
@@ -2393,13 +2442,14 @@ async function sendAssistantMessage(event) {
     }
 
     const finalAnswer = answer.trim() || 'I could not find enough context to answer that cleanly yet.';
-    if (assistantMessageEl) assistantMessageEl.textContent = finalAnswer;
+    const cardMarkup = buildAssistantReply(content);
+    if (assistantMessageEl) assistantMessageEl.innerHTML = `<div class="assistant-text">${escapeHtml(finalAnswer)}</div>${cardMarkup}`;
     assistantMessages.push({ role: 'assistant', content: finalAnswer });
     assistantMessages = assistantMessages.slice(-MAX_ASSISTANT_MESSAGES);
     setAssistantStatus('Ready');
   } catch (error) {
     console.warn('[ASSISTANT]', error);
-    const message = error instanceof Error && error.message ? error.message : 'I could not reach Groq right now. Try again in a moment.';
+    const message = error instanceof Error && error.message ? error.message : 'The assistant is offline right now. Try again in a moment.';
     if (assistantMessageEl) assistantMessageEl.textContent = message;
     assistantMessages.push({ role: 'assistant', content: message });
     setAssistantStatus('Offline');

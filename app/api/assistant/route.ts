@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getGroqClient, GROQ_MODEL } from '@/lib/groq';
+import { getAssistantClient, ASSISTANT_MODEL } from '@/lib/assistant';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,11 +26,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid assistant payload.' }, { status: 400 });
   }
 
-  let groq;
+  let assistant;
   try {
-    groq = getGroqClient();
+    assistant = getAssistantClient();
   } catch (error) {
-    const message = error instanceof Error && error.message ? error.message : 'Groq is not configured.';
+    const message = error instanceof Error && error.message ? error.message : 'Assistant is not configured.';
     return NextResponse.json({ error: message }, { status: 503 });
   }
 
@@ -38,8 +38,8 @@ export async function POST(req: Request) {
   const body = new ReadableStream({
     async start(controller) {
       try {
-        const stream = await groq.chat.completions.create({
-          model: GROQ_MODEL,
+        const stream = await assistant.chat.completions.create({
+          model: ASSISTANT_MODEL,
           temperature: 0.35,
           max_completion_tokens: 900,
           stream: true,
@@ -80,7 +80,7 @@ export async function POST(req: Request) {
         controller.close();
       } catch (error) {
         const message = error instanceof Error && error.message ? error.message : 'The assistant could not answer right now.';
-        console.error('[GROQ_ASSISTANT]', error);
+        console.error('[ASSISTANT_ERROR]', error);
         controller.enqueue(encoder.encode(sse({ error: message })));
         controller.close();
       }

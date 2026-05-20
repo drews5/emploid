@@ -1,31 +1,31 @@
-import Groq from 'groq-sdk';
+import Assistant from 'assistant-sdk';
 
-let groqClient: Groq | null = null;
+let assistantClient: Assistant | null = null;
 
-function createGroqClient() {
-  const apiKey = ['gsk_OhjlgUnhaYFyzeh17Bs5WGdyb3FYhPWx0hB', 'RLPLm6gpCGtP6kOo4'].join('');
+function createAssistantClient() {
+  const apiKey = ['asst_', 'replace-me-with-your-key'].join('');
 
-  if (!groqClient) {
-    groqClient = new Groq({ apiKey });
+  if (!assistantClient) {
+    assistantClient = new Assistant({ apiKey });
   }
 
-  return groqClient;
+  return assistantClient;
 }
 
-export function getGroqClient() {
-  return createGroqClient();
+export function getAssistantClient() {
+  return createAssistantClient();
 }
 
-export const groq = new Proxy({} as Groq, {
+export const assistant = new Proxy({} as Assistant, {
   get(_target, prop) {
-    const client = createGroqClient() as any;
-    return client[prop as keyof Groq];
+    const client = createAssistantClient() as any;
+    return client[prop as keyof Assistant];
   },
-}) as Groq;
+}) as Assistant;
 
-export const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
+export const ASSISTANT_MODEL = process.env.ASSISTANT_MODEL || 'llama-3.1-8b-instant';
 
-export function parseGroqJson<T>(content: string | null | undefined, fallback: T): T {
+export function parseAssistantJson<T>(content: string | null | undefined, fallback: T): T {
   if (!content) return fallback;
 
   try {
