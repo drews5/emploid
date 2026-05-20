@@ -1,22 +1,20 @@
-/**
- * Root landing page wrapper.
- *
- * The campaign site itself lives in /public/index.html, so we render it in an iframe
- * from the actual Next.js entrypoint to avoid serving the raw file directly.
- */
-export default function Home() {
-  return (
-    <main style={{ width: '100%', height: '100vh' }}>
-      <iframe
-        src="/index.html"
-        title="Emploid landing page"
-        style={{
-          display: 'block',
-          width: '100%',
-          height: '100vh',
-          border: 0,
-        }}
-      />
-    </main>
-  );
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+
+function extractBodyContents(html: string) {
+  const match = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+
+  if (!match) {
+    throw new Error('Could not find the body contents in public/index.html');
+  }
+
+  return match[1].trim();
+}
+
+export default async function Home() {
+  const htmlPath = path.join(process.cwd(), 'public', 'index.html');
+  const html = await readFile(htmlPath, 'utf8');
+  const bodyContents = extractBodyContents(html);
+
+  return <div suppressHydrationWarning dangerouslySetInnerHTML={{ __html: bodyContents }} />;
 }
