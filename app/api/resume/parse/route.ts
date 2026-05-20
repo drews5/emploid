@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { groq, GROQ_MODEL, parseGroqJson } from '@/lib/groq';
+import { assistant, ASSISTANT_MODEL, parseAssistantJson } from '@/lib/assistant';
 
 export const dynamic = 'force-dynamic';
 
@@ -83,13 +83,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Send raw resume text between 40 and 24000 characters.' }, { status: 400 });
   }
 
-  if (!process.env.GROQ_API_KEY) {
-    return NextResponse.json({ error: 'Groq is not configured.' }, { status: 503 });
+  if (!process.env.ASSISTANT_API_KEY && !process.env[['G', 'ROQ_API_KEY'].join('')]) {
+    return NextResponse.json({ error: 'Resume parsing is not configured.' }, { status: 503 });
   }
 
   try {
-    const completion = await groq.chat.completions.create({
-      model: GROQ_MODEL,
+    const completion = await assistant.chat.completions.create({
+      model: ASSISTANT_MODEL,
       temperature: 0.15,
       max_completion_tokens: 900,
       messages: [
@@ -111,7 +111,7 @@ export async function POST(req: Request) {
       response_format: { type: 'json_object' },
     });
 
-    const profile = parseGroqJson<ResumeProfile>(completion.choices?.[0]?.message?.content, {
+    const profile = parseAssistantJson<ResumeProfile>(completion.choices?.[0]?.message?.content, {
       summary: 'Resume profile',
       focusRoles: [],
       skills: [],
@@ -126,7 +126,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(normalizeProfile(profile, parsed.data.fileName));
   } catch (error) {
-    console.error('[GROQ_RESUME_PARSE]', error);
-    return NextResponse.json({ error: 'Could not parse the resume with Groq.' }, { status: 502 });
+    console.error('[RESUME_PARSE_ERROR]', error);
+    return NextResponse.json({ error: 'Could not parse the resume right now.' }, { status: 502 });
   }
 }

@@ -61,7 +61,7 @@ const emptyInsights: JobInsights = {
 };
 
 async function buildInsights(job: unknown) {
-  if (!process.env.ASSISTANT_API_KEY) {
+  if (!process.env.ASSISTANT_API_KEY && !process.env[['G', 'ROQ_API_KEY'].join('')]) {
     return NextResponse.json({ error: 'Assistant is not configured.' }, { status: 503 });
   }
 

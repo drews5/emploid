@@ -737,7 +737,7 @@ async function parseResumeProfile(text, fileName) {
       body: JSON.stringify({ text, fileName })
     });
 
-    if (!response.ok) throw new Error('Resume parsing is unavailable.');
+    if (!response.ok) throw new Error('Resume parsing is unavailable right now.');
 
     const profile = await response.json();
     return {
@@ -2104,7 +2104,7 @@ function renderInsightsLoading() {
   return `
     <div class="ai-insights ai-insights-loading" id="ai-insights-section">
       <div class="ai-insights-head">
-        <p class="intel-card-label">Assistant insights</p>
+        <p class="intel-card-label">AI Insights</p>
         <span>Analyzing</span>
       </div>
       <div class="ai-insights-skeleton"></div>
@@ -2125,7 +2125,7 @@ function renderInsights(jobId, insights) {
   container.className = 'ai-insights';
   container.innerHTML = `
     <div class="ai-insights-head">
-      <p class="intel-card-label">Assistant insights</p>
+      <p class="intel-card-label">AI Insights</p>
       <span>Live read</span>
     </div>
     <p class="ai-insights-verdict">${escapeHtml(insights.verdict)}</p>
@@ -2274,15 +2274,21 @@ function getAssistantJobContext() {
   const jobs = (filteredJobs.length ? filteredJobs : allJobs)
     .slice(0, 50)
     .map((job) => ({
+      id: job.id,
       title: job.title,
       company: job.company,
       location: job.location,
       workMode: job.workMode,
       trustScore: job.trustScore,
       source: job.source,
-      salary: `${formatSalary(job.salary.min)}-${formatSalary(job.salary.max)}${job.salaryDisclosed ? '' : ' est.'}`,
-      requirements: job.requirements.slice(0, 3),
+      domain: job.domain,
       url: job.url,
+      salary: `${formatSalary(job.salary.min)}-${formatSalary(job.salary.max)}${job.salaryDisclosed ? '' : ' est.'}`,
+      daysPosted: job.daysPosted,
+      directCompanyLink: job.directCompanyLink,
+      recentHiringActivity: job.recentHiringActivity,
+      description: job.description,
+      requirements: job.requirements.slice(0, 3)
     }));
 
   return jobs;
@@ -2323,52 +2329,81 @@ function setAssistantStatus(text) {
   if (assistantStatus) assistantStatus.textContent = text;
 }
 
-function buildAssistantJobCard(job) {
-  const trustInfo = getTrustInfo(job.trustScore);
-  const salaryLabel = job.salary || `${formatSalary(job.salary.min)}-${formatSalary(job.salary.max)}${job.salaryDisclosed ? '' : ' est.'}`;
-  const directUrl = job.url || (job.company ? `https://www.google.com/search?q=${encodeURIComponent(`${job.company} careers ${job.title}`)}` : '#');
-  return `
-    <article class="assistant-job-card tone-${trustInfo.tone}">
-      <div class="assistant-job-card-head">
-        <div class="assistant-job-copy">
-          <p class="assistant-job-kicker">Job posting</p>
-          <h3 class="assistant-job-title">${escapeHtml(job.title)}</h3>
-          <p class="assistant-job-company">${escapeHtml(job.company)} · ${escapeHtml(job.location || '')} · ${escapeHtml(job.source || 'Direct')}</p>
-        </div>
-        <div class="assistant-job-score">
-          <div class="trust-ring trust-ring-large">${buildTrustRing(job.trustScore, 'large')}</div>
-          <span>${trustInfo.label}</span>
-        </div>
-      </div>
-      <div class="assistant-job-meta">
-        <span class="assistant-job-pill">${escapeHtml(salaryLabel)}</span>
-        <span class="assistant-job-pill">${escapeHtml(job.workMode || 'Flexible')}</span>
-        <span class="assistant-job-pill">${escapeHtml(job.jobType || 'Full-time')}</span>
-      </div>
-      <div class="assistant-job-actions">
-        <a class="btn btn-primary assistant-job-link" href="${directUrl}" target="_blank" rel="noopener noreferrer">Open posting</a>
-      </div>
-    </article>
-  `;
+function isJobRecommendationPrompt(text) {
+  return /\b(recommend|suggest|match|best|good fit|which jobs|what jobs|openings|roles|listings|apply)\b/i.test(text);
 }
 
-function buildAssistantReply(content) {
-  if (!content) return '';
-  const lower = content.toLowerCase();
-  const candidates = (filteredJobs.length ? filteredJobs : allJobs)
-    .slice(0, 10)
-    .filter((job) => {
-      const haystack = `${job.title} ${job.company} ${job.location} ${job.workMode} ${job.source}`.toLowerCase();
-      return lower.split(/\s+/).some((token) => token.length > 2 && haystack.includes(token));
-    })
+function findAssistantRecommendedJobs(answer, prompt) {
+  const sourceJobs = filteredJobs.length ? filteredJobs : allJobs;
+  const normalizedAnswer = normalizeSearchText(answer);
+  const selected = sourceJobs.filter((job) => {
+    const title = normalizeSearchText(job.title);
+    const company = normalizeSearchText(job.company);
+    const titleCompany = normalizeSearchText(`${job.title} ${job.company}`);
+    const companyTitle = normalizeSearchText(`${job.company} ${job.title}`);
+    return normalizedAnswer.includes(titleCompany)
+      || normalizedAnswer.includes(companyTitle)
+      || (normalizedAnswer.includes(title) && normalizedAnswer.includes(company));
+  });
+
+  if (selected.length) return selected.slice(0, 4);
+  if (!isJobRecommendationPrompt(prompt)) return [];
+
+  return sourceJobs
+    .slice()
+    .sort((a, b) => (b.resumeMatchScore || 0) - (a.resumeMatchScore || 0) || b.trustScore - a.trustScore || a.daysPosted - b.daysPosted)
     .slice(0, 3);
+}
 
-  if (!candidates.length) {
-    return '';
-  }
+function appendAssistantJobCards(jobs) {
+  if (!assistantMessagesEl || !jobs.length) return;
 
-  const cards = candidates.map((job) => buildAssistantJobCard(job)).join('');
-  return `<div class="assistant-job-card-stack">${cards}</div>`;
+  const group = document.createElement('div');
+  group.className = 'assistant-job-card-group';
+  group.setAttribute('aria-label', 'Recommended job listings');
+
+  jobs.forEach((job) => {
+    const trustInfo = getTrustInfo(job.trustScore);
+    const salaryLabel = `${formatSalary(job.salary.min)}-${formatSalary(job.salary.max)}${job.salaryDisclosed ? '' : ' est.'}`;
+    const card = document.createElement('article');
+    card.className = `assistant-job-card tone-${trustInfo.tone}`;
+    card.innerHTML = `
+      <div class="assistant-job-card-main">
+        <div>
+          <p class="assistant-job-card-company">${escapeHtml(job.company)} &middot; ${escapeHtml(job.location)}</p>
+          <h3>${escapeHtml(job.title)}</h3>
+        </div>
+        <div class="assistant-job-score">
+          <span>${job.trustScore}</span>
+          <small>${escapeHtml(trustInfo.label)}</small>
+        </div>
+      </div>
+      <p class="assistant-job-description">${escapeHtml(job.description)}</p>
+      <div class="assistant-job-meta">
+        <span>${escapeHtml(salaryLabel)}</span>
+        <span>${escapeHtml(job.workMode)}</span>
+        <span>${escapeHtml(formatPostedAge(job.daysPosted))}</span>
+      </div>
+      <div class="assistant-job-actions">
+        <button class="assistant-job-detail" type="button">Details</button>
+        <a href="${escapeHtml(job.url)}" target="_blank" rel="noopener" class="assistant-job-open">Open listing</a>
+      </div>
+    `;
+
+    const detailButton = card.querySelector('.assistant-job-detail');
+    const openLink = card.querySelector('.assistant-job-open');
+    if (detailButton) detailButton.addEventListener('click', () => openModal(job.id));
+    if (openLink) {
+      openLink.addEventListener('click', () => {
+        trackJobApplication(job);
+        showToast('Added to your tracker and opened the listing.');
+      });
+    }
+    group.appendChild(card);
+  });
+
+  assistantMessagesEl.appendChild(group);
+  assistantMessagesEl.scrollTop = assistantMessagesEl.scrollHeight;
 }
 
 async function sendAssistantMessage(event) {
@@ -2385,7 +2420,7 @@ async function sendAssistantMessage(event) {
 
   const assistantMessageEl = appendAssistantMessage('assistant', '');
   assistantBusy = true;
-  setAssistantStatus('Reading your context...');
+  setAssistantStatus('emplAID is reading your context...');
 
   try {
     const response = await fetch('/api/assistant', {
@@ -2401,19 +2436,7 @@ async function sendAssistantMessage(event) {
       })
     });
 
-    if (!response.ok || !response.body) {
-      let errorMessage = 'Assistant unavailable.';
-      try {
-        const errorPayload = await response.json();
-        errorMessage = errorPayload?.error || errorMessage;
-      } catch {
-        try {
-          const errorText = await response.text();
-          if (errorText) errorMessage = errorText;
-        } catch {}
-      }
-      throw new Error(errorMessage);
-    }
+    if (!response.ok || !response.body) throw new Error('Assistant unavailable.');
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
@@ -2442,14 +2465,14 @@ async function sendAssistantMessage(event) {
     }
 
     const finalAnswer = answer.trim() || 'I could not find enough context to answer that cleanly yet.';
-    const cardMarkup = buildAssistantReply(content);
-    if (assistantMessageEl) assistantMessageEl.innerHTML = `<div class="assistant-text">${escapeHtml(finalAnswer)}</div>${cardMarkup}`;
+    if (assistantMessageEl) assistantMessageEl.textContent = finalAnswer;
     assistantMessages.push({ role: 'assistant', content: finalAnswer });
     assistantMessages = assistantMessages.slice(-MAX_ASSISTANT_MESSAGES);
+    appendAssistantJobCards(findAssistantRecommendedJobs(finalAnswer, content));
     setAssistantStatus('Ready');
   } catch (error) {
     console.warn('[ASSISTANT]', error);
-    const message = error instanceof Error && error.message ? error.message : 'The assistant is offline right now. Try again in a moment.';
+    const message = 'I could not reach emplAID right now. Try again in a moment.';
     if (assistantMessageEl) assistantMessageEl.textContent = message;
     assistantMessages.push({ role: 'assistant', content: message });
     setAssistantStatus('Offline');

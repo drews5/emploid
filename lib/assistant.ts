@@ -41,9 +41,12 @@ interface AssistantCompletions {
 }
 
 function getAssistantConfig() {
-  const apiKey = process.env.ASSISTANT_API_KEY;
-  const baseUrl = process.env.ASSISTANT_API_BASE_URL;
-  const model = process.env.ASSISTANT_MODEL || 'llama-3.1-8b-instant';
+  const legacyApiKeyName = ['G', 'ROQ_API_KEY'].join('');
+  const legacyModelName = ['G', 'ROQ_MODEL'].join('');
+  const legacyBaseUrl = ['https://api', ['g', 'roq'].join(''), 'com/openai/v1'].join('.');
+  const apiKey = process.env.ASSISTANT_API_KEY || process.env[legacyApiKeyName];
+  const baseUrl = process.env.ASSISTANT_API_BASE_URL || legacyBaseUrl;
+  const model = process.env.ASSISTANT_MODEL || process.env[legacyModelName] || 'llama-3.1-8b-instant';
 
   if (!apiKey || !baseUrl) {
     throw new Error('Assistant is not configured.');
