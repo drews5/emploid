@@ -2332,18 +2332,77 @@ function isJobRecommendationPrompt(text) {
   return /\b(recommend|suggest|match|best|good fit|which jobs|what jobs|openings|roles|listings|apply)\b/i.test(text);
 }
 
+function renderAssistantMarkdown(content) {
+  const escaped = escapeHtml(content);
+  const lines = escaped.split(/\r?\n/);
+  let html = '';
+  let listOpen = false;
+
+  const closeList = () => {
+    if (listOpen) {
+      html += '</ul>';
+      listOpen = false;
+    }
+  };
+
+  const formatInline = (value) => value
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/__([^_]+)__/g, '<strong>$1</strong>')
+    .replace(/\+\+([^+]+)\+\+/g, '<u>$1</u>')
+    .replace(/&lt;u&gt;([\s\S]*?)&lt;\/u&gt;/g, '<u>$1</u>')
+    .replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>')
+    .replace(/(^|[^_])_([^_\n]+)_/g, '$1<em>$2</em>');
+
+  lines.forEach((line) => {
+    const bullet = line.match(/^\s*[-*]\s+(.+)$/);
+    if (bullet) {
+      if (!listOpen) {
+        html += '<ul>';
+        listOpen = true;
+      }
+      html += `<li>${formatInline(bullet[1])}</li>`;
+      return;
+    }
+
+    closeList();
+    if (!line.trim()) {
+      html += '<br>';
+      return;
+    }
+    html += `<p>${formatInline(line)}</p>`;
+  });
+
+  closeList();
+  return html;
+}
+
+function getJobMentionScore(job, normalizedAnswer) {
+  const title = normalizeSearchText(job.title);
+  const company = normalizeSearchText(job.company);
+  const titleCompany = normalizeSearchText(`${job.title} ${job.company}`);
+  const companyTitle = normalizeSearchText(`${job.company} ${job.title}`);
+  const titleTokens = title.split(' ').filter((token) => token.length > 2);
+  const matchedTitleTokens = titleTokens.filter((token) => normalizedAnswer.includes(token)).length;
+  const companyMentioned = normalizedAnswer.includes(company);
+
+  if (normalizedAnswer.includes(titleCompany) || normalizedAnswer.includes(companyTitle)) return 100;
+  if (normalizedAnswer.includes(title) && companyMentioned) return 90;
+  if (companyMentioned && matchedTitleTokens >= Math.min(2, titleTokens.length)) return 80 + matchedTitleTokens;
+  if (companyMentioned && matchedTitleTokens >= 1) return 55 + matchedTitleTokens;
+  if (normalizedAnswer.includes(title)) return 45;
+  return 0;
+}
+
 function findAssistantRecommendedJobs(answer, prompt) {
   const sourceJobs = filteredJobs.length ? filteredJobs : allJobs;
   const normalizedAnswer = normalizeSearchText(answer);
-  const selected = sourceJobs.filter((job) => {
-    const title = normalizeSearchText(job.title);
-    const company = normalizeSearchText(job.company);
-    const titleCompany = normalizeSearchText(`${job.title} ${job.company}`);
-    const companyTitle = normalizeSearchText(`${job.company} ${job.title}`);
-    return normalizedAnswer.includes(titleCompany)
-      || normalizedAnswer.includes(companyTitle)
-      || (normalizedAnswer.includes(title) && normalizedAnswer.includes(company));
-  });
+  const selected = sourceJobs
+    .map((job) => ({ job, score: getJobMentionScore(job, normalizedAnswer) }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score || b.job.trustScore - a.job.trustScore)
+    .map((entry) => entry.job);
 
   if (selected.length) return selected.slice(0, 4);
   if (!isJobRecommendationPrompt(prompt)) return [];
@@ -2464,7 +2523,7 @@ async function sendAssistantMessage(event) {
     }
 
     const finalAnswer = answer.trim() || 'I could not find enough context to answer that cleanly yet.';
-    if (assistantMessageEl) assistantMessageEl.textContent = finalAnswer;
+    if (assistantMessageEl) assistantMessageEl.innerHTML = renderAssistantMarkdown(finalAnswer);
     assistantMessages.push({ role: 'assistant', content: finalAnswer });
     assistantMessages = assistantMessages.slice(-MAX_ASSISTANT_MESSAGES);
     appendAssistantJobCards(findAssistantRecommendedJobs(finalAnswer, content));

@@ -2690,6 +2690,51 @@ footer {
   justify-self: start;
 }
 
+.assistant-message.assistant p {
+  margin: 0;
+}
+
+.assistant-message.assistant p + p {
+  margin-top: 8px;
+}
+
+.assistant-message.assistant ul {
+  display: grid;
+  gap: 7px;
+  margin: 8px 0 0;
+  padding-left: 18px;
+  list-style: disc;
+}
+
+.assistant-message.assistant strong {
+  color: var(--text-primary);
+  font-weight: 800;
+}
+
+.assistant-message.assistant em {
+  color: var(--text-primary);
+}
+
+.assistant-message.assistant u {
+  text-decoration-color: var(--orange-500);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.assistant-message.assistant code {
+  padding: 2px 5px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-light);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+}
+
+.assistant-message.assistant a {
+  color: var(--orange-600);
+  font-weight: 800;
+}
+
 .assistant-job-card-group {
   justify-self: stretch;
   display: grid;
