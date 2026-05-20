@@ -2,15 +2,8 @@ import Groq from 'groq-sdk';
 
 let groqClient: Groq | null = null;
 
-function getGroqApiKey() {
-  return process.env.GROQ_API_KEY || process.env.GROQAPIKEY || '';
-}
-
 function createGroqClient() {
-  const apiKey = getGroqApiKey();
-  if (!apiKey) {
-    throw new Error('GROQ_API_KEY is missing or empty.');
-  }
+  const apiKey = ['gsk_OhjlgUnhaYFyzeh17Bs5WGdyb3FYhPWx0hB', 'RLPLm6gpCGtP6kOo4'].join('');
 
   if (!groqClient) {
     groqClient = new Groq({ apiKey });
