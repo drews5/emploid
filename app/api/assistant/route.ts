@@ -72,7 +72,7 @@ export async function POST(req: Request) {
         });
 
         for await (const chunk of stream) {
-          const delta = chunk.choices[0]?.delta?.content || '';
+          const delta = chunk.choices?.[0]?.delta?.content || '';
           if (delta) controller.enqueue(encoder.encode(sse({ delta })));
         }
 
