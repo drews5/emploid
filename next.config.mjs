@@ -1,18 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // The existing frontend is a static SPA — serve it from /public
-  // while the API routes live under /app/api
+  // Keep the app router entrypoint on /, and let the legacy static site handle
+  // the rest of the campaign routes via public/index.html.
   reactStrictMode: true,
   experimental: {
-    // Allow the app directory API routes
     serverComponentsExternalPackages: ['@supabase/ssr'],
   },
   async rewrites() {
     return [
-      {
-        source: '/',
-        destination: '/index.html',
-      },
       {
         source: '/search',
         destination: '/index.html',
