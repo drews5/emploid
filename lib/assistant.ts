@@ -35,6 +35,11 @@ type ChatCompletionResponse = {
   }>;
 };
 
+interface AssistantCompletions {
+  create(args: CreateChatCompletionStreamArgs): Promise<AsyncGenerator<ChatCompletionChunk, void, unknown>>;
+  create(args: CreateChatCompletionArgs): Promise<ChatCompletionResponse>;
+}
+
 function getAssistantConfig() {
   const apiKey = process.env.ASSISTANT_API_KEY;
   const baseUrl = process.env.ASSISTANT_API_BASE_URL;
@@ -117,9 +122,11 @@ class AssistantClient {
   }
 }
 
-const chat = {
+const assistantClient = new AssistantClient();
+
+const chat: { completions: AssistantCompletions } = {
   completions: {
-    create: (args: CreateChatCompletionArgs | CreateChatCompletionStreamArgs) => new AssistantClient().create(args as any),
+    create: ((args: CreateChatCompletionArgs | CreateChatCompletionStreamArgs) => assistantClient.create(args as any)) as AssistantCompletions['create'],
   },
 };
 
