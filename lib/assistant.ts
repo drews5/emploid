@@ -3,13 +3,20 @@ type ChatMessage = {
   content: string;
 };
 
-type CreateChatCompletionArgs = {
+type CreateChatCompletionBaseArgs = {
   model: string;
   messages: ChatMessage[];
   temperature?: number;
   max_completion_tokens?: number;
   response_format?: { type: 'json_object' };
-  stream?: boolean;
+};
+
+type CreateChatCompletionStreamArgs = CreateChatCompletionBaseArgs & {
+  stream: true;
+};
+
+type CreateChatCompletionArgs = CreateChatCompletionBaseArgs & {
+  stream?: false | undefined;
 };
 
 type ChatCompletionChunk = {
@@ -40,7 +47,7 @@ function getAssistantConfig() {
   return { apiKey, baseUrl: baseUrl.replace(/\/+$/, ''), model };
 }
 
-async function* parseSseStream(body: ReadableStream<Uint8Array>) {
+async function* parseSseStream(body: ReadableStream<Uint8Array>): AsyncGenerator<ChatCompletionChunk, void, unknown> {
   const reader = body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
@@ -74,7 +81,9 @@ async function* parseSseStream(body: ReadableStream<Uint8Array>) {
 }
 
 class AssistantClient {
-  async create(args: CreateChatCompletionArgs) {
+  async create(args: CreateChatCompletionStreamArgs): Promise<AsyncGenerator<ChatCompletionChunk, void, unknown>>;
+  async create(args: CreateChatCompletionArgs): Promise<ChatCompletionResponse>;
+  async create(args: CreateChatCompletionArgs | CreateChatCompletionStreamArgs): Promise<ChatCompletionResponse | AsyncGenerator<ChatCompletionChunk, void, unknown>> {
     const { apiKey, baseUrl, model } = getAssistantConfig();
     const response = await fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
@@ -110,7 +119,7 @@ class AssistantClient {
 
 const chat = {
   completions: {
-    create: (args: CreateChatCompletionArgs) => new AssistantClient().create(args),
+    create: (args: CreateChatCompletionArgs | CreateChatCompletionStreamArgs) => new AssistantClient().create(args as any),
   },
 };
 
@@ -128,7 +137,7 @@ export function parseAssistantJson<T>(content: string | null | undefined, fallba
   try {
     return JSON.parse(content) as T;
   } catch {
-    const match = content.match(/{[\s\S]*}/);
+    const match = content.match(/\{[\s\S]*\}/);
     if (!match) return fallback;
 
     try {
