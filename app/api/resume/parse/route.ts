@@ -111,7 +111,7 @@ export async function POST(req: Request) {
       response_format: { type: 'json_object' },
     });
 
-    const profile = parseGroqJson<ResumeProfile>(completion.choices[0]?.message?.content, {
+    const profile = parseGroqJson<ResumeProfile>(completion.choices?.[0]?.message?.content, {
       summary: 'Resume profile',
       focusRoles: [],
       skills: [],
