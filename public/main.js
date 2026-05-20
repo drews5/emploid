@@ -2352,7 +2352,19 @@ async function sendAssistantMessage(event) {
       })
     });
 
-    if (!response.ok || !response.body) throw new Error('Assistant unavailable.');
+    if (!response.ok || !response.body) {
+      let errorMessage = 'Assistant unavailable.';
+      try {
+        const errorPayload = await response.json();
+        errorMessage = errorPayload?.error || errorMessage;
+      } catch {
+        try {
+          const errorText = await response.text();
+          if (errorText) errorMessage = errorText;
+        } catch {}
+      }
+      throw new Error(errorMessage);
+    }
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
@@ -2387,7 +2399,7 @@ async function sendAssistantMessage(event) {
     setAssistantStatus('Ready');
   } catch (error) {
     console.warn('[ASSISTANT]', error);
-    const message = 'I could not reach Groq right now. Try again in a moment.';
+    const message = error instanceof Error && error.message ? error.message : 'I could not reach Groq right now. Try again in a moment.';
     if (assistantMessageEl) assistantMessageEl.textContent = message;
     assistantMessages.push({ role: 'assistant', content: message });
     setAssistantStatus('Offline');
