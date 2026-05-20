@@ -1,8 +1,19 @@
 import Groq from 'groq-sdk';
 
-export const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+let groqClient: Groq | null = null;
+
+export function getGroqClient() {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    throw new Error('GROQ_API_KEY is missing or empty.');
+  }
+
+  if (!groqClient) {
+    groqClient = new Groq({ apiKey });
+  }
+
+  return groqClient;
+}
 
 export const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
 
@@ -12,7 +23,7 @@ export function parseGroqJson<T>(content: string | null | undefined, fallback: T
   try {
     return JSON.parse(content) as T;
   } catch {
-    const match = content.match(/\{[\s\S]*\}/);
+    const match = content.match(/{[sS]*}/);
     if (!match) return fallback;
 
     try {
