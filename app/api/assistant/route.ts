@@ -26,11 +26,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid assistant payload.' }, { status: 400 });
   }
 
-  if (!process.env.GROQ_API_KEY) {
-    return NextResponse.json({ error: 'GROQ_API_KEY is missing or empty.' }, { status: 503 });
+  let groq;
+  try {
+    groq = getGroqClient();
+  } catch (error) {
+    const message = error instanceof Error && error.message ? error.message : 'Groq is not configured.';
+    return NextResponse.json({ error: message }, { status: 503 });
   }
 
-  const groq = getGroqClient();
   const encoder = new TextEncoder();
   const body = new ReadableStream({
     async start(controller) {
