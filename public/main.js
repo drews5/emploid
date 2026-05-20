@@ -2384,14 +2384,14 @@ function getJobMentionScore(job, normalizedAnswer) {
   const titleCompany = normalizeSearchText(`${job.title} ${job.company}`);
   const companyTitle = normalizeSearchText(`${job.company} ${job.title}`);
   const titleTokens = title.split(' ').filter((token) => token.length > 2);
-  const matchedTitleTokens = titleTokens.filter((token) => normalizedAnswer.includes(token)).length;
   const companyMentioned = normalizedAnswer.includes(company);
+  const exactTitleMentioned = normalizedAnswer.includes(title);
+  const allTitleTokensMentioned = titleTokens.length > 0 && titleTokens.every((token) => normalizedAnswer.includes(token));
 
   if (normalizedAnswer.includes(titleCompany) || normalizedAnswer.includes(companyTitle)) return 100;
-  if (normalizedAnswer.includes(title) && companyMentioned) return 90;
-  if (companyMentioned && matchedTitleTokens >= Math.min(2, titleTokens.length)) return 80 + matchedTitleTokens;
-  if (companyMentioned && matchedTitleTokens >= 1) return 55 + matchedTitleTokens;
-  if (normalizedAnswer.includes(title)) return 45;
+  if (companyMentioned && exactTitleMentioned) return 95;
+  if (companyMentioned && allTitleTokensMentioned) return 90;
+  if (exactTitleMentioned) return 70;
   return 0;
 }
 
@@ -2400,17 +2400,12 @@ function findAssistantRecommendedJobs(answer, prompt) {
   const normalizedAnswer = normalizeSearchText(answer);
   const selected = sourceJobs
     .map((job) => ({ job, score: getJobMentionScore(job, normalizedAnswer) }))
-    .filter((entry) => entry.score > 0)
+    .filter((entry) => entry.score >= 70)
     .sort((a, b) => b.score - a.score || b.job.trustScore - a.job.trustScore)
     .map((entry) => entry.job);
 
   if (selected.length) return selected.slice(0, 4);
-  if (!isJobRecommendationPrompt(prompt)) return [];
-
-  return sourceJobs
-    .slice()
-    .sort((a, b) => (b.resumeMatchScore || 0) - (a.resumeMatchScore || 0) || b.trustScore - a.trustScore || a.daysPosted - b.daysPosted)
-    .slice(0, 3);
+  return [];
 }
 
 function appendAssistantJobCards(jobs) {
