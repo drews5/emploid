@@ -88,7 +88,7 @@ async function buildInsights(job: unknown) {
       response_format: { type: 'json_object' },
     });
 
-    const insights = parseAssistantJson<JobInsights>(completion.choices[0]?.message?.content, emptyInsights);
+    const insights = parseAssistantJson<JobInsights>(completion.choices?.[0]?.message?.content, emptyInsights);
     return NextResponse.json({
       verdict: insights.verdict,
       greenFlags: insights.greenFlags.slice(0, 4),
