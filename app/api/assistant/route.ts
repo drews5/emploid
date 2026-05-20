@@ -27,7 +27,7 @@ export async function POST(req: Request) {
   }
 
   if (!process.env.GROQ_API_KEY) {
-    return NextResponse.json({ error: 'Groq is not configured.' }, { status: 503 });
+    return NextResponse.json({ error: 'GROQ_API_KEY is missing or empty.' }, { status: 503 });
   }
 
   const groq = getGroqClient();
@@ -76,8 +76,9 @@ export async function POST(req: Request) {
         controller.enqueue(encoder.encode(sse({ done: true })));
         controller.close();
       } catch (error) {
+        const message = error instanceof Error && error.message ? error.message : 'The assistant could not answer right now.';
         console.error('[GROQ_ASSISTANT]', error);
-        controller.enqueue(encoder.encode(sse({ error: 'The assistant could not answer right now.' })));
+        controller.enqueue(encoder.encode(sse({ error: message })));
         controller.close();
       }
     },
