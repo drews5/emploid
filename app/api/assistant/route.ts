@@ -80,9 +80,8 @@ export async function POST(req: Request) {
         controller.enqueue(encoder.encode(sse({ done: true })));
         controller.close();
       } catch (error) {
-        const message = error instanceof Error && error.message ? error.message : 'The assistant could not answer right now.';
         console.error('[ASSISTANT_ERROR]', error);
-        controller.enqueue(encoder.encode(sse({ error: message })));
+        controller.enqueue(encoder.encode(sse({ error: 'The assistant could not answer right now.' })));
         controller.close();
       }
     },

@@ -2272,7 +2272,7 @@ if (modalArea) modalArea.addEventListener('click', (event) => event.stopPropagat
 
 function getAssistantJobContext() {
   const jobs = (filteredJobs.length ? filteredJobs : allJobs)
-    .slice(0, 50)
+    .slice(0, 12)
     .map((job) => ({
       id: job.id,
       title: job.title,
@@ -2287,8 +2287,7 @@ function getAssistantJobContext() {
       daysPosted: job.daysPosted,
       directCompanyLink: job.directCompanyLink,
       recentHiringActivity: job.recentHiringActivity,
-      description: job.description,
-      requirements: job.requirements.slice(0, 3)
+      summary: job.description,
     }));
 
   return jobs;
