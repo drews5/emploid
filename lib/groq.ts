@@ -2,8 +2,12 @@ import Groq from 'groq-sdk';
 
 let groqClient: Groq | null = null;
 
+function getGroqApiKey() {
+  return process.env.GROQ_API_KEY || process.env.GROQAPIKEY || '';
+}
+
 function createGroqClient() {
-  const apiKey = process.env.GROQ_API_KEY;
+  const apiKey = getGroqApiKey();
   if (!apiKey) {
     throw new Error('GROQ_API_KEY is missing or empty.');
   }
