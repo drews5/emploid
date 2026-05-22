@@ -385,10 +385,11 @@ function todayIso() {
 }
 
 const PAGE_ROUTES = {
-  home: '/search',
+  home: '/',
   jobs: '/browse',
   tracker: '/tracker',
   about: '/about',
+  blog: '/blog',
 };
 
 const ROUTE_TO_PAGE = {
@@ -398,12 +399,13 @@ const ROUTE_TO_PAGE = {
   '/browse': 'jobs',
   '/tracker': 'tracker',
   '/about': 'about',
+  '/blog': 'blog',
 };
 
 function normalizePageId(pageId) {
   if (pageId === 'search') return 'home';
   if (pageId === 'browse') return 'jobs';
-  if (pageId === 'home' || pageId === 'jobs' || pageId === 'tracker' || pageId === 'about') return pageId;
+  if (pageId === 'home' || pageId === 'jobs' || pageId === 'tracker' || pageId === 'about' || pageId === 'blog') return pageId;
   return 'home';
 }
 
@@ -1653,17 +1655,89 @@ function navigateTo(pageId, options = {}) {
   closeMobileMenu();
   closeMobileFilters();
 
-  if (syncLocation) {
-    const targetUrl = buildPageUrl(normalizedPageId, params || new URLSearchParams());
-    const currentUrl = `${window.location.pathname}${window.location.search}`;
-    if (targetUrl !== currentUrl) {
-      const historyMethod = replace ? 'replaceState' : 'pushState';
-      window.history[historyMethod]({}, '', targetUrl);
+  if (normalizedPageId === 'blog') {
+    let articleSlug = 'ghost-jobs';
+    if (params) {
+      articleSlug = params.get('article') || 'ghost-jobs';
+    } else {
+      const urlParams = new URLSearchParams(window.location.search);
+      articleSlug = urlParams.get('article') || 'ghost-jobs';
+    }
+    setActiveBlogArticle(articleSlug, false);
+    if (syncLocation) {
+      const nextParams = params ? new URLSearchParams(params) : new URLSearchParams();
+      nextParams.set('article', articleSlug);
+      const targetUrl = buildPageUrl('blog', nextParams);
+      const currentUrl = `${window.location.pathname}${window.location.search}`;
+      if (targetUrl !== currentUrl) {
+        const historyMethod = replace ? 'replaceState' : 'pushState';
+        window.history[historyMethod]({}, '', targetUrl);
+      }
+    }
+  } else {
+    if (syncLocation) {
+      const targetUrl = buildPageUrl(normalizedPageId, params || new URLSearchParams());
+      const currentUrl = `${window.location.pathname}${window.location.search}`;
+      if (targetUrl !== currentUrl) {
+        const historyMethod = replace ? 'replaceState' : 'pushState';
+        window.history[historyMethod]({}, '', targetUrl);
+      }
     }
   }
 
   if (scroll) window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+function setActiveBlogArticle(slug, updateUrl = true) {
+  document.querySelectorAll('.blog-article').forEach((article) => {
+    article.style.display = article.id === `article-${slug}` ? 'block' : 'none';
+  });
+
+  document.querySelectorAll('.blog-toc-item').forEach((tocItem) => {
+    if (tocItem.dataset.tocSlug === slug) {
+      tocItem.classList.add('active');
+    } else {
+      tocItem.classList.remove('active');
+    }
+  });
+
+  if (updateUrl) {
+    const params = new URLSearchParams(window.location.search);
+    params.set('article', slug);
+    const targetUrl = buildPageUrl('blog', params);
+    const currentUrl = `${window.location.pathname}${window.location.search}`;
+    if (targetUrl !== currentUrl) {
+      window.history.pushState({}, '', targetUrl);
+    }
+  }
+}
+
+function initBlogEvents() {
+  const backBtn = document.getElementById('blog-back-to-home');
+  if (backBtn) {
+    backBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateTo('home');
+    });
+  }
+
+  document.querySelectorAll('.blog-toc-item a').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const slug = link.closest('.blog-toc-item').dataset.tocSlug;
+      setActiveBlogArticle(slug, true);
+    });
+  });
+
+  document.querySelectorAll('[data-article-slug]').forEach((card) => {
+    card.addEventListener('click', (e) => {
+      e.preventDefault();
+      const slug = card.getAttribute('data-article-slug');
+      navigateTo('blog', { params: new URLSearchParams({ article: slug }) });
+    });
+  });
+}
+
 
 function applyInitialPageState() {
   const params = new URLSearchParams(window.location.search);
@@ -2564,5 +2638,6 @@ setAuthMode('signup');
 renderHomePreview();
 renderResumeMatchUI();
 renderTracker();
+initBlogEvents();
 applyInitialPageState();
 applyFilters();

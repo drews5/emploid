@@ -21,7 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: `
 (function(){
   var p = window.location.pathname;
-  var id = p === '/browse' ? 'jobs' : p === '/tracker' ? 'tracker' : p === '/about' ? 'about' : 'home';
+  var id = p === '/browse' ? 'jobs' : p === '/tracker' ? 'tracker' : p === '/about' ? 'about' : p === '/blog' ? 'blog' : 'home';
   document.documentElement.setAttribute('data-init-page', id);
   document.addEventListener('DOMContentLoaded', function() {
     document.body.setAttribute('data-page', id);

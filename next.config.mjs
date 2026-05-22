@@ -24,6 +24,10 @@ const nextConfig = {
         source: '/about',
         destination: '/index.html',
       },
+      {
+        source: '/blog',
+        destination: '/index.html',
+      },
     ];
   },
 };

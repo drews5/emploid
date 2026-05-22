@@ -16,13 +16,13 @@
   <header>
     <nav class="nav" id="main-nav">
       <div class="container nav-inner">
-        <a href="/search" class="nav-logo" data-page="home" aria-label="Emploid home">
+        <a href="/" class="nav-logo" data-page="home" aria-label="Emploid home">
           <img src="/images/logoicon.svg" alt="Emploid logo mark" />
           <span class="nav-logo-word">emploid</span>
         </a>
 
         <div class="nav-links">
-          <a href="/search" class="nav-link active" data-page="home" id="nav-home">Search</a>
+          <a href="/" class="nav-link active" data-page="home" id="nav-home">Home</a>
           <a href="/browse" class="nav-link" data-page="jobs" id="nav-jobs">Browse Jobs</a>
           <a href="/tracker" class="nav-link" data-page="tracker" id="nav-tracker">Tracker</a>
           <a href="/about" class="nav-link" data-page="about" id="nav-about">About</a>
@@ -45,7 +45,7 @@
       </div>
 
       <div class="nav-mobile-menu" id="nav-mobile-menu">
-        <a href="/search" class="nav-mobile-link active" data-page="home">Search</a>
+        <a href="/" class="nav-mobile-link active" data-page="home">Home</a>
         <a href="/browse" class="nav-mobile-link" data-page="jobs">Browse Jobs</a>
         <a href="/tracker" class="nav-mobile-link" data-page="tracker">Tracker</a>
         <a href="/about" class="nav-mobile-link" data-page="about">About</a>
@@ -66,155 +66,1246 @@
 
   <main>
     <section id="page-home" class="page active">
-      <section class="hero">
-        <div class="container hero-grid">
-          <div class="hero-copy">
+      <!-- 1. Hero Section -->
+      <section class="hero-section">
+        <div class="container hero-container">
+          <div class="hero-copy-centered">
             <h1>
-              <span class="hero-line">Find jobs</span>
-              <span class="hero-line">that are</span>
-              <span class="hero-line hero-squiggle-line">
-                <span class="hero-squiggle-text">actually hiring.</span>
-                <span class="hero-squiggle-mark" aria-hidden="true"></span>
-              </span>
+              Find jobs that are<br/>
+              <span class="emp-underline">actually hiring.</span>
             </h1>
-            <p class="hero-sub">
-              Over 40% of online job postings are "ghost jobs" — listings for roles that
-              aren't really open. We scan thousands of postings across every major job board
-              to filter out the fakes, so you only spend time on real opportunities.
+            <p class="hero-sub-centered">
+              Stop wasting time on ghost jobs. Emploid filters out fake, stale, and duplicate listings so you only spend time on real opportunities.
             </p>
 
-            <div class="hero-search-stack">
-              <label class="sr-only" for="hero-search">Search jobs</label>
-              <div class="hero-search">
+            <div class="hero-search-stack-centered">
+              <div class="hero-search-bar">
                 <svg class="hero-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <circle cx="11" cy="11" r="8"></circle>
                   <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <input id="hero-search" type="text" class="input" placeholder="Role, company, or keyword (e.g., Marketing, Target)" autocomplete="off" />
+                <input id="hero-search" type="text" class="input" placeholder="Role, company, or keyword" autocomplete="off" />
                 <button class="btn btn-primary hero-search-btn" id="hero-search-btn" type="button">Search</button>
-                <div class="hero-upload-wrap">
-                  <button class="btn btn-secondary hero-upload-btn" id="hero-resume-trigger" type="button">Upload Resume</button>
-                  <div class="hero-upload-tooltip" role="note">
-                    <p class="hero-upload-tooltip-title">UPLOAD RESUME</p>
-                    <p class="hero-upload-tooltip-copy">Emploid will scan your resume and suggest jobs for you.</p>
-                  </div>
-                </div>
               </div>
-
-              <div class="resume-entry-card">
-                <div>
-                  <p class="resume-entry-kicker">Resume Match</p>
-                  <p class="resume-entry-copy" id="home-resume-status">Upload your resume and we’ll tailor the search instantly.</p>
+              <div class="hero-upload-wrap">
+                <button class="btn btn-secondary hero-upload-btn" id="hero-resume-trigger" type="button">Upload Resume</button>
+                <div class="hero-upload-tooltip" role="note">
+                  <p class="hero-upload-tooltip-title">UPLOAD RESUME</p>
+                  <p class="hero-upload-tooltip-copy">Emploid will scan your resume and suggest jobs for you.</p>
                 </div>
-                <button class="btn btn-secondary" id="home-resume-trigger" type="button">Upload Resume</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="hero-preview">
-            <div class="browser-window">
-              <div class="browser-bar">
-                <div class="browser-dots">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-                <div class="browser-address">emploid.com/search</div>
-              </div>
-              <div class="browser-body">
-                <div class="preview-header">
-                  <div>
-                    <p class="preview-kicker">Product preview</p>
-                    <h2>Every result shows a Listing Trust Score before you click apply.</h2>
-                  </div>
-                </div>
-                <div class="preview-list" id="home-preview-list"></div>
               </div>
             </div>
           </div>
         </div>
-      </section>
 
-      <section class="stats-strip">
-        <div class="container stats-strip-inner">
-          <div class="stats-inline">
-            <span><strong class="mono">12,000+</strong> listings scanned</span>
-            <span class="stats-divider"></span>
-            <span><strong class="mono">6</strong> job boards indexed</span>
-            <span class="stats-divider"></span>
-            <span><strong class="mono squiggle-wrap">43%</strong> flagged as low trust</span>
+        <!-- Hero Scanning Interactive Widget (replaces dashboard mockup) -->
+        <div class="hero-scanner-wrapper">
+            <div class="hero-scanner-widget">
+              
+              <!-- Ambient Glow Layers -->
+              <div class="scanner-glow-background"></div>
+              
+              <div class="scanner-viewport">
+                
+                <!-- 1. SKELETON LAYER (Clipped to left 50%) -->
+                <div class="scanner-layer scanner-layer-skeleton">
+                  
+                  <!-- Row 1: Skeletons -->
+                  <div class="scanner-row row-1">
+                    <div class="scanner-track">
+                      <!-- Set 1 -->
+                      <div class="job-card-skeleton">
+                        <div class="skeleton-logo"></div>
+                        <div class="skeleton-content">
+                          <div class="skeleton-title"></div>
+                          <div class="skeleton-info"></div>
+                          <div class="skeleton-tags"><span></span><span></span><span></span></div>
+                        </div>
+                      </div>
+                      <div class="job-card-skeleton">
+                        <div class="skeleton-logo"></div>
+                        <div class="skeleton-content">
+                          <div class="skeleton-title"></div>
+                          <div class="skeleton-info"></div>
+                          <div class="skeleton-tags"><span></span><span></span><span></span></div>
+                        </div>
+                      </div>
+                      <div class="job-card-skeleton">
+                        <div class="skeleton-logo"></div>
+                        <div class="skeleton-content">
+                          <div class="skeleton-title"></div>
+                          <div class="skeleton-info"></div>
+                          <div class="skeleton-tags"><span></span><span></span><span></span></div>
+                        </div>
+                      </div>
+                      <!-- Set 2 (for seamless loop) -->
+                      <div class="job-card-skeleton">
+                        <div class="skeleton-logo"></div>
+                        <div class="skeleton-content">
+                          <div class="skeleton-title"></div>
+                          <div class="skeleton-info"></div>
+                          <div class="skeleton-tags"><span></span><span></span><span></span></div>
+                        </div>
+                      </div>
+                      <div class="job-card-skeleton">
+                        <div class="skeleton-logo"></div>
+                        <div class="skeleton-content">
+                          <div class="skeleton-title"></div>
+                          <div class="skeleton-info"></div>
+                          <div class="skeleton-tags"><span></span><span></span><span></span></div>
+                        </div>
+                      </div>
+                      <div class="job-card-skeleton">
+                        <div class="skeleton-logo"></div>
+                        <div class="skeleton-content">
+                          <div class="skeleton-title"></div>
+                          <div class="skeleton-info"></div>
+                          <div class="skeleton-tags"><span></span><span></span><span></span></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Row 2: Skeletons -->
+                  <div class="scanner-row row-2">
+                    <div class="scanner-track">
+                      <!-- Set 1 -->
+                      <div class="job-card-skeleton">
+                        <div class="skeleton-logo"></div>
+                        <div class="skeleton-content">
+                          <div class="skeleton-title"></div>
+                          <div class="skeleton-info"></div>
+                          <div class="skeleton-tags"><span></span><span></span><span></span></div>
+                        </div>
+                      </div>
+                      <div class="job-card-skeleton">
+                        <div class="skeleton-logo"></div>
+                        <div class="skeleton-content">
+                          <div class="skeleton-title"></div>
+                          <div class="skeleton-info"></div>
+                          <div class="skeleton-tags"><span></span><span></span><span></span></div>
+                        </div>
+                      </div>
+                      <div class="job-card-skeleton">
+                        <div class="skeleton-logo"></div>
+                        <div class="skeleton-content">
+                          <div class="skeleton-title"></div>
+                          <div class="skeleton-info"></div>
+                          <div class="skeleton-tags"><span></span><span></span><span></span></div>
+                        </div>
+                      </div>
+                      <!-- Set 2 -->
+                      <div class="job-card-skeleton">
+                        <div class="skeleton-logo"></div>
+                        <div class="skeleton-content">
+                          <div class="skeleton-title"></div>
+                          <div class="skeleton-info"></div>
+                          <div class="skeleton-tags"><span></span><span></span><span></span></div>
+                        </div>
+                      </div>
+                      <div class="job-card-skeleton">
+                        <div class="skeleton-logo"></div>
+                        <div class="skeleton-content">
+                          <div class="skeleton-title"></div>
+                          <div class="skeleton-info"></div>
+                          <div class="skeleton-tags"><span></span><span></span><span></span></div>
+                        </div>
+                      </div>
+                      <div class="job-card-skeleton">
+                        <div class="skeleton-logo"></div>
+                        <div class="skeleton-content">
+                          <div class="skeleton-title"></div>
+                          <div class="skeleton-info"></div>
+                          <div class="skeleton-tags"><span></span><span></span><span></span></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Row 3: Skeletons -->
+                  <div class="scanner-row row-3">
+                    <div class="scanner-track">
+                      <!-- Set 1 -->
+                      <div class="job-card-skeleton">
+                        <div class="skeleton-logo"></div>
+                        <div class="skeleton-content">
+                          <div class="skeleton-title"></div>
+                          <div class="skeleton-info"></div>
+                          <div class="skeleton-tags"><span></span><span></span><span></span></div>
+                        </div>
+                      </div>
+                      <div class="job-card-skeleton">
+                        <div class="skeleton-logo"></div>
+                        <div class="skeleton-content">
+                          <div class="skeleton-title"></div>
+                          <div class="skeleton-info"></div>
+                          <div class="skeleton-tags"><span></span><span></span><span></span></div>
+                        </div>
+                      </div>
+                      <div class="job-card-skeleton">
+                        <div class="skeleton-logo"></div>
+                        <div class="skeleton-content">
+                          <div class="skeleton-title"></div>
+                          <div class="skeleton-info"></div>
+                          <div class="skeleton-tags"><span></span><span></span><span></span></div>
+                        </div>
+                      </div>
+                      <!-- Set 2 -->
+                      <div class="job-card-skeleton">
+                        <div class="skeleton-logo"></div>
+                        <div class="skeleton-content">
+                          <div class="skeleton-title"></div>
+                          <div class="skeleton-info"></div>
+                          <div class="skeleton-tags"><span></span><span></span><span></span></div>
+                        </div>
+                      </div>
+                      <div class="job-card-skeleton">
+                        <div class="skeleton-logo"></div>
+                        <div class="skeleton-content">
+                          <div class="skeleton-title"></div>
+                          <div class="skeleton-info"></div>
+                          <div class="skeleton-tags"><span></span><span></span><span></span></div>
+                        </div>
+                      </div>
+                      <div class="job-card-skeleton">
+                        <div class="skeleton-logo"></div>
+                        <div class="skeleton-content">
+                          <div class="skeleton-title"></div>
+                          <div class="skeleton-info"></div>
+                          <div class="skeleton-tags"><span></span><span></span><span></span></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- 2. DETAILED LAYER (Clipped to right 50%) -->
+                <div class="scanner-layer scanner-layer-detailed">
+                  
+                  <!-- Row 1: Detailed Cards -->
+                  <div class="scanner-row row-1">
+                    <div class="scanner-track">
+                      <!-- Set 1 -->
+                      <!-- Card 1.1 -->
+                      <div class="job-card-detailed">
+                        <div class="card-logo-wrap">
+                          <span class="card-icon font-icon-wrapper">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <line x1="18" y1="20" x2="18" y2="10"></line>
+                              <line x1="12" y1="20" x2="12" y2="4"></line>
+                              <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="card-content">
+                          <h3 class="card-title">Financial Analyst</h3>
+                          <p class="card-info">Target &bull; Minneapolis, MN <span class="card-source">via LinkedIn</span></p>
+                          <div class="card-tags">
+                            <span class="card-tag">$75k-$90k</span>
+                            <span class="card-tag">Hybrid</span>
+                          </div>
+                        </div>
+                        <div class="card-trust">
+                          <div class="trust-score-indicator high">
+                            <svg viewBox="0 0 36 36" class="trust-ring-svg">
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="3.5"></circle>
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--score-high)" stroke-width="3.5" stroke-dasharray="97 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+                            </svg>
+                            <span class="trust-ring-value">97</span>
+                          </div>
+                          <span class="trust-label high">High Trust</span>
+                          <div class="source-verified">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Source Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Card 1.2 -->
+                      <div class="job-card-detailed">
+                        <div class="card-logo-wrap">
+                          <span class="card-icon font-icon-wrapper">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <line x1="18" y1="20" x2="18" y2="10"></line>
+                              <line x1="12" y1="20" x2="12" y2="4"></line>
+                              <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="card-content">
+                          <h3 class="card-title">Sr Financial Analyst</h3>
+                          <p class="card-info">Northwestern Mutual &bull; MN <span class="card-source">via LinkedIn</span></p>
+                          <div class="card-tags">
+                            <span class="card-tag">$120k-$145k</span>
+                            <span class="card-tag">Remote</span>
+                          </div>
+                        </div>
+                        <div class="card-trust">
+                          <div class="trust-score-indicator high">
+                            <svg viewBox="0 0 36 36" class="trust-ring-svg">
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="3.5"></circle>
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--score-high)" stroke-width="3.5" stroke-dasharray="91 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+                            </svg>
+                            <span class="trust-ring-value">91</span>
+                          </div>
+                          <span class="trust-label high">High Trust</span>
+                          <div class="source-verified">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Source Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Card 1.3 -->
+                      <div class="job-card-detailed">
+                        <div class="card-logo-wrap">
+                          <span class="card-icon font-icon-wrapper">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <line x1="18" y1="20" x2="18" y2="10"></line>
+                              <line x1="12" y1="20" x2="12" y2="4"></line>
+                              <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="card-content">
+                          <h3 class="card-title">Portfolio Associate</h3>
+                          <p class="card-info">Best Buy &bull; Minneapolis, MN <span class="card-source">via Handshake</span></p>
+                          <div class="card-tags">
+                            <span class="card-tag">$85k-$102k</span>
+                            <span class="card-tag">Hybrid</span>
+                          </div>
+                        </div>
+                        <div class="card-trust">
+                          <div class="trust-score-indicator medium">
+                            <svg viewBox="0 0 36 36" class="trust-ring-svg">
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="3.5"></circle>
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--score-mid)" stroke-width="3.5" stroke-dasharray="82 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+                            </svg>
+                            <span class="trust-ring-value">82</span>
+                          </div>
+                          <span class="trust-label medium">Medium Trust</span>
+                          <div class="source-verified">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Source Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Set 2 (for seamless loop) -->
+                      <!-- Card 1.1 -->
+                      <div class="job-card-detailed">
+                        <div class="card-logo-wrap">
+                          <span class="card-icon font-icon-wrapper">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <line x1="18" y1="20" x2="18" y2="10"></line>
+                              <line x1="12" y1="20" x2="12" y2="4"></line>
+                              <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="card-content">
+                          <h3 class="card-title">Financial Analyst</h3>
+                          <p class="card-info">Target &bull; Minneapolis, MN <span class="card-source">via LinkedIn</span></p>
+                          <div class="card-tags">
+                            <span class="card-tag">$75k-$90k</span>
+                            <span class="card-tag">Hybrid</span>
+                          </div>
+                        </div>
+                        <div class="card-trust">
+                          <div class="trust-score-indicator high">
+                            <svg viewBox="0 0 36 36" class="trust-ring-svg">
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="3.5"></circle>
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--score-high)" stroke-width="3.5" stroke-dasharray="97 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+                            </svg>
+                            <span class="trust-ring-value">97</span>
+                          </div>
+                          <span class="trust-label high">High Trust</span>
+                          <div class="source-verified">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Source Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Card 1.2 -->
+                      <div class="job-card-detailed">
+                        <div class="card-logo-wrap">
+                          <span class="card-icon font-icon-wrapper">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <line x1="18" y1="20" x2="18" y2="10"></line>
+                              <line x1="12" y1="20" x2="12" y2="4"></line>
+                              <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="card-content">
+                          <h3 class="card-title">Sr Financial Analyst</h3>
+                          <p class="card-info">Northwestern Mutual &bull; MN <span class="card-source">via LinkedIn</span></p>
+                          <div class="card-tags">
+                            <span class="card-tag">$120k-$145k</span>
+                            <span class="card-tag">Remote</span>
+                          </div>
+                        </div>
+                        <div class="card-trust">
+                          <div class="trust-score-indicator high">
+                            <svg viewBox="0 0 36 36" class="trust-ring-svg">
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="3.5"></circle>
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--score-high)" stroke-width="3.5" stroke-dasharray="91 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+                            </svg>
+                            <span class="trust-ring-value">91</span>
+                          </div>
+                          <span class="trust-label high">High Trust</span>
+                          <div class="source-verified">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Source Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Card 1.3 -->
+                      <div class="job-card-detailed">
+                        <div class="card-logo-wrap">
+                          <span class="card-icon font-icon-wrapper">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <line x1="18" y1="20" x2="18" y2="10"></line>
+                              <line x1="12" y1="20" x2="12" y2="4"></line>
+                              <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="card-content">
+                          <h3 class="card-title">Portfolio Associate</h3>
+                          <p class="card-info">Best Buy &bull; Minneapolis, MN <span class="card-source">via Handshake</span></p>
+                          <div class="card-tags">
+                            <span class="card-tag">$85k-$102k</span>
+                            <span class="card-tag">Hybrid</span>
+                          </div>
+                        </div>
+                        <div class="card-trust">
+                          <div class="trust-score-indicator medium">
+                            <svg viewBox="0 0 36 36" class="trust-ring-svg">
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="3.5"></circle>
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--score-mid)" stroke-width="3.5" stroke-dasharray="82 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+                            </svg>
+                            <span class="trust-ring-value">82</span>
+                          </div>
+                          <span class="trust-label medium">Medium Trust</span>
+                          <div class="source-verified">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Source Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Row 2: Detailed Cards -->
+                  <div class="scanner-row row-2">
+                    <div class="scanner-track">
+                      <!-- Set 1 -->
+                      <!-- Card 2.1 -->
+                      <div class="job-card-detailed">
+                        <div class="card-logo-wrap">
+                          <span class="card-icon font-icon-wrapper">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="card-content">
+                          <h3 class="card-title">Marketing Coordinator</h3>
+                          <p class="card-info">Luxe &amp; Bloom &bull; Chicago, IL <span class="card-source">via LinkedIn</span></p>
+                          <div class="card-tags">
+                            <span class="card-tag">$50k-$65k</span>
+                            <span class="card-tag">Remote</span>
+                          </div>
+                        </div>
+                        <div class="card-trust">
+                          <div class="trust-score-indicator high">
+                            <svg viewBox="0 0 36 36" class="trust-ring-svg">
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="3.5"></circle>
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--score-high)" stroke-width="3.5" stroke-dasharray="91 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+                            </svg>
+                            <span class="trust-ring-value">91</span>
+                          </div>
+                          <span class="trust-label high">High Trust</span>
+                          <div class="source-verified">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Source Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Card 2.2 -->
+                      <div class="job-card-detailed">
+                        <div class="card-logo-wrap">
+                          <span class="card-icon font-icon-wrapper">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="card-content">
+                          <h3 class="card-title">Growth Marketing Intern</h3>
+                          <p class="card-info">Best Buy &bull; Minneapolis, MN <span class="card-source">via Handshake</span></p>
+                          <div class="card-tags">
+                            <span class="card-tag">$45k-$55k</span>
+                            <span class="card-tag">Hybrid</span>
+                          </div>
+                        </div>
+                        <div class="card-trust">
+                          <div class="trust-score-indicator medium">
+                            <svg viewBox="0 0 36 36" class="trust-ring-svg">
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="3.5"></circle>
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--score-mid)" stroke-width="3.5" stroke-dasharray="76 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+                            </svg>
+                            <span class="trust-ring-value">76</span>
+                          </div>
+                          <span class="trust-label medium">Medium Trust</span>
+                          <div class="source-verified">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Source Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Card 2.3 -->
+                      <div class="job-card-detailed">
+                        <div class="card-logo-wrap">
+                          <span class="card-icon font-icon-wrapper">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="card-content">
+                          <h3 class="card-title">Social Media Specialist</h3>
+                          <p class="card-info">Target &bull; Minneapolis, MN <span class="card-source">via LinkedIn</span></p>
+                          <div class="card-tags">
+                            <span class="card-tag">$65k-$80k</span>
+                            <span class="card-tag">Hybrid</span>
+                          </div>
+                        </div>
+                        <div class="card-trust">
+                          <div class="trust-score-indicator high">
+                            <svg viewBox="0 0 36 36" class="trust-ring-svg">
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="3.5"></circle>
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--score-high)" stroke-width="3.5" stroke-dasharray="85 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+                            </svg>
+                            <span class="trust-ring-value">85</span>
+                          </div>
+                          <span class="trust-label high">High Trust</span>
+                          <div class="source-verified">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Source Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Set 2 -->
+                      <!-- Card 2.1 -->
+                      <div class="job-card-detailed">
+                        <div class="card-logo-wrap">
+                          <span class="card-icon font-icon-wrapper">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="card-content">
+                          <h3 class="card-title">Marketing Coordinator</h3>
+                          <p class="card-info">Luxe &amp; Bloom &bull; Chicago, IL <span class="card-source">via LinkedIn</span></p>
+                          <div class="card-tags">
+                            <span class="card-tag">$50k-$65k</span>
+                            <span class="card-tag">Remote</span>
+                          </div>
+                        </div>
+                        <div class="card-trust">
+                          <div class="trust-score-indicator high">
+                            <svg viewBox="0 0 36 36" class="trust-ring-svg">
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="3.5"></circle>
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--score-high)" stroke-width="3.5" stroke-dasharray="91 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+                            </svg>
+                            <span class="trust-ring-value">91</span>
+                          </div>
+                          <span class="trust-label high">High Trust</span>
+                          <div class="source-verified">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Source Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Card 2.2 -->
+                      <div class="job-card-detailed">
+                        <div class="card-logo-wrap">
+                          <span class="card-icon font-icon-wrapper">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="card-content">
+                          <h3 class="card-title">Growth Marketing Intern</h3>
+                          <p class="card-info">Best Buy &bull; Minneapolis, MN <span class="card-source">via Handshake</span></p>
+                          <div class="card-tags">
+                            <span class="card-tag">$45k-$55k</span>
+                            <span class="card-tag">Hybrid</span>
+                          </div>
+                        </div>
+                        <div class="card-trust">
+                          <div class="trust-score-indicator medium">
+                            <svg viewBox="0 0 36 36" class="trust-ring-svg">
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="3.5"></circle>
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--score-mid)" stroke-width="3.5" stroke-dasharray="76 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+                            </svg>
+                            <span class="trust-ring-value">76</span>
+                          </div>
+                          <span class="trust-label medium">Medium Trust</span>
+                          <div class="source-verified">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Source Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Card 2.3 -->
+                      <div class="job-card-detailed">
+                        <div class="card-logo-wrap">
+                          <span class="card-icon font-icon-wrapper">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="card-content">
+                          <h3 class="card-title">Social Media Specialist</h3>
+                          <p class="card-info">Target &bull; Minneapolis, MN <span class="card-source">via LinkedIn</span></p>
+                          <div class="card-tags">
+                            <span class="card-tag">$65k-$80k</span>
+                            <span class="card-tag">Hybrid</span>
+                          </div>
+                        </div>
+                        <div class="card-trust">
+                          <div class="trust-score-indicator high">
+                            <svg viewBox="0 0 36 36" class="trust-ring-svg">
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="3.5"></circle>
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--score-high)" stroke-width="3.5" stroke-dasharray="85 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+                            </svg>
+                            <span class="trust-ring-value">85</span>
+                          </div>
+                          <span class="trust-label high">High Trust</span>
+                          <div class="source-verified">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Source Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Row 3: Detailed Cards -->
+                  <div class="scanner-row row-3">
+                    <div class="scanner-track">
+                      <!-- Set 1 -->
+                      <!-- Card 3.1 -->
+                      <div class="job-card-detailed">
+                        <div class="card-logo-wrap">
+                          <span class="card-icon font-icon-wrapper">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                              <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="card-content">
+                          <h3 class="card-title">IT Support Specialist</h3>
+                          <p class="card-info">TEKsystems &bull; Remote <span class="card-source">via Indeed</span></p>
+                          <div class="card-tags">
+                            <span class="card-tag">$55k-$65k</span>
+                            <span class="card-tag">Remote</span>
+                          </div>
+                        </div>
+                        <div class="card-trust">
+                          <div class="trust-score-indicator medium">
+                            <svg viewBox="0 0 36 36" class="trust-ring-svg">
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="3.5"></circle>
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--score-mid)" stroke-width="3.5" stroke-dasharray="64 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+                            </svg>
+                            <span class="trust-ring-value">64</span>
+                          </div>
+                          <span class="trust-label medium">Medium Trust</span>
+                          <div class="source-verified">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Source Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Card 3.2 -->
+                      <div class="job-card-detailed">
+                        <div class="card-logo-wrap">
+                          <span class="card-icon font-icon-wrapper">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                              <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="card-content">
+                          <h3 class="card-title">Helpdesk Technician</h3>
+                          <p class="card-info">Land O'Lakes &bull; MN <span class="card-source">via Indeed</span></p>
+                          <div class="card-tags">
+                            <span class="card-tag">$50k-$62k</span>
+                            <span class="card-tag">Hybrid</span>
+                          </div>
+                        </div>
+                        <div class="card-trust">
+                          <div class="trust-score-indicator low">
+                            <svg viewBox="0 0 36 36" class="trust-ring-svg">
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="3.5"></circle>
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--score-low)" stroke-width="3.5" stroke-dasharray="41 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+                            </svg>
+                            <span class="trust-ring-value">41</span>
+                          </div>
+                          <span class="trust-label low">Low Trust</span>
+                          <div class="source-verified">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Source Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Card 3.3 -->
+                      <div class="job-card-detailed">
+                        <div class="card-logo-wrap">
+                          <span class="card-icon font-icon-wrapper">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                              <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="card-content">
+                          <h3 class="card-title">Systems Administrator</h3>
+                          <p class="card-info">Medtronic &bull; MN <span class="card-source">Company Direct</span></p>
+                          <div class="card-tags">
+                            <span class="card-tag">$90k-$110k</span>
+                            <span class="card-tag">On-site</span>
+                          </div>
+                        </div>
+                        <div class="card-trust">
+                          <div class="trust-score-indicator medium">
+                            <svg viewBox="0 0 36 36" class="trust-ring-svg">
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="3.5"></circle>
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--score-mid)" stroke-width="3.5" stroke-dasharray="78 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+                            </svg>
+                            <span class="trust-ring-value">78</span>
+                          </div>
+                          <span class="trust-label medium">Medium Trust</span>
+                          <div class="source-verified">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Source Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Set 2 -->
+                      <!-- Card 3.1 -->
+                      <div class="job-card-detailed">
+                        <div class="card-logo-wrap">
+                          <span class="card-icon font-icon-wrapper">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                              <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="card-content">
+                          <h3 class="card-title">IT Support Specialist</h3>
+                          <p class="card-info">TEKsystems &bull; Remote <span class="card-source">via Indeed</span></p>
+                          <div class="card-tags">
+                            <span class="card-tag">$55k-$65k</span>
+                            <span class="card-tag">Remote</span>
+                          </div>
+                        </div>
+                        <div class="card-trust">
+                          <div class="trust-score-indicator medium">
+                            <svg viewBox="0 0 36 36" class="trust-ring-svg">
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="3.5"></circle>
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--score-mid)" stroke-width="3.5" stroke-dasharray="64 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+                            </svg>
+                            <span class="trust-ring-value">64</span>
+                          </div>
+                          <span class="trust-label medium">Medium Trust</span>
+                          <div class="source-verified">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Source Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Card 3.2 -->
+                      <div class="job-card-detailed">
+                        <div class="card-logo-wrap">
+                          <span class="card-icon font-icon-wrapper">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                              <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="card-content">
+                          <h3 class="card-title">Helpdesk Technician</h3>
+                          <p class="card-info">Land O'Lakes &bull; MN <span class="card-source">via Indeed</span></p>
+                          <div class="card-tags">
+                            <span class="card-tag">$50k-$62k</span>
+                            <span class="card-tag">Hybrid</span>
+                          </div>
+                        </div>
+                        <div class="card-trust">
+                          <div class="trust-score-indicator low">
+                            <svg viewBox="0 0 36 36" class="trust-ring-svg">
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="3.5"></circle>
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--score-low)" stroke-width="3.5" stroke-dasharray="41 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+                            </svg>
+                            <span class="trust-ring-value">41</span>
+                          </div>
+                          <span class="trust-label low">Low Trust</span>
+                          <div class="source-verified">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Source Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Card 3.3 -->
+                      <div class="job-card-detailed">
+                        <div class="card-logo-wrap">
+                          <span class="card-icon font-icon-wrapper">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                              <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="card-content">
+                          <h3 class="card-title">Systems Administrator</h3>
+                          <p class="card-info">Medtronic &bull; MN <span class="card-source">Company Direct</span></p>
+                          <div class="card-tags">
+                            <span class="card-tag">$90k-$110k</span>
+                            <span class="card-tag">On-site</span>
+                          </div>
+                        </div>
+                        <div class="card-trust">
+                          <div class="trust-score-indicator medium">
+                            <svg viewBox="0 0 36 36" class="trust-ring-svg">
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="3.5"></circle>
+                              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--score-mid)" stroke-width="3.5" stroke-dasharray="78 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>
+                            </svg>
+                            <span class="trust-ring-value">78</span>
+                          </div>
+                          <span class="trust-label medium">Medium Trust</span>
+                          <div class="source-verified">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Source Verified</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- 3. SCANNER OVERLAY ELEMENTS -->
+                <div class="scanner-center-overlay">
+                  
+                  <!-- Glowing Orange Scanner Line -->
+                  <div class="scanner-line"></div>
+                  
+                  <!-- Bottom Flare SVG -->
+                  <svg class="scanner-flare" viewBox="0 0 240 190" preserveAspectRatio="none">
+                    <path d="M 116,0 Q 120,100 0,190 L 240,190 Q 120,100 124,0 Z" fill="var(--orange-500)"></path>
+                  </svg>
+                  
+                  <!-- Central Emploid Logo Badge -->
+                  <div class="scanner-logo-badge">
+                    <img src="/images/logoicon.svg" alt="Emploid Logo mark" />
+                  </div>
+                  
+                </div>
+                
+              </div>
+            </div>
+          </div>
+
+          <!-- Redesigned Stats Bar Right below the Dashboard -->
+          <div class="scanner-stats-bar">
+            <div class="container stats-container">
+              <div class="stat-item">
+                <span class="stat-number">70%</span>
+                <span class="stat-desc">of hiring managers keep stale listings active.</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat-item">
+                <span class="stat-number">50%</span>
+                <span class="stat-desc">of online job postings are fake "ghost jobs".</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat-item">
+                <span class="stat-number">5x</span>
+                <span class="stat-desc">higher interview rate when applying directly.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      <!-- 2. Scrolling Brand Marquee -->
+      <section class="brand-marquee-section">
+        <div class="container marquee-title-container">
+          <p class="marquee-title uppercase-label">Emploid Users Hired At</p>
+        </div>
+        <div class="marquee-container">
+          <div class="marquee-track">
+            <div class="marquee-group">
+              <div class="marquee-item" title="Apple">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71,19.5C17.88,20.74,17,21.95,15.66,22c-1.31,0-1.72-.8-3.22-.8s-2,.78-3.25.82c-1.35.05-2.33-1.2-3.17-2.41C4.28,17,2.94,11.66,4.72,8.56c.89-1.55,2.49-2.54,4.22-2.56,1.31,0,2.55.91,3.35.91s2.26-1.1,3.82-.94a5.3,5.3,0,0,1,4.15,2.24,5.17,5.17,0,0,0-2.48,4.35,5.19,5.19,0,0,0,3.15,4.74A12.75,12.75,0,0,1,18.71,19.5M15.9,3.78a5.16,5.16,0,0,0,1.17-3.7,5.21,5.21,0,0,0-3.4,1.75,4.88,4.88,0,0,0-1.21,3.58A4.47,4.47,0,0,0,15.9,3.78Z"/></svg>
+              </div>
+              <div class="marquee-item" title="Microsoft">
+                <svg viewBox="0 0 23 23" fill="currentColor"><rect x="0" y="0" width="10.5" height="10.5" /><rect x="11.5" y="0" width="10.5" height="10.5" /><rect x="0" y="11.5" width="10.5" height="10.5" /><rect x="11.5" y="11.5" width="10.5" height="10.5" /></svg>
+              </div>
+              <div class="marquee-item" title="NVIDIA">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.1,13.5c0.5-0.7,0.7-1.5,0.7-2.3c0-4-2.5-7.5-6.2-8.8c-1.3-0.5-2.7-0.7-4.1-0.6v3.2c1.2,0,2.3,0.3,3.3,0.8 c2.2,1,3.7,3.1,3.8,5.6c0,2.1-1.1,4.1-3,5.1c-0.6,0.3-1.3,0.5-1.9,0.5l-0.1,0.1v3.2C17.7,20,19.9,18.9,21.5,17 C22.4,16,22.9,14.8,23.1,13.5z M13.4,4.2c-0.3,0-0.7-0.1-1-0.1c-4.4,0-8.2,3.1-9,7.4c-0.3,1.3-0.2,2.7,0.3,4 c0.8,2.3,2.5,4.1,4.8,5c0.8,0.3,1.7,0.5,2.6,0.5c0.8,0,1.7-0.1,2.5-0.3l0.1-0.1v-3.2c-0.4,0.1-0.9,0.2-1.3,0.2 c-1.6,0-3.1-0.8-3.9-2.2c-0.4-0.7-0.6-1.5-0.6-2.3c0-2,1.2-3.8,3.1-4.6c0.6-0.3,1.3-0.4,2-0.4V4.2z M12,8.4c-1.8,0-3.3,1.3-3.6,3.1 c-0.1,0.5,0,1,0.2,1.5c0.4,1,1.3,1.6,2.4,1.7c0.3,0,0.7,0,1-0.1v-3c-0.2,0-0.4,0.1-0.6,0.1c-0.6,0-1.1-0.4-1.3-0.9 c-0.1-0.2-0.1-0.5-0.1-0.7c0-0.7,0.5-1.3,1.2-1.5c0.2-0.1,0.5-0.1,0.8-0.1V8.4z"/></svg>
+              </div>
+              <div class="marquee-item" title="Google">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114-3.533 0-6.4-2.867-6.4-6.4s2.867-6.4 6.4-6.4c1.582 0 3.026.582 4.137 1.542l3.075-3.075C19.347 2.377 16 1 12.24 1 5.922 1 12 5.922 1 12s4.922 11 11.24 11c6.533 0 10.873-4.6 10.873-11.086 0-.742-.068-1.442-.2-2.128H12.24z"/></svg>
+              </div>
+              <div class="marquee-item" title="Amazon">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.9,13.2c-0.8,0.5-1.8,0.8-3.1,0.8c-2.3,0-3.6-1.1-3.6-3c0-2.3,1.8-3.3,4.4-3.3c1,0,1.8,0.2,2.3,0.4v0.7 c0,1.6-0.8,2.5-2.2,2.5c-0.7,0-1.1-0.3-1.1-0.9c0-0.8,0.7-1.3,1.6-1.3c0.4,0,0.8,0.1,1,0.2v-0.5c0-0.7-0.4-1-1.2-1 c-0.8,0-1.6,0.3-2.2,0.8L9,7.6c0.8-0.8,2-1.2,3.4-1.2c2.2,0,3.5,1.1,3.5,3.3v4c0,0.8,0.2,1.3,0.5,1.7h-2.1 C14.1,14.8,14,14.1,14,13.8L15.9,13.2z M12.9,21.5c-4.9,0.7-9.4-1.4-12-4.8c-0.4-0.5,0-1,0.5-0.7c2.9,1.7,6.8,2.7,10.9,2.7 c3.6,0,7.2-0.8,9.8-2.3c0.5-0.3,0.9,0.2,0.5,0.7C19.7,19.9,16.5,21.1,12.9,21.5z M22.2,15.6c-0.3-0.5-1.9-0.2-2.6-0.1 c-0.3,0-0.3-0.3,0-0.4c1-0.5,2.6-0.3,2.9,0.2c0.3,0.5-0.3,1.9-0.8,2.8c-0.2,0.3-0.4,0.2-0.3-0.1C21.6,17.2,22.5,16,22.2,15.6z"/></svg>
+              </div>
+              <div class="marquee-item" title="Meta">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.9,8c-1.3-1.3-3.2-1.9-5.1-1.9c-1.8,0-3.5,0.7-4.8,1.9L12,8l0,0l-0.1-0.1C10.6,6.7,8.9,6.1,7.1,6.1 c-1.9,0-3.8,0.6-5.1,1.9C0.7,9.3,0,11.1,0,13c0,1.9,0.7,3.7,2,5c1.3,1.3,3.2,1.9,5.1,1.9c1.8,0,3.5-0.7,4.8-1.9l0.1-0.1l0,0l0.1,0.1 c1.3,1.3,3,1.9,4.8,1.9c1.9,0,3.8-0.6,5.1-1.9c1.3-1.3,2-3.1,2-5C24,11.1,23.3,9.3,21.9,8z M7.1,18c-1.4,0-2.7-0.5-3.6-1.4 C2.6,15.7,2.1,14.4,2.1,13c0-1.4,0.5-2.7,1.4-3.6C4.4,8.5,5.7,8,7.1,8c1.3,0,2.5,0.5,3.4,1.4l1.5,1.5l1.5-1.5 C14.4,8.5,15.6,8,16.9,8c1.4,0,2.7,0.5,3.6,1.4c0.9,0.9,1.4,2.2,1.4,3.6c0,1.4-0.5,2.7-1.4,3.6c-0.9,0.9-2.2,1.4-3.6,1.4 c-1.3,0-2.5-0.5-3.4-1.4l-1.5-1.5l-1.5,1.5C9.6,17.5,8.4,18,7.1,18z"/></svg>
+              </div>
+              <div class="marquee-item" title="Berkshire Hathaway" style="transform: translateY(-2px);">
+                <svg viewBox="0 0 223.938 17.079" fill="currentColor" style="max-width: 180px;"><g id="Page_1"><g id="Í_xBC__xB2_ã_1_1_"><g><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M13.804,6.313c0.682-0.513,0.853-1.365,0.853-2.047c0-0.853-0.171-1.534-0.682-2.217c-0.341-0.681-1.022-1.193-1.875-1.534c-0.853-0.341-2.215-0.511-4.09-0.511H0v0.341c0.682,0,1.194,0.17,1.534,0.341c0.341,0.17,0.512,0.341,0.512,0.512c0.17,0.171,0.341,0.852,0.341,1.705v10.911c0,1.023-0.171,1.535-0.341,1.876c0,0.17-0.171,0.341-0.512,0.511C1.194,16.372,0.682,16.372,0,16.372v0.512h8.521c2.386,0,4.261-0.512,5.454-1.534c1.022-0.853,1.534-1.876,1.534-3.24c0-1.193-0.512-2.046-1.364-2.897c-0.682-0.513-1.875-0.854-3.408-1.364C12.271,7.506,13.293,6.995,13.804,6.313L13.804,6.313L13.804,6.313z M6.136,0.856c1.193,0,2.216,0.171,2.727,0.513c0.511,0.17,1.023,0.511,1.193,1.021c0.341,0.513,0.512,1.023,0.512,1.876c0,0.682-0.171,1.364-0.512,1.705C9.714,6.483,9.373,6.824,8.862,7.165C8.18,7.506,7.329,7.506,6.136,7.506V0.856L6.136,0.856z M9.032,8.871c0.682,0.341,1.194,0.682,1.535,1.363s0.511,1.364,0.511,2.046c0,0.683-0.17,1.364-0.511,1.876c-0.341,0.511-0.682,1.023-1.194,1.364c-0.681,0.17-1.193,0.34-1.875,0.34c-0.341,0-0.681,0-1.022-0.34c-0.171-0.171-0.341-0.513-0.341-1.023v-0.513V8.529C7.499,8.529,8.352,8.699,9.032,8.871L9.032,8.871L9.032,8.871z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M22.056,7.729c0.788,0,1.279,0,1.476,0.099c0.492,0.099,0.787,0.394,1.082,0.688c0.295,0.296,0.492,0.788,0.59,1.477h0.295V7.138h-8.166v0.197h0.394c0.296,0,0.493,0.099,0.689,0.295c0.099,0,0.197,0.197,0.295,0.296c0,0.098,0,0.394,0,0.886v6.396c0,0.493,0,0.788-0.099,0.887c0,0.196-0.098,0.295-0.295,0.394c-0.098,0.099-0.394,0.099-0.591,0.099h-0.394v0.295h8.362l0.493-3.149h-0.295c-0.197,0.886-0.591,1.575-1.181,1.969c-0.492,0.394-1.279,0.59-2.164,0.59h-0.59c-0.295,0-0.492,0-0.591-0.098c-0.098-0.099-0.197-0.197-0.197-0.295c-0.098-0.1-0.098-0.395-0.098-0.985v-2.756c0.492,0,0.787,0.099,1.083,0.197c0.197,0.099,0.394,0.394,0.59,0.688c0.196,0.395,0.295,0.887,0.393,1.379h0.295V9.401h-0.295c-0.098,0.689-0.295,1.279-0.59,1.674c-0.197,0.394-0.689,0.591-1.279,0.591h-0.197V7.729H22.056L22.056,7.729z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M31.402,12.453l3.148,4.429H37.6v-0.295c-0.295,0-0.492-0.099-0.688-0.296c-0.098-0.098-0.394-0.295-0.688-0.688l-2.262-3.347c0.59-0.099,0.983-0.394,1.377-0.688c0.492-0.394,0.787-0.984,0.787-1.772c0-0.59-0.197-1.082-0.59-1.476c-0.295-0.492-0.787-0.787-1.279-0.984c-0.591-0.099-1.476-0.197-2.558-0.197h-4.525v0.197c0.394,0,0.688,0.099,0.885,0.197c0.197,0.098,0.295,0.196,0.295,0.295c0.098,0.099,0.098,0.492,0.098,0.984v6.396c0,0.493,0,0.788-0.098,0.985c0,0.098-0.099,0.196-0.295,0.295s-0.492,0.099-0.885,0.099v0.295h4.919v-0.295c-0.394,0-0.688,0-0.885-0.099s-0.295-0.197-0.295-0.295c-0.098-0.197-0.197-0.492-0.197-0.985v-2.755H31.402L31.402,12.453z M31.5,7.63c0.787,0,1.377,0.197,1.672,0.591c0.394,0.295,0.591,0.886,0.591,1.574c0,0.591-0.099,0.985-0.296,1.28s-0.492,0.492-0.787,0.688c-0.394,0.099-0.885,0.197-1.476,0.197h-0.492V7.63H31.5L31.5,7.63z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M46.454,8.614c0.689-0.591,1.083-0.984,1.279-1.082c0.197-0.099,0.492-0.099,0.787-0.197V7.138h-3.738v0.197c0.394,0.099,0.688,0.099,0.787,0.197c0.197,0.098,0.295,0.196,0.295,0.394c0,0.295-0.295,0.59-0.787,0.983l-3.542,2.953V8.812c0-0.492,0-0.788,0-0.984c0.098-0.099,0.197-0.197,0.295-0.295c0.197-0.099,0.492-0.197,0.788-0.197V7.138h-4.821v0.197h0.296c0.295,0,0.492,0.099,0.688,0.197c0.098,0.098,0.295,0.196,0.295,0.295c0.099,0.196,0.099,0.492,0.099,0.984v6.396c0,0.493,0,0.788-0.099,0.887c-0.098,0.196-0.197,0.295-0.295,0.394c-0.197,0.099-0.394,0.099-0.688,0.099h-0.296v0.295h4.919v-0.295c-0.394,0-0.689,0-0.788-0.099c-0.196-0.099-0.295-0.197-0.393-0.295c0-0.197,0-0.492,0-0.985v-2.656l0.295-0.296l2.263,2.757c0.393,0.59,0.688,0.983,0.688,1.181c0,0.098-0.099,0.196-0.197,0.295c-0.099,0-0.295,0.099-0.59,0.099v0.295h5.017v-0.295c-0.295,0-0.492-0.099-0.787-0.197c-0.394-0.196-0.787-0.591-1.279-1.279l-3.345-4.232L46.454,8.614L46.454,8.614z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M55.604,6.941c-0.099,0.295-0.197,0.394-0.296,0.492c0,0.099-0.098,0.099-0.294,0.099c-0.098,0-0.295,0-0.591-0.197c-0.393-0.099-0.59-0.197-0.885-0.295c-0.295-0.099-0.59-0.099-0.885-0.099c-0.885,0-1.574,0.295-2.165,0.787C49.897,8.319,49.7,8.909,49.7,9.697c0,0.492,0.099,0.886,0.295,1.279c0.197,0.394,0.492,0.689,0.886,0.984c0.394,0.295,0.984,0.689,1.869,1.082c0.688,0.395,1.082,0.591,1.377,0.788c0.197,0.196,0.394,0.394,0.492,0.591c0.099,0.295,0.197,0.491,0.197,0.688c0,0.394-0.197,0.688-0.492,0.984c-0.294,0.295-0.688,0.492-1.279,0.492c-0.688,0-1.279-0.296-1.967-0.788c-0.591-0.591-0.984-1.377-1.181-2.361H49.7v3.642h0.197c0.099-0.197,0.197-0.395,0.296-0.492c0.197-0.099,0.294-0.099,0.492-0.099c0.099,0,0.294,0,0.492,0.099c0.394,0.197,0.787,0.295,1.082,0.394c0.197,0.099,0.492,0.099,0.885,0.099c0.886,0,1.771-0.295,2.361-0.886c0.59-0.591,0.984-1.28,0.984-2.067c0-0.688-0.197-1.279-0.59-1.771c-0.394-0.394-1.18-0.984-2.361-1.574c-0.787-0.395-1.279-0.689-1.476-0.788c-0.393-0.197-0.59-0.492-0.688-0.688c-0.098-0.197-0.197-0.295-0.197-0.591c0-0.295,0.197-0.59,0.394-0.886c0.295-0.197,0.688-0.394,1.181-0.394c0.688,0,1.279,0.295,1.771,0.787c0.59,0.492,0.885,1.083,1.082,1.969h0.295L55.8,6.941H55.604L55.604,6.941z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M64.458,12.157v3.051c0,0.493,0,0.788,0,0.887c-0.099,0.196-0.197,0.295-0.295,0.394c-0.197,0.099-0.394,0.099-0.689,0.099h-0.295v0.295h5.017v-0.295h-0.295c-0.296,0-0.492,0-0.688-0.099c-0.099-0.099-0.197-0.197-0.296-0.394c-0.098-0.099-0.098-0.394-0.098-0.887V8.812c0-0.492,0-0.788,0.098-0.886c0.099-0.197,0.197-0.296,0.296-0.394c0.197-0.099,0.393-0.197,0.688-0.197h0.295V7.138h-5.017v0.197h0.295c0.295,0,0.492,0.099,0.59,0.197c0.197,0.098,0.295,0.196,0.394,0.295c0,0.196,0,0.492,0,0.984v2.756h-3.443V8.812c0-0.492,0.098-0.788,0.098-0.886c0.099-0.197,0.197-0.296,0.295-0.394c0.197-0.099,0.394-0.197,0.688-0.197h0.295V7.138h-5.017v0.197h0.295c0.295,0,0.492,0.099,0.689,0.197c0.098,0.098,0.197,0.196,0.294,0.295c0.098,0.196,0.098,0.492,0.098,0.984v6.396c0,0.493,0,0.788-0.098,0.887c-0.098,0.196-0.197,0.295-0.294,0.394c-0.197,0.099-0.394,0.099-0.689,0.099h-0.295v0.295h5.017v-0.295h-0.295c-0.295,0-0.492,0-0.59,0.099c-0.197-0.099-0.295-0.197-0.394-0.394c0-0.099-0.098-0.394-0.098-0.887v-3.051H64.458L64.458,12.157z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M73.508,16.587c-0.295,0-0.492,0-0.688-0.099c-0.099-0.099-0.197-0.197-0.295-0.394c0-0.099-0.098-0.394-0.098-0.887V8.812c0-0.492,0.098-0.788,0.098-0.886c0.099-0.197,0.197-0.296,0.295-0.394c0.197-0.099,0.393-0.197,0.688-0.197h0.295V7.138h-5.017v0.197h0.295c0.295,0,0.492,0.099,0.689,0.197c0.098,0.098,0.196,0.196,0.295,0.295c0,0.196,0.098,0.492,0.098,0.984v6.396c0,0.493-0.098,0.788-0.098,0.887c-0.099,0.196-0.197,0.295-0.295,0.394c-0.197,0.099-0.394,0.099-0.689,0.099h-0.295v0.295h5.017v-0.295H73.508L73.508,16.587z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M78.722,12.453l3.148,4.429h3.05v-0.295c-0.295,0-0.492-0.099-0.688-0.296c-0.099-0.098-0.295-0.295-0.59-0.688l-2.361-3.347c0.59-0.099,1.082-0.394,1.377-0.688c0.493-0.394,0.787-0.984,0.787-1.772c0-0.59-0.197-1.082-0.492-1.476c-0.394-0.492-0.787-0.787-1.377-0.984c-0.492-0.099-1.377-0.197-2.558-0.197h-4.525v0.197c0.394,0,0.787,0.099,0.886,0.197c0.196,0.098,0.295,0.196,0.393,0.295c0,0.099,0.099,0.492,0.099,0.984v6.396c0,0.493-0.099,0.788-0.099,0.985c-0.098,0.098-0.197,0.196-0.393,0.295c-0.099,0.099-0.394,0.099-0.886,0.099v0.295h4.919v-0.295c-0.394,0-0.688,0-0.885-0.099c-0.098-0.099-0.295-0.197-0.295-0.295c-0.099-0.197-0.099-0.492-0.099-0.985v-2.755H78.722L78.722,12.453z M78.82,7.63c0.787,0,1.378,0.197,1.771,0.591c0.295,0.295,0.492,0.886,0.492,1.574c0,0.591-0.098,0.985-0.295,1.28s-0.492,0.492-0.787,0.688c-0.295,0.099-0.788,0.197-1.476,0.197h-0.394V7.63H78.82L78.82,7.63z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M89.839,7.729c0.688,0,1.18,0,1.475,0.099c0.493,0.099,0.788,0.394,1.082,0.688c0.197,0.296,0.394,0.788,0.591,1.477h0.197V7.138h-8.067v0.197h0.295c0.295,0,0.59,0.099,0.787,0.295c0.098,0,0.197,0.197,0.197,0.296c0.098,0.098,0.098,0.394,0.098,0.886v6.396c0,0.493-0.098,0.788-0.098,0.887c-0.099,0.196-0.197,0.295-0.295,0.394c-0.197,0.099-0.394,0.099-0.688,0.099h-0.295v0.295h8.362l0.492-3.149h-0.295c-0.295,0.886-0.688,1.575-1.18,1.969c-0.591,0.394-1.279,0.59-2.165,0.59h-0.59c-0.295,0-0.492,0-0.59-0.098c-0.098-0.099-0.197-0.197-0.295-0.295c0-0.1-0.098-0.395-0.098-0.985v-2.756c0.492,0,0.885,0.099,1.082,0.197c0.295,0.099,0.492,0.394,0.688,0.688c0.197,0.395,0.295,0.887,0.295,1.379h0.295V9.401h-0.295c0,0.689-0.197,1.279-0.492,1.674c-0.295,0.394-0.688,0.591-1.377,0.591h-0.196V7.729H89.839L89.839,7.729z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M112.177,8.697v5.287c0,0.854,0,1.364-0.171,1.535c0,0.341-0.34,0.512-0.511,0.682c-0.17,0.171-0.682,0.171-1.193,0.171h-0.512v0.512h8.865v-0.512h-0.683c-0.341,0-0.852,0-1.021-0.171c-0.342-0.17-0.513-0.341-0.683-0.682c0-0.171,0-0.682,0-1.535V2.899c0-0.854,0-1.364,0-1.534c0.17-0.342,0.341-0.513,0.512-0.683c0.341-0.172,0.682-0.342,1.192-0.342h0.683V0h-8.865v0.341h0.512c0.511,0,0.852,0.17,1.193,0.342c0.341,0.17,0.511,0.341,0.511,0.511c0.171,0.342,0.171,0.853,0.171,1.706v4.775h-5.966V2.899c0-0.854,0-1.364,0.17-1.534c0.171-0.342,0.341-0.513,0.512-0.683c0.341-0.172,0.682-0.342,1.193-0.342h0.511V0h-8.864v0.341h0.681c0.341,0,0.853,0.17,1.023,0.342c0.341,0.17,0.512,0.341,0.682,0.511c0,0.342,0,0.853,0,1.706v11.085c0,0.854,0,1.364,0,1.535c-0.17,0.341-0.341,0.512-0.511,0.682c-0.341,0.171-0.682,0.171-1.194,0.171h-0.681v0.512h8.864v-0.512h-0.511c-0.511,0-0.852,0-1.193-0.171c-0.171-0.17-0.512-0.341-0.512-0.682c-0.17-0.171-0.17-0.682-0.17-1.535V8.697H112.177L112.177,8.697z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M126.88,15.308c0.099,0.295,0.196,0.491,0.196,0.491c0,0.1,0,0.197,0,0.296c0,0.196,0,0.295-0.098,0.394c-0.197,0.099-0.394,0.099-0.787,0.099h-0.197v0.295h4.624v-0.295c-0.295,0-0.492-0.099-0.688-0.296c-0.197-0.098-0.492-0.59-0.787-1.378l-3.542-7.972h-0.098l-3.443,7.775c-0.296,0.688-0.591,1.182-0.886,1.477c-0.196,0.196-0.492,0.394-0.787,0.394v0.295h3.148v-0.295c-0.492,0-0.787-0.099-0.886-0.197c-0.196-0.099-0.394-0.295-0.394-0.591c0-0.196,0.099-0.491,0.197-0.786l0.491-0.887h3.345L126.88,15.308L126.88,15.308z M123.142,13.536l1.476-3.248l1.476,3.248H123.142L123.142,13.536z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M131.406,7.138v2.657h0.196c0.099-0.786,0.395-1.279,0.788-1.672c0.295-0.296,0.786-0.395,1.475-0.395h0.689v7.479c0,0.493,0,0.788-0.099,0.887c-0.099,0.196-0.197,0.295-0.295,0.394c-0.197,0.099-0.394,0.099-0.688,0.099h-0.296v0.295h5.018v-0.295h-0.295c-0.197,0-0.492,0-0.591-0.099c-0.196-0.099-0.295-0.197-0.295-0.394c-0.098-0.099-0.098-0.394-0.098-0.887V7.729h0.688c0.491,0,0.786,0,0.983,0.099c0.295,0.196,0.59,0.394,0.787,0.591c0.098,0.295,0.295,0.787,0.491,1.377h0.197V7.138H131.406L131.406,7.138z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M148.13,12.157v3.051c0,0.493-0.099,0.788-0.099,0.887c-0.099,0.196-0.197,0.295-0.295,0.394c-0.197,0.099-0.394,0.099-0.688,0.099h-0.296v0.295h5.018v-0.295h-0.295c-0.295,0-0.492,0-0.688-0.099c-0.099-0.099-0.197-0.197-0.295-0.394c0-0.099-0.099-0.394-0.099-0.887V8.812c0-0.492,0.099-0.788,0.099-0.886c0.098-0.197,0.196-0.296,0.295-0.394c0.196-0.099,0.394-0.197,0.688-0.197h0.295V7.138h-5.018v0.197h0.296c0.295,0,0.491,0.099,0.688,0.197c0.098,0.098,0.196,0.196,0.295,0.295c0,0.196,0.099,0.492,0.099,0.984v2.756h-3.443V8.812c0-0.492,0-0.788,0-0.886c0.099-0.197,0.197-0.296,0.295-0.394c0.197-0.099,0.394-0.197,0.688-0.197h0.296V7.138h-5.018v0.197h0.295c0.295,0,0.492,0.099,0.688,0.197c0.099,0.098,0.197,0.196,0.295,0.295c0.099,0.196,0.099,0.492,0.099,0.984v6.396c0,0.493,0,0.788-0.099,0.887c-0.098,0.196-0.196,0.295-0.295,0.394c-0.196,0.099-0.394,0.099-0.688,0.099h-0.295v0.295h5.018v-0.295h-0.296c-0.295,0-0.491,0-0.591-0.099c-0.195-0.099-0.294-0.197-0.393-0.394c0-0.099,0-0.394,0-0.887v-3.051H148.13L148.13,12.157z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M158.657,15.308c0.099,0.295,0.196,0.491,0.196,0.491c0.099,0.1,0.099,0.197,0.099,0.296c0,0.196-0.099,0.295-0.196,0.394c-0.099,0.099-0.394,0.099-0.787,0.099h-0.197v0.295h4.723v-0.295c-0.295,0-0.492-0.099-0.688-0.296c-0.197-0.098-0.492-0.59-0.788-1.378l-3.541-7.972h-0.099l-3.541,7.775c-0.295,0.688-0.591,1.182-0.788,1.477c-0.195,0.196-0.491,0.394-0.885,0.394v0.295h3.246v-0.295c-0.491,0-0.786-0.099-0.983-0.197c-0.196-0.099-0.295-0.295-0.295-0.591c0-0.196,0.099-0.491,0.196-0.786l0.394-0.887h3.443L158.657,15.308L158.657,15.308z M155.017,13.536l1.475-3.248l1.378,3.248H155.017L155.017,13.536z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M174.693,7.138v0.197c0.394,0.099,0.59,0.099,0.786,0.197c0.099,0.098,0.197,0.295,0.197,0.491c0,0.197-0.099,0.296-0.099,0.492c0,0.099-0.099,0.394-0.295,0.886l-1.574,4.135l-1.771-4.627c-0.197-0.59-0.295-0.886-0.295-0.983c0-0.099,0-0.197,0.098-0.296c0-0.098,0.099-0.098,0.197-0.196c0.098,0,0.394-0.099,0.688-0.099V7.138h-4.624v0.197c0.295,0,0.492,0.099,0.688,0.197c0.099,0.098,0.295,0.196,0.395,0.394c0.098,0.197,0.294,0.59,0.491,1.083l0.394,1.082l-1.574,3.642l-1.869-4.724c-0.196-0.591-0.394-0.985-0.394-1.083c0-0.197,0.099-0.296,0.197-0.394c0.098-0.099,0.295-0.099,0.688-0.197V7.138h-4.23v0.197c0.295,0.099,0.492,0.197,0.688,0.295c0.099,0.197,0.295,0.689,0.688,1.477l3.148,7.973h0.295l2.656-6.299l2.361,6.299h0.296l3.049-8.07c0.295-0.689,0.394-0.985,0.394-1.083c0.099-0.197,0.295-0.296,0.394-0.394c0.099-0.099,0.295-0.099,0.492-0.197V7.138H174.693L174.693,7.138z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M183.94,15.308c0.099,0.295,0.197,0.491,0.197,0.491c0.098,0.1,0.098,0.197,0.098,0.296c0,0.196-0.098,0.295-0.196,0.394s-0.394,0.099-0.787,0.099h-0.197v0.295h4.723v-0.295c-0.295,0-0.59-0.099-0.688-0.296c-0.197-0.098-0.492-0.59-0.787-1.378l-3.542-7.972h-0.098l-3.542,7.775c-0.295,0.688-0.59,1.182-0.787,1.477c-0.196,0.196-0.492,0.394-0.885,0.394v0.295h3.246v-0.295c-0.492,0-0.787-0.099-0.984-0.197c-0.196-0.099-0.295-0.295-0.295-0.591c0-0.196,0.099-0.491,0.197-0.786l0.393-0.887h3.443L183.94,15.308L183.94,15.308z M180.3,13.536l1.476-3.248l1.377,3.248H180.3L180.3,13.536z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M195.451,7.138v0.197c0.394,0.099,0.688,0.197,0.885,0.295c0.099,0.099,0.197,0.197,0.197,0.296c0,0.197-0.295,0.688-0.688,1.476l-1.771,2.854l-1.771-3.149c-0.394-0.688-0.59-1.181-0.59-1.378c0-0.099,0.098-0.099,0.196-0.196c0.099-0.099,0.295-0.197,0.59-0.197h0.197V7.138h-4.624v0.197c0.295,0,0.59,0.099,0.787,0.295c0.099,0.099,0.492,0.591,0.886,1.477l2.36,4.134v1.968c0,0.493-0.098,0.788-0.098,0.887c-0.099,0.196-0.197,0.295-0.295,0.394c-0.197,0.099-0.394,0.099-0.689,0.099h-0.491v0.295h5.41v-0.295h-0.491c-0.295,0-0.492,0-0.688-0.099c-0.1-0.099-0.197-0.197-0.296-0.394c0-0.099-0.098-0.394-0.098-0.887v-2.361l2.164-3.543c0.491-0.886,0.885-1.477,1.082-1.674c0.196-0.098,0.491-0.196,0.787-0.295V7.138H195.451L195.451,7.138z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M206.65,16.738c-0.136,0-0.272,0-0.408-0.068c-0.137-0.068-0.204-0.137-0.204-0.272c-0.068-0.068-0.068-0.272-0.068-0.613v-4.426c0-0.341,0-0.545,0.068-0.612c0-0.137,0.067-0.205,0.204-0.272c0.068-0.068,0.272-0.137,0.408-0.137h0.272v-0.136h-3.54v0.136h0.272c0.137,0,0.341,0.068,0.409,0.137c0.136,0.067,0.204,0.136,0.204,0.204c0.068,0.136,0.068,0.34,0.068,0.681v4.426c0,0.341,0,0.545-0.068,0.613c0,0.136-0.068,0.204-0.204,0.272c-0.068,0.068-0.272,0.068-0.409,0.068h-0.272v0.204h3.54v-0.204H206.65L206.65,16.738z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M207.331,10.201v0.136c0.204,0.068,0.34,0.068,0.408,0.137c0.136,0.067,0.272,0.204,0.408,0.34l0.137,0.204v4.767c0,0.341-0.068,0.613-0.204,0.749c-0.137,0.137-0.409,0.205-0.817,0.205v0.204h2.45v-0.204h-0.204c-0.204,0-0.408-0.068-0.612-0.205c-0.137-0.136-0.272-0.408-0.272-0.749v-4.289l4.561,5.583h0.204v-5.583c0-0.341,0-0.545,0.068-0.682c0.067-0.136,0.136-0.272,0.204-0.272c0.136-0.067,0.272-0.136,0.612-0.204v-0.136h-2.246v0.136c0.34,0,0.612,0.137,0.817,0.341c0.067,0.136,0.136,0.408,0.136,0.817v2.859l-3.268-4.153H207.331L207.331,10.201z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M221.08,10.064c0,0.137-0.068,0.272-0.137,0.341c-0.136,0.068-0.204,0.136-0.272,0.136c-0.136,0-0.272-0.067-0.612-0.204c-0.545-0.204-1.021-0.272-1.497-0.272c-0.612,0-1.226,0.137-1.77,0.477c-0.613,0.272-1.021,0.749-1.361,1.294c-0.341,0.613-0.545,1.226-0.545,1.839c0,0.612,0.204,1.157,0.477,1.702s0.749,0.953,1.293,1.294c0.545,0,1.157,0.408,1.906,0.408c0.545,0,1.021-0.067,1.43-0.272c0.407-0.204,0.816-0.477,1.156-0.885v-0.545c-0.408,0.477-0.749,0.749-1.089,0.953s-0.749,0.272-1.157,0.272c-0.544,0-0.952-0.136-1.293-0.34c-0.272-0.272-0.544-0.682-0.681-1.158c-0.136-0.477-0.204-1.021-0.204-1.634c0-0.613,0.068-1.158,0.272-1.703c0.204-0.34,0.408-0.681,0.748-0.953c0.409-0.204,0.749-0.34,1.157-0.34c0.545,0,0.953,0.204,1.361,0.477c0.408,0.34,0.681,0.816,0.817,1.43h0.204v-2.315H221.08L221.08,10.064z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M222.508,15.648c-0.136,0.136-0.204,0.341-0.204,0.613c0,0.204,0.068,0.408,0.204,0.544c0.204,0.137,0.341,0.272,0.612,0.272c0.205,0,0.409-0.136,0.545-0.272c0.204-0.136,0.272-0.34,0.272-0.544c0-0.272-0.068-0.478-0.272-0.613c-0.136-0.136-0.34-0.272-0.545-0.272C222.849,15.376,222.712,15.513,222.508,15.648L222.508,15.648L222.508,15.648z"/></g></g></g></svg>
+              </div>
+              <div class="marquee-item" title="Eli Lilly" style="transform: translateY(-2px);">
+                <svg viewBox="0 0 631 344" fill="currentColor" style="max-width: 60px;"><g class="layer"><title>Lilly</title><path d="m435.53,200.79c3.65,-2.6 7.6,-5.64 11.29,-8.56c28.4,-22.72 50.1,-47.62 54.38,-61.4c0.16,-0.44 0.54,-1.71 0.54,-2.73c0,-1.42 -0.68,-2.42 -1.99,-2.42c-13.01,0 -54.86,41.65 -64.99,75.37l0,0.14l0.77,-0.4zm-104.88,-4.79c39.55,-29.87 81.08,-73.37 85.51,-91.23c0.15,-0.58 0.29,-1.15 0.27,-1.7c-0.05,-1.16 -0.69,-2.22 -2.18,-2.22c-12.51,0 -70.48,53.45 -83.6,95.15zm-242.82,26.26c-10.44,-7.24 -26.59,-13.57 -41,-13.57c-13.99,0 -22.95,5.49 -22.95,12.41c0,7.98 10.87,11.47 23.02,11.47c14.74,0 28.12,-3.99 40.93,-10.31zm121.15,-93.71c28.35,-9.1 55.24,-28.1 75.3,-47.94c18.55,-18.37 33.39,-40.18 33.39,-50.97c0,-2.47 -1.77,-3.95 -4,-3.95c-8.58,0 -24.88,11.41 -46.78,33.33c-17.07,17.12 -36.95,40.46 -57.91,69.53zm422.02,68.54c-24.34,24.23 -100.22,90.82 -120.3,146.87l-24.87,-6.41c8.12,-23.21 32.6,-59.3 59.89,-87.17c-5.8,2.2 -11.87,3.01 -16.72,3.01c-7.37,0 -13.11,-2.22 -16.55,-6.41c-2.49,-3 -3.74,-6.93 -3.74,-11.6c0,-1.01 0.07,-2.04 0.21,-3.17c-23.95,14.58 -43.23,21.18 -62.1,21.18c-14.68,0 -27.06,-6.41 -32.75,-17.63c-23.8,11.8 -46.59,17.63 -65.67,17.63c-17.75,0 -32.05,-7.02 -38.62,-19.85c-24.05,13.53 -44.49,19.85 -60.77,19.85c-9.37,0 -16.79,-2.6 -21.57,-7.51c-3.51,-3.61 -5.37,-8.5 -5.62,-14.13c-15.43,10.14 -37.93,21.64 -61.04,21.64c-23.61,0 -39.46,-8.12 -51.75,-16.14c-17.77,26.27 -47.01,48.09 -77.56,48.09c-20.59,0 -33.91,-11.1 -33.91,-26.8c0,-30.85 56.59,-79.59 106.1,-84.7c3.28,7.42 6.22,13.13 9.22,19.93c-48.92,5.68 -89.65,34.64 -89.65,62.93c0,18.59 20.91,37.27 65.27,37.27c7.6,0 15.24,-0.73 22.76,-1.78c39.15,-54.05 99.18,-137.99 150.81,-137.99c15.29,0 23.26,9.28 23.26,21.72c0,25.56 -21.96,53.08 -36.28,67.43c-22.51,22.61 -63.2,56.25 -120.05,67.39c-22.12,30.75 -40.3,51.16 -58.47,65.89c11.03,5.95 21.34,9.58 33.67,9.58c30.59,0 60.27,-28.01 83.46,-51.74l0.82,-0.79l18.08,14.13l-0.84,0.98c-10.26,11.76 -19.7,24.18 -19.7,31.13c0,5.3 4.45,6.34 8.3,6.34c11.73,0 29.77,-7.58 51.03,-20.65l0,-0.18c2.35,-52.53 74.02,-132.84 117.53,-132.84c12.28,0 19.35,6.1 19.35,16.83c0,26.33 -45.44,82.79 -111.5,125.98l0,0.03c3.42,7.35 11.29,10.9 24.64,10.9c10.43,0 30.8,-4.65 55.04,-17.31c2.82,-27.22 18.23,-56.43 37.78,-77.25c19.62,-20.86 41.61,-34.42 60.62,-34.42c11.72,0 18.64,6.47 18.64,16.59c0,22.96 -26.65,62.22 -90.86,103.33c2.83,5.51 8.36,8.99 16.93,8.99c19.12,0 52.82,-20.42 79.08,-45.52l18.84,14.65c-8.05,9.76 -16.19,20.51 -15.92,26.67c0.06,2 1.41,3.33 4.57,3.33c19.35,0 49.82,-25.53 72.65,-48.07l18,13.97zm-350.19,-52.68c8.54,0 15.44,6.95 15.44,15.46c0,8.56 -6.9,15.49 -15.44,15.49c-8.57,0 -15.49,-6.93 -15.49,-15.49c0,-8.51 6.92,-15.46 15.49,-15.46z" fill="currentColor" id="svg_1"/></g></svg>
+              </div>
+              <div class="marquee-item" title="Tesla">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,2C11.5,3.9,10,7,7.1,9.4C6.5,9.9,5.8,10.3,5,10.7c4,0.3,8,0.3,12,0c-0.8-0.3-1.5-0.8-2.1-1.2 C12,7,10.5,3.9,10,2h4c0.8,3,2.5,5.6,5.1,7.2c0.6,0.4,1.3,0.7,2,1c-1.3,0.8-2.8,1.2-4.3,1.3c-2.3,1.5-4,4.2-4.8,7.3h-2 c-0.8-3.1-2.5-5.8-4.8-7.3c-1.5-0.1-3-0.5-4.3-1.3c0.7-0.3,1.4-0.6,2-1C5.5,14.8,7.2,12.2,8,9.2h4V2z"/></svg>
+              </div>
+              <div class="marquee-item" title="JPMorgan Chase">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,0 L18,3.5 L21.5,9.5 L21.5,14.5 L18,20.5 L12,24 L6,20.5 L2.5,14.5 L2.5,9.5 L6,3.5 Z M12,3 L7.5,5.6 L4.9,10.1 L4.9,13.9 L7.5,18.4 L12,21 L16.5,18.4 L19.1,13.9 L19.1,10.1 L16.5,5.6 Z"/></svg>
+              </div>
+            </div>
+            <div class="marquee-group">
+              <div class="marquee-item" title="Apple">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71,19.5C17.88,20.74,17,21.95,15.66,22c-1.31,0-1.72-.8-3.22-.8s-2,.78-3.25.82c-1.35.05-2.33-1.2-3.17-2.41C4.28,17,2.94,11.66,4.72,8.56c.89-1.55,2.49-2.54,4.22-2.56,1.31,0,2.55.91,3.35.91s2.26-1.1,3.82-.94a5.3,5.3,0,0,1,4.15,2.24,5.17,5.17,0,0,0-2.48,4.35,5.19,5.19,0,0,0,3.15,4.74A12.75,12.75,0,0,1,18.71,19.5M15.9,3.78a5.16,5.16,0,0,0,1.17-3.7,5.21,5.21,0,0,0-3.4,1.75,4.88,4.88,0,0,0-1.21,3.58A4.47,4.47,0,0,0,15.9,3.78Z"/></svg>
+              </div>
+              <div class="marquee-item" title="Microsoft">
+                <svg viewBox="0 0 23 23" fill="currentColor"><rect x="0" y="0" width="10.5" height="10.5" /><rect x="11.5" y="0" width="10.5" height="10.5" /><rect x="0" y="11.5" width="10.5" height="10.5" /><rect x="11.5" y="11.5" width="10.5" height="10.5" /></svg>
+              </div>
+              <div class="marquee-item" title="NVIDIA">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.1,13.5c0.5-0.7,0.7-1.5,0.7-2.3c0-4-2.5-7.5-6.2-8.8c-1.3-0.5-2.7-0.7-4.1-0.6v3.2c1.2,0,2.3,0.3,3.3,0.8 c2.2,1,3.7,3.1,3.8,5.6c0,2.1-1.1,4.1-3,5.1c-0.6,0.3-1.3,0.5-1.9,0.5l-0.1,0.1v3.2C17.7,20,19.9,18.9,21.5,17 C22.4,16,22.9,14.8,23.1,13.5z M13.4,4.2c-0.3,0-0.7-0.1-1-0.1c-4.4,0-8.2,3.1-9,7.4c-0.3,1.3-0.2,2.7,0.3,4 c0.8,2.3,2.5,4.1,4.8,5c0.8,0.3,1.7,0.5,2.6,0.5c0.8,0,1.7-0.1,2.5-0.3l0.1-0.1v-3.2c-0.4,0.1-0.9,0.2-1.3,0.2 c-1.6,0-3.1-0.8-3.9-2.2c-0.4-0.7-0.6-1.5-0.6-2.3c0-2,1.2-3.8,3.1-4.6c0.6-0.3,1.3-0.4,2-0.4V4.2z M12,8.4c-1.8,0-3.3,1.3-3.6,3.1 c-0.1,0.5,0,1,0.2,1.5c0.4,1,1.3,1.6,2.4,1.7c0.3,0,0.7,0,1-0.1v-3c-0.2,0-0.4,0.1-0.6,0.1c-0.6,0-1.1-0.4-1.3-0.9 c-0.1-0.2-0.1-0.5-0.1-0.7c0-0.7,0.5-1.3,1.2-1.5c0.2-0.1,0.5-0.1,0.8-0.1V8.4z"/></svg>
+              </div>
+              <div class="marquee-item" title="Google">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114-3.533 0-6.4-2.867-6.4-6.4s2.867-6.4 6.4-6.4c1.582 0 3.026.582 4.137 1.542l3.075-3.075C19.347 2.377 16 1 12.24 1 5.922 1 12 5.922 1 12s4.922 11 11.24 11c6.533 0 10.873-4.6 10.873-11.086 0-.742-.068-1.442-.2-2.128H12.24z"/></svg>
+              </div>
+              <div class="marquee-item" title="Amazon">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.9,13.2c-0.8,0.5-1.8,0.8-3.1,0.8c-2.3,0-3.6-1.1-3.6-3c0-2.3,1.8-3.3,4.4-3.3c1,0,1.8,0.2,2.3,0.4v0.7 c0,1.6-0.8,2.5-2.2,2.5c-0.7,0-1.1-0.3-1.1-0.9c0-0.8,0.7-1.3,1.6-1.3c0.4,0,0.8,0.1,1,0.2v-0.5c0-0.7-0.4-1-1.2-1 c-0.8,0-1.6,0.3-2.2,0.8L9,7.6c0.8-0.8,2-1.2,3.4-1.2c2.2,0,3.5,1.1,3.5,3.3v4c0,0.8,0.2,1.3,0.5,1.7h-2.1 C14.1,14.8,14,14.1,14,13.8L15.9,13.2z M12.9,21.5c-4.9,0.7-9.4-1.4-12-4.8c-0.4-0.5,0-1,0.5-0.7c2.9,1.7,6.8,2.7,10.9,2.7 c3.6,0,7.2-0.8,9.8-2.3c0.5-0.3,0.9,0.2,0.5,0.7C19.7,19.9,16.5,21.1,12.9,21.5z M22.2,15.6c-0.3-0.5-1.9-0.2-2.6-0.1 c-0.3,0-0.3-0.3,0-0.4c1-0.5,2.6-0.3,2.9,0.2c0.3,0.5-0.3,1.9-0.8,2.8c-0.2,0.3-0.4,0.2-0.3-0.1C21.6,17.2,22.5,16,22.2,15.6z"/></svg>
+              </div>
+              <div class="marquee-item" title="Meta">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.9,8c-1.3-1.3-3.2-1.9-5.1-1.9c-1.8,0-3.5,0.7-4.8,1.9L12,8l0,0l-0.1-0.1C10.6,6.7,8.9,6.1,7.1,6.1 c-1.9,0-3.8,0.6-5.1,1.9C0.7,9.3,0,11.1,0,13c0,1.9,0.7,3.7,2,5c1.3,1.3,3.2,1.9,5.1,1.9c1.8,0,3.5-0.7,4.8-1.9l0.1-0.1l0,0l0.1,0.1 c1.3,1.3,3,1.9,4.8,1.9c1.9,0,3.8-0.6,5.1-1.9c1.3-1.3,2-3.1,2-5C24,11.1,23.3,9.3,21.9,8z M7.1,18c-1.4,0-2.7-0.5-3.6-1.4 C2.6,15.7,2.1,14.4,2.1,13c0-1.4,0.5-2.7,1.4-3.6C4.4,8.5,5.7,8,7.1,8c1.3,0,2.5,0.5,3.4,1.4l1.5,1.5l1.5-1.5 C14.4,8.5,15.6,8,16.9,8c1.4,0,2.7,0.5,3.6,1.4c0.9,0.9,1.4,2.2,1.4,3.6c0,1.4-0.5,2.7-1.4,3.6c-0.9,0.9-2.2,1.4-3.6,1.4 c-1.3,0-2.5-0.5-3.4-1.4l-1.5-1.5l-1.5,1.5C9.6,17.5,8.4,18,7.1,18z"/></svg>
+              </div>
+              <div class="marquee-item" title="Berkshire Hathaway" style="transform: translateY(-2px);">
+                <svg viewBox="0 0 223.938 17.079" fill="currentColor" style="max-width: 180px;"><g id="Page_1"><g id="Í_xBC__xB2_ã_1_1_"><g><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M13.804,6.313c0.682-0.513,0.853-1.365,0.853-2.047c0-0.853-0.171-1.534-0.682-2.217c-0.341-0.681-1.022-1.193-1.875-1.534c-0.853-0.341-2.215-0.511-4.09-0.511H0v0.341c0.682,0,1.194,0.17,1.534,0.341c0.341,0.17,0.512,0.341,0.512,0.512c0.17,0.171,0.341,0.852,0.341,1.705v10.911c0,1.023-0.171,1.535-0.341,1.876c0,0.17-0.171,0.341-0.512,0.511C1.194,16.372,0.682,16.372,0,16.372v0.512h8.521c2.386,0,4.261-0.512,5.454-1.534c1.022-0.853,1.534-1.876,1.534-3.24c0-1.193-0.512-2.046-1.364-2.897c-0.682-0.513-1.875-0.854-3.408-1.364C12.271,7.506,13.293,6.995,13.804,6.313L13.804,6.313L13.804,6.313z M6.136,0.856c1.193,0,2.216,0.171,2.727,0.513c0.511,0.17,1.023,0.511,1.193,1.021c0.341,0.513,0.512,1.023,0.512,1.876c0,0.682-0.171,1.364-0.512,1.705C9.714,6.483,9.373,6.824,8.862,7.165C8.18,7.506,7.329,7.506,6.136,7.506V0.856L6.136,0.856z M9.032,8.871c0.682,0.341,1.194,0.682,1.535,1.363s0.511,1.364,0.511,2.046c0,0.683-0.17,1.364-0.511,1.876c-0.341,0.511-0.682,1.023-1.194,1.364c-0.681,0.17-1.193,0.34-1.875,0.34c-0.341,0-0.681,0-1.022-0.34c-0.171-0.171-0.341-0.513-0.341-1.023v-0.513V8.529C7.499,8.529,8.352,8.699,9.032,8.871L9.032,8.871L9.032,8.871z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M22.056,7.729c0.788,0,1.279,0,1.476,0.099c0.492,0.099,0.787,0.394,1.082,0.688c0.295,0.296,0.492,0.788,0.59,1.477h0.295V7.138h-8.166v0.197h0.394c0.296,0,0.493,0.099,0.689,0.295c0.099,0,0.197,0.197,0.295,0.296c0,0.098,0,0.394,0,0.886v6.396c0,0.493,0,0.788-0.099,0.887c0,0.196-0.098,0.295-0.295,0.394c-0.098,0.099-0.394,0.099-0.591,0.099h-0.394v0.295h8.362l0.493-3.149h-0.295c-0.197,0.886-0.591,1.575-1.181,1.969c-0.492,0.394-1.279,0.59-2.164,0.59h-0.59c-0.295,0-0.492,0-0.591-0.098c-0.098-0.099-0.197-0.197-0.197-0.295c-0.098-0.1-0.098-0.395-0.098-0.985v-2.756c0.492,0,0.787,0.099,1.083,0.197c0.197,0.099,0.394,0.394,0.59,0.688c0.196,0.395,0.295,0.887,0.393,1.379h0.295V9.401h-0.295c-0.098,0.689-0.295,1.279-0.59,1.674c-0.197,0.394-0.689,0.591-1.279,0.591h-0.197V7.729H22.056L22.056,7.729z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M31.402,12.453l3.148,4.429H37.6v-0.295c-0.295,0-0.492-0.099-0.688-0.296c-0.098-0.098-0.394-0.295-0.688-0.688l-2.262-3.347c0.59-0.099,0.983-0.394,1.377-0.688c0.492-0.394,0.787-0.984,0.787-1.772c0-0.59-0.197-1.082-0.59-1.476c-0.295-0.492-0.787-0.787-1.279-0.984c-0.591-0.099-1.476-0.197-2.558-0.197h-4.525v0.197c0.394,0,0.688,0.099,0.885,0.197c0.197,0.098,0.295,0.196,0.295,0.295c0.098,0.099,0.098,0.492,0.098,0.984v6.396c0,0.493,0,0.788-0.098,0.985c0,0.098-0.099,0.196-0.295,0.295s-0.492,0.099-0.885,0.099v0.295h4.919v-0.295c-0.394,0-0.688,0-0.885-0.099s-0.295-0.197-0.295-0.295c-0.098-0.197-0.197-0.492-0.197-0.985v-2.755H31.402L31.402,12.453z M31.5,7.63c0.787,0,1.377,0.197,1.672,0.591c0.394,0.295,0.591,0.886,0.591,1.574c0,0.591-0.099,0.985-0.296,1.28s-0.492,0.492-0.787,0.688c-0.394,0.099-0.885,0.197-1.476,0.197h-0.492V7.63H31.5L31.5,7.63z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M46.454,8.614c0.689-0.591,1.083-0.984,1.279-1.082c0.197-0.099,0.492-0.099,0.787-0.197V7.138h-3.738v0.197c0.394,0.099,0.688,0.099,0.787,0.197c0.197,0.098,0.295,0.196,0.295,0.394c0,0.295-0.295,0.59-0.787,0.983l-3.542,2.953V8.812c0-0.492,0-0.788,0-0.984c0.098-0.099,0.197-0.197,0.295-0.295c0.197-0.099,0.492-0.197,0.788-0.197V7.138h-4.821v0.197h0.296c0.295,0,0.492,0.099,0.688,0.197c0.098,0.098,0.295,0.196,0.295,0.295c0.099,0.196,0.099,0.492,0.099,0.984v6.396c0,0.493,0,0.788-0.099,0.887c-0.098,0.196-0.197,0.295-0.295,0.394c-0.197,0.099-0.394,0.099-0.688,0.099h-0.296v0.295h4.919v-0.295c-0.394,0-0.689,0-0.788-0.099c-0.196-0.099-0.295-0.197-0.393-0.295c0-0.197,0-0.492,0-0.985v-2.656l0.295-0.296l2.263,2.757c0.393,0.59,0.688,0.983,0.688,1.181c0,0.098-0.099,0.196-0.197,0.295c-0.099,0-0.295,0.099-0.59,0.099v0.295h5.017v-0.295c-0.295,0-0.492-0.099-0.787-0.197c-0.394-0.196-0.787-0.591-1.279-1.279l-3.345-4.232L46.454,8.614L46.454,8.614z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M55.604,6.941c-0.099,0.295-0.197,0.394-0.296,0.492c0,0.099-0.098,0.099-0.294,0.099c-0.098,0-0.295,0-0.591-0.197c-0.393-0.099-0.59-0.197-0.885-0.295c-0.295-0.099-0.59-0.099-0.885-0.099c-0.885,0-1.574,0.295-2.165,0.787C49.897,8.319,49.7,8.909,49.7,9.697c0,0.492,0.099,0.886,0.295,1.279c0.197,0.394,0.492,0.689,0.886,0.984c0.394,0.295,0.984,0.689,1.869,1.082c0.688,0.395,1.082,0.591,1.377,0.788c0.197,0.196,0.394,0.394,0.492,0.591c0.099,0.295,0.197,0.491,0.197,0.688c0,0.394-0.197,0.688-0.492,0.984c-0.294,0.295-0.688,0.492-1.279,0.492c-0.688,0-1.279-0.296-1.967-0.788c-0.591-0.591-0.984-1.377-1.181-2.361H49.7v3.642h0.197c0.099-0.197,0.197-0.395,0.296-0.492c0.197-0.099,0.294-0.099,0.492-0.099c0.099,0,0.294,0,0.492,0.099c0.394,0.197,0.787,0.295,1.082,0.394c0.197,0.099,0.492,0.099,0.885,0.099c0.886,0,1.771-0.295,2.361-0.886c0.59-0.591,0.984-1.28,0.984-2.067c0-0.688-0.197-1.279-0.59-1.771c-0.394-0.394-1.18-0.984-2.361-1.574c-0.787-0.395-1.279-0.689-1.476-0.788c-0.393-0.197-0.59-0.492-0.688-0.688c-0.098-0.197-0.197-0.295-0.197-0.591c0-0.295,0.197-0.59,0.394-0.886c0.295-0.197,0.688-0.394,1.181-0.394c0.688,0,1.279,0.295,1.771,0.787c0.59,0.492,0.885,1.083,1.082,1.969h0.295L55.8,6.941H55.604L55.604,6.941z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M64.458,12.157v3.051c0,0.493,0,0.788,0,0.887c-0.099,0.196-0.197,0.295-0.295,0.394c-0.197,0.099-0.394,0.099-0.689,0.099h-0.295v0.295h5.017v-0.295h-0.295c-0.296,0-0.492,0-0.688-0.099c-0.099-0.099-0.197-0.197-0.296-0.394c-0.098-0.099-0.098-0.394-0.098-0.887V8.812c0-0.492,0-0.788,0.098-0.886c0.099-0.197,0.197-0.296,0.296-0.394c0.197-0.099,0.393-0.197,0.688-0.197h0.295V7.138h-5.017v0.197h0.295c0.295,0,0.492,0.099,0.59,0.197c0.197,0.098,0.295,0.196,0.394,0.295c0,0.196,0,0.492,0,0.984v2.756h-3.443V8.812c0-0.492,0.098-0.788,0.098-0.886c0.099-0.197,0.197-0.296,0.295-0.394c0.197-0.099,0.394-0.197,0.688-0.197h0.295V7.138h-5.017v0.197h0.295c0.295,0,0.492,0.099,0.689,0.197c0.098,0.098,0.197,0.196,0.294,0.295c0.098,0.196,0.098,0.492,0.098,0.984v6.396c0,0.493,0,0.788-0.098,0.887c-0.098,0.196-0.197,0.295-0.294,0.394c-0.197,0.099-0.394,0.099-0.689,0.099h-0.295v0.295h5.017v-0.295h-0.295c-0.295,0-0.492,0-0.59,0.099c-0.197-0.099-0.295-0.197-0.394-0.394c0-0.099-0.098-0.394-0.098-0.887v-3.051H64.458L64.458,12.157z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M73.508,16.587c-0.295,0-0.492,0-0.688-0.099c-0.099-0.099-0.197-0.197-0.295-0.394c0-0.099-0.098-0.394-0.098-0.887V8.812c0-0.492,0.098-0.788,0.098-0.886c0.099-0.197,0.197-0.296,0.295-0.394c0.197-0.099,0.393-0.197,0.688-0.197h0.295V7.138h-5.017v0.197h0.295c0.295,0,0.492,0.099,0.689,0.197c0.098,0.098,0.196,0.196,0.295,0.295c0,0.196,0.098,0.492,0.098,0.984v6.396c0,0.493-0.098,0.788-0.098,0.887c-0.099,0.196-0.197,0.295-0.295,0.394c-0.197,0.099-0.394,0.099-0.689,0.099h-0.295v0.295h5.017v-0.295H73.508L73.508,16.587z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M78.722,12.453l3.148,4.429h3.05v-0.295c-0.295,0-0.492-0.099-0.688-0.296c-0.099-0.098-0.295-0.295-0.59-0.688l-2.361-3.347c0.59-0.099,1.082-0.394,1.377-0.688c0.493-0.394,0.787-0.984,0.787-1.772c0-0.59-0.197-1.082-0.492-1.476c-0.394-0.492-0.787-0.787-1.377-0.984c-0.492-0.099-1.377-0.197-2.558-0.197h-4.525v0.197c0.394,0,0.787,0.099,0.886,0.197c0.196,0.098,0.295,0.196,0.393,0.295c0,0.099,0.099,0.492,0.099,0.984v6.396c0,0.493-0.099,0.788-0.099,0.985c-0.098,0.098-0.197,0.196-0.393,0.295c-0.099,0.099-0.394,0.099-0.886,0.099v0.295h4.919v-0.295c-0.394,0-0.688,0-0.885-0.099c-0.098-0.099-0.295-0.197-0.295-0.295c-0.099-0.197-0.099-0.492-0.099-0.985v-2.755H78.722L78.722,12.453z M78.82,7.63c0.787,0,1.378,0.197,1.771,0.591c0.295,0.295,0.492,0.886,0.492,1.574c0,0.591-0.098,0.985-0.295,1.28s-0.492,0.492-0.787,0.688c-0.295,0.099-0.788,0.197-1.476,0.197h-0.394V7.63H78.82L78.82,7.63z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M89.839,7.729c0.688,0,1.18,0,1.475,0.099c0.493,0.099,0.788,0.394,1.082,0.688c0.197,0.296,0.394,0.788,0.591,1.477h0.197V7.138h-8.067v0.197h0.295c0.295,0,0.59,0.099,0.787,0.295c0.098,0,0.197,0.197,0.197,0.296c0.098,0.098,0.098,0.394,0.098,0.886v6.396c0,0.493-0.098,0.788-0.098,0.887c-0.099,0.196-0.197,0.295-0.295,0.394c-0.197,0.099-0.394,0.099-0.688,0.099h-0.295v0.295h8.362l0.492-3.149h-0.295c-0.295,0.886-0.688,1.575-1.18,1.969c-0.591,0.394-1.279,0.59-2.165,0.59h-0.59c-0.295,0-0.492,0-0.59-0.098c-0.098-0.099-0.197-0.197-0.295-0.295c0-0.1-0.098-0.395-0.098-0.985v-2.756c0.492,0,0.885,0.099,1.082,0.197c0.295,0.099,0.492,0.394,0.688,0.688c0.197,0.395,0.295,0.887,0.295,1.379h0.295V9.401h-0.295c0,0.689-0.197,1.279-0.492,1.674c-0.295,0.394-0.688,0.591-1.377,0.591h-0.196V7.729H89.839L89.839,7.729z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M112.177,8.697v5.287c0,0.854,0,1.364-0.171,1.535c0,0.341-0.34,0.512-0.511,0.682c-0.17,0.171-0.682,0.171-1.193,0.171h-0.512v0.512h8.865v-0.512h-0.683c-0.341,0-0.852,0-1.021-0.171c-0.342-0.17-0.513-0.341-0.683-0.682c0-0.171,0-0.682,0-1.535V2.899c0-0.854,0-1.364,0-1.534c0.17-0.342,0.341-0.513,0.512-0.683c0.341-0.172,0.682-0.342,1.192-0.342h0.683V0h-8.865v0.341h0.512c0.511,0,0.852,0.17,1.193,0.342c0.341,0.17,0.511,0.341,0.511,0.511c0.171,0.342,0.171,0.853,0.171,1.706v4.775h-5.966V2.899c0-0.854,0-1.364,0.17-1.534c0.171-0.342,0.341-0.513,0.512-0.683c0.341-0.172,0.682-0.342,1.193-0.342h0.511V0h-8.864v0.341h0.681c0.341,0,0.853,0.17,1.023,0.342c0.341,0.17,0.512,0.341,0.682,0.511c0,0.342,0,0.853,0,1.706v11.085c0,0.854,0,1.364,0,1.535c-0.17,0.341-0.341,0.512-0.511,0.682c-0.341,0.171-0.682,0.171-1.194,0.171h-0.681v0.512h8.864v-0.512h-0.511c-0.511,0-0.852,0-1.193-0.171c-0.171-0.17-0.512-0.341-0.512-0.682c-0.17-0.171-0.17-0.682-0.17-1.535V8.697H112.177L112.177,8.697z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M126.88,15.308c0.099,0.295,0.196,0.491,0.196,0.491c0,0.1,0,0.197,0,0.296c0,0.196,0,0.295-0.098,0.394c-0.197,0.099-0.394,0.099-0.787,0.099h-0.197v0.295h4.624v-0.295c-0.295,0-0.492-0.099-0.688-0.296c-0.197-0.098-0.492-0.59-0.787-1.378l-3.542-7.972h-0.098l-3.443,7.775c-0.296,0.688-0.591,1.182-0.886,1.477c-0.196,0.196-0.492,0.394-0.787,0.394v0.295h3.148v-0.295c-0.492,0-0.787-0.099-0.886-0.197c-0.196-0.099-0.394-0.295-0.394-0.591c0-0.196,0.099-0.491,0.197-0.786l0.491-0.887h3.345L126.88,15.308L126.88,15.308z M123.142,13.536l1.476-3.248l1.476,3.248H123.142L123.142,13.536z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M131.406,7.138v2.657h0.196c0.099-0.786,0.395-1.279,0.788-1.672c0.295-0.296,0.786-0.395,1.475-0.395h0.689v7.479c0,0.493,0,0.788-0.099,0.887c-0.099,0.196-0.197,0.295-0.295,0.394c-0.197,0.099-0.394,0.099-0.688,0.099h-0.296v0.295h5.018v-0.295h-0.295c-0.197,0-0.492,0-0.591-0.099c-0.196-0.099-0.295-0.197-0.295-0.394c-0.098-0.099-0.098-0.394-0.098-0.887V7.729h0.688c0.491,0,0.786,0,0.983,0.099c0.295,0.196,0.59,0.394,0.787,0.591c0.098,0.295,0.295,0.787,0.491,1.377h0.197V7.138H131.406L131.406,7.138z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M148.13,12.157v3.051c0,0.493-0.099,0.788-0.099,0.887c-0.099,0.196-0.197,0.295-0.295,0.394c-0.197,0.099-0.394,0.099-0.688,0.099h-0.296v0.295h5.018v-0.295h-0.295c-0.295,0-0.492,0-0.688-0.099c-0.099-0.099-0.197-0.197-0.295-0.394c0-0.099-0.099-0.394-0.099-0.887V8.812c0-0.492,0.099-0.788,0.099-0.886c0.098-0.197,0.196-0.296,0.295-0.394c0.196-0.099,0.394-0.197,0.688-0.197h0.295V7.138h-5.018v0.197h0.296c0.295,0,0.491,0.099,0.688,0.197c0.098,0.098,0.196,0.196,0.295,0.295c0,0.196,0.099,0.492,0.099,0.984v2.756h-3.443V8.812c0-0.492,0-0.788,0-0.886c0.099-0.197,0.197-0.296,0.295-0.394c0.197-0.099,0.394-0.197,0.688-0.197h0.296V7.138h-5.018v0.197h0.295c0.295,0,0.492,0.099,0.688,0.197c0.099,0.098,0.197,0.196,0.295,0.295c0.099,0.196,0.099,0.492,0.099,0.984v6.396c0,0.493,0,0.788-0.099,0.887c-0.098,0.196-0.196,0.295-0.295,0.394c-0.196,0.099-0.394,0.099-0.688,0.099h-0.295v0.295h5.018v-0.295h-0.296c-0.295,0-0.491,0-0.591-0.099c-0.195-0.099-0.294-0.197-0.393-0.394c0-0.099,0-0.394,0-0.887v-3.051H148.13L148.13,12.157z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M158.657,15.308c0.099,0.295,0.196,0.491,0.196,0.491c0.099,0.1,0.099,0.197,0.099,0.296c0,0.196-0.099,0.295-0.196,0.394c-0.099,0.099-0.394,0.099-0.787,0.099h-0.197v0.295h4.723v-0.295c-0.295,0-0.492-0.099-0.688-0.296c-0.197-0.098-0.492-0.59-0.788-1.378l-3.541-7.972h-0.099l-3.541,7.775c-0.295,0.688-0.591,1.182-0.788,1.477c-0.195,0.196-0.491,0.394-0.885,0.394v0.295h3.246v-0.295c-0.491,0-0.786-0.099-0.983-0.197c-0.196-0.099-0.295-0.295-0.295-0.591c0-0.196,0.099-0.491,0.196-0.786l0.394-0.887h3.443L158.657,15.308L158.657,15.308z M155.017,13.536l1.475-3.248l1.378,3.248H155.017L155.017,13.536z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M174.693,7.138v0.197c0.394,0.099,0.59,0.099,0.786,0.197c0.099,0.098,0.197,0.295,0.197,0.491c0,0.197-0.099,0.296-0.099,0.492c0,0.099-0.099,0.394-0.295,0.886l-1.574,4.135l-1.771-4.627c-0.197-0.59-0.295-0.886-0.295-0.983c0-0.099,0-0.197,0.098-0.296c0-0.098,0.099-0.098,0.197-0.196c0.098,0,0.394-0.099,0.688-0.099V7.138h-4.624v0.197c0.295,0,0.492,0.099,0.688,0.197c0.099,0.098,0.295,0.196,0.395,0.394c0.098,0.197,0.294,0.59,0.491,1.083l0.394,1.082l-1.574,3.642l-1.869-4.724c-0.196-0.591-0.394-0.985-0.394-1.083c0-0.197,0.099-0.296,0.197-0.394c0.098-0.099,0.295-0.099,0.688-0.197V7.138h-4.23v0.197c0.295,0.099,0.492,0.197,0.688,0.295c0.099,0.197,0.295,0.689,0.688,1.477l3.148,7.973h0.295l2.656-6.299l2.361,6.299h0.296l3.049-8.07c0.295-0.689,0.394-0.985,0.394-1.083c0.099-0.197,0.295-0.296,0.394-0.394c0.099-0.099,0.295-0.099,0.492-0.197V7.138H174.693L174.693,7.138z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M183.94,15.308c0.099,0.295,0.197,0.491,0.197,0.491c0.098,0.1,0.098,0.197,0.098,0.296c0,0.196-0.098,0.295-0.196,0.394s-0.394,0.099-0.787,0.099h-0.197v0.295h4.723v-0.295c-0.295,0-0.59-0.099-0.688-0.296c-0.197-0.098-0.492-0.59-0.787-1.378l-3.542-7.972h-0.098l-3.542,7.775c-0.295,0.688-0.59,1.182-0.787,1.477c-0.196,0.196-0.492,0.394-0.885,0.394v0.295h3.246v-0.295c-0.492,0-0.787-0.099-0.984-0.197c-0.196-0.099-0.295-0.295-0.295-0.591c0-0.196,0.099-0.491,0.197-0.786l0.393-0.887h3.443L183.94,15.308L183.94,15.308z M180.3,13.536l1.476-3.248l1.377,3.248H180.3L180.3,13.536z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M195.451,7.138v0.197c0.394,0.099,0.688,0.197,0.885,0.295c0.099,0.099,0.197,0.197,0.197,0.296c0,0.197-0.295,0.688-0.688,1.476l-1.771,2.854l-1.771-3.149c-0.394-0.688-0.59-1.181-0.59-1.378c0-0.099,0.098-0.099,0.196-0.196c0.099-0.099,0.295-0.197,0.59-0.197h0.197V7.138h-4.624v0.197c0.295,0,0.59,0.099,0.787,0.295c0.099,0.099,0.492,0.591,0.886,1.477l2.36,4.134v1.968c0,0.493-0.098,0.788-0.098,0.887c-0.099,0.196-0.197,0.295-0.295,0.394c-0.197,0.099-0.394,0.099-0.689,0.099h-0.491v0.295h5.41v-0.295h-0.491c-0.295,0-0.492,0-0.688-0.099c-0.1-0.099-0.197-0.197-0.296-0.394c0-0.099-0.098-0.394-0.098-0.887v-2.361l2.164-3.543c0.491-0.886,0.885-1.477,1.082-1.674c0.196-0.098,0.491-0.196,0.787-0.295V7.138H195.451L195.451,7.138z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M206.65,16.738c-0.136,0-0.272,0-0.408-0.068c-0.137-0.068-0.204-0.137-0.204-0.272c-0.068-0.068-0.068-0.272-0.068-0.613v-4.426c0-0.341,0-0.545,0.068-0.612c0-0.137,0.067-0.205,0.204-0.272c0.068-0.068,0.272-0.137,0.408-0.137h0.272v-0.136h-3.54v0.136h0.272c0.137,0,0.341,0.068,0.409,0.137c0.136,0.067,0.204,0.136,0.204,0.204c0.068,0.136,0.068,0.34,0.068,0.681v4.426c0,0.341,0,0.545-0.068,0.613c0,0.136-0.068,0.204-0.204,0.272c-0.068,0.068-0.272,0.068-0.409,0.068h-0.272v0.204h3.54v-0.204H206.65L206.65,16.738z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M207.331,10.201v0.136c0.204,0.068,0.34,0.068,0.408,0.137c0.136,0.067,0.272,0.204,0.408,0.34l0.137,0.204v4.767c0,0.341-0.068,0.613-0.204,0.749c-0.137,0.137-0.409,0.205-0.817,0.205v0.204h2.45v-0.204h-0.204c-0.204,0-0.408-0.068-0.612-0.205c-0.137-0.136-0.272-0.408-0.272-0.749v-4.289l4.561,5.583h0.204v-5.583c0-0.341,0-0.545,0.068-0.682c0.067-0.136,0.136-0.272,0.204-0.272c0.136-0.067,0.272-0.136,0.612-0.204v-0.136h-2.246v0.136c0.34,0,0.612,0.137,0.817,0.341c0.067,0.136,0.136,0.408,0.136,0.817v2.859l-3.268-4.153H207.331L207.331,10.201z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M221.08,10.064c0,0.137-0.068,0.272-0.137,0.341c-0.136,0.068-0.204,0.136-0.272,0.136c-0.136,0-0.272-0.067-0.612-0.204c-0.545-0.204-1.021-0.272-1.497-0.272c-0.612,0-1.226,0.137-1.77,0.477c-0.613,0.272-1.021,0.749-1.361,1.294c-0.341,0.613-0.545,1.226-0.545,1.839c0,0.612,0.204,1.157,0.477,1.702s0.749,0.953,1.293,1.294c0.545,0,1.157,0.408,1.906,0.408c0.545,0,1.021-0.067,1.43-0.272c0.407-0.204,0.816-0.477,1.156-0.885v-0.545c-0.408,0.477-0.749,0.749-1.089,0.953s-0.749,0.272-1.157,0.272c-0.544,0-0.952-0.136-1.293-0.34c-0.272-0.272-0.544-0.682-0.681-1.158c-0.136-0.477-0.204-1.021-0.204-1.634c0-0.613,0.068-1.158,0.272-1.703c0.204-0.34,0.408-0.681,0.748-0.953c0.409-0.204,0.749-0.34,1.157-0.34c0.545,0,0.953,0.204,1.361,0.477c0.408,0.34,0.681,0.816,0.817,1.43h0.204v-2.315H221.08L221.08,10.064z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor" d="M222.508,15.648c-0.136,0.136-0.204,0.341-0.204,0.613c0,0.204,0.068,0.408,0.204,0.544c0.204,0.137,0.341,0.272,0.612,0.272c0.205,0,0.409-0.136,0.545-0.272c0.204-0.136,0.272-0.34,0.272-0.544c0-0.272-0.068-0.478-0.272-0.613c-0.136-0.136-0.34-0.272-0.545-0.272C222.849,15.376,222.712,15.513,222.508,15.648L222.508,15.648L222.508,15.648z"/></g></g></g></svg>
+              </div>
+              <div class="marquee-item" title="Eli Lilly" style="transform: translateY(-2px);">
+                <svg viewBox="0 0 631 344" fill="currentColor" style="max-width: 60px;"><g class="layer"><title>Lilly</title><path d="m435.53,200.79c3.65,-2.6 7.6,-5.64 11.29,-8.56c28.4,-22.72 50.1,-47.62 54.38,-61.4c0.16,-0.44 0.54,-1.71 0.54,-2.73c0,-1.42 -0.68,-2.42 -1.99,-2.42c-13.01,0 -54.86,41.65 -64.99,75.37l0,0.14l0.77,-0.4zm-104.88,-4.79c39.55,-29.87 81.08,-73.37 85.51,-91.23c0.15,-0.58 0.29,-1.15 0.27,-1.7c-0.05,-1.16 -0.69,-2.22 -2.18,-2.22c-12.51,0 -70.48,53.45 -83.6,95.15zm-242.82,26.26c-10.44,-7.24 -26.59,-13.57 -41,-13.57c-13.99,0 -22.95,5.49 -22.95,12.41c0,7.98 10.87,11.47 23.02,11.47c14.74,0 28.12,-3.99 40.93,-10.31zm121.15,-93.71c28.35,-9.1 55.24,-28.1 75.3,-47.94c18.55,-18.37 33.39,-40.18 33.39,-50.97c0,-2.47 -1.77,-3.95 -4,-3.95c-8.58,0 -24.88,11.41 -46.78,33.33c-17.07,17.12 -36.95,40.46 -57.91,69.53zm422.02,68.54c-24.34,24.23 -100.22,90.82 -120.3,146.87l-24.87,-6.41c8.12,-23.21 32.6,-59.3 59.89,-87.17c-5.8,2.2 -11.87,3.01 -16.72,3.01c-7.37,0 -13.11,-2.22 -16.55,-6.41c-2.49,-3 -3.74,-6.93 -3.74,-11.6c0,-1.01 0.07,-2.04 0.21,-3.17c-23.95,14.58 -43.23,21.18 -62.1,21.18c-14.68,0 -27.06,-6.41 -32.75,-17.63c-23.8,11.8 -46.59,17.63 -65.67,17.63c-17.75,0 -32.05,-7.02 -38.62,-19.85c-24.05,13.53 -44.49,19.85 -60.77,19.85c-9.37,0 -16.79,-2.6 -21.57,-7.51c-3.51,-3.61 -5.37,-8.5 -5.62,-14.13c-15.43,10.14 -37.93,21.64 -61.04,21.64c-23.61,0 -39.46,-8.12 -51.75,-16.14c-17.77,26.27 -47.01,48.09 -77.56,48.09c-20.59,0 -33.91,-11.1 -33.91,-26.8c0,-30.85 56.59,-79.59 106.1,-84.7c3.28,7.42 6.22,13.13 9.22,19.93c-48.92,5.68 -89.65,34.64 -89.65,62.93c0,18.59 20.91,37.27 65.27,37.27c7.6,0 15.24,-0.73 22.76,-1.78c39.15,-54.05 99.18,-137.99 150.81,-137.99c15.29,0 23.26,9.28 23.26,21.72c0,25.56 -21.96,53.08 -36.28,67.43c-22.51,22.61 -63.2,56.25 -120.05,67.39c-22.12,30.75 -40.3,51.16 -58.47,65.89c11.03,5.95 21.34,9.58 33.67,9.58c30.59,0 60.27,-28.01 83.46,-51.74l0.82,-0.79l18.08,14.13l-0.84,0.98c-10.26,11.76 -19.7,24.18 -19.7,31.13c0,5.3 4.45,6.34 8.3,6.34c11.73,0 29.77,-7.58 51.03,-20.65l0,-0.18c2.35,-52.53 74.02,-132.84 117.53,-132.84c12.28,0 19.35,6.1 19.35,16.83c0,26.33 -45.44,82.79 -111.5,125.98l0,0.03c3.42,7.35 11.29,10.9 24.64,10.9c10.43,0 30.8,-4.65 55.04,-17.31c2.82,-27.22 18.23,-56.43 37.78,-77.25c19.62,-20.86 41.61,-34.42 60.62,-34.42c11.72,0 18.64,6.47 18.64,16.59c0,22.96 -26.65,62.22 -90.86,103.33c2.83,5.51 8.36,8.99 16.93,8.99c19.12,0 52.82,-20.42 79.08,-45.52l18.84,14.65c-8.05,9.76 -16.19,20.51 -15.92,26.67c0.06,2 1.41,3.33 4.57,3.33c19.35,0 49.82,-25.53 72.65,-48.07l18,13.97zm-350.19,-52.68c8.54,0 15.44,6.95 15.44,15.46c0,8.56 -6.9,15.49 -15.44,15.49c-8.57,0 -15.49,-6.93 -15.49,-15.49c0,-8.51 6.92,-15.46 15.49,-15.46z" fill="currentColor" id="svg_1"/></g></svg>
+              </div>
+              <div class="marquee-item" title="Tesla">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,2C11.5,3.9,10,7,7.1,9.4C6.5,9.9,5.8,10.3,5,10.7c4,0.3,8,0.3,12,0c-0.8-0.3-1.5-0.8-2.1-1.2 C12,7,10.5,3.9,10,2h4c0.8,3,2.5,5.6,5.1,7.2c0.6,0.4,1.3,0.7,2,1c-1.3,0.8-2.8,1.2-4.3,1.3c-2.3,1.5-4,4.2-4.8,7.3h-2 c-0.8-3.1-2.5-5.8-4.8-7.3c-1.5-0.1-3-0.5-4.3-1.3c0.7-0.3,1.4-0.6,2-1C5.5,14.8,7.2,12.2,8,9.2h4V2z"/></svg>
+              </div>
+              <div class="marquee-item" title="JPMorgan Chase">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,0 L18,3.5 L21.5,9.5 L21.5,14.5 L18,20.5 L12,24 L6,20.5 L2.5,14.5 L2.5,9.5 L6,3.5 Z M12,3 L7.5,5.6 L4.9,10.1 L4.9,13.9 L7.5,18.4 L12,21 L16.5,18.4 L19.1,13.9 L19.1,10.1 L16.5,5.6 Z"/></svg>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="process-section">
-        <div class="container">
-          <div class="section-heading">
-            <p class="section-kicker">How it actually works</p>
-            <h2>One search, a clearer signal, and a direct path to the employer.</h2>
+      <!-- 4. Split Feature Spotlights -->
+      <section class="spotlight-section">
+        <div class="container spotlight-grid">
+          <!-- Spotlight Card 1 -->
+          <div class="spotlight-card">
+            <div class="spotlight-copy">
+              <span class="kicker">Signal Analysis</span>
+              <h3>Filter by Listing Trust Score</h3>
+              <p>
+                Our algorithm rates every job listing from 0 to 100. We analyze details like listing age, repost cycles, salary disclosures, and structural links to assign a transparent score. High score means a real open chair; low score means a data-gathering ghost post.
+              </p>
+            </div>
+            <div class="spotlight-visual trust-gauge-visual">
+              <div class="gauge-container">
+                <svg class="gauge-svg" viewBox="0 0 120 120">
+                  <circle cx="60" cy="60" r="50" class="gauge-track" />
+                  <circle cx="60" cy="60" r="50" class="gauge-fill" />
+                </svg>
+                <div class="gauge-center">
+                  <span class="gauge-number">88</span>
+                  <span class="gauge-label">TRUST</span>
+                </div>
+              </div>
+              <div class="gauge-legend">
+                <span class="legend-badge high">Source Link Verified</span>
+                <span class="legend-badge high">Fresh Posting (2d)</span>
+              </div>
+            </div>
           </div>
 
-          <div class="process-steps">
-            <article class="process-step">
-              <div class="process-number">01</div>
-              <h3>We scan everything</h3>
+          <!-- Spotlight Card 2 -->
+          <div class="spotlight-card">
+            <div class="spotlight-copy">
+              <span class="kicker">Application Pipeline</span>
+              <h3>Track your Applications</h3>
               <p>
-                One search covers every major job board and thousands of company
-                career pages. LinkedIn, Indeed, Handshake, Glassdoor, and more.
+                Say goodbye to scattered spreadsheets. Emploid features a built-in Application Kanban Tracker that auto-logs applications when you apply. Monitor stages, track follow-ups, and receive AI next-step prompts based on standard hiring timelines.
               </p>
-            </article>
-            <article class="process-step">
-              <div class="process-number">02</div>
-              <h3>We score for trust</h3>
-              <p>
-                Our Listing Trust Score analyzes posting age, repost frequency,
-                salary transparency, and hiring activity to estimate if a job is
-                real. Scores range from 0 (likely fake) to 100 (likely real).
-              </p>
-            </article>
-            <article class="process-step">
-              <div class="process-number">03</div>
-              <h3>You apply directly</h3>
-              <p>
-                Every apply link routes straight to the employer's own website.
-                No middlemen, no redirects, no third-party portals.
-              </p>
-            </article>
+            </div>
+            <div class="spotlight-visual pipeline-visual">
+              <div class="pipeline-board">
+                <div class="pipeline-column-mock">
+                  <span class="column-title-mock">Applied</span>
+                  <div class="pipeline-item-mock">
+                    <strong>Software Eng.</strong>
+                    <span>Stripe · $145k</span>
+                  </div>
+                </div>
+                <div class="pipeline-column-mock active">
+                  <span class="column-title-mock">Interview</span>
+                  <div class="pipeline-item-mock animate-float">
+                    <strong>Product Designer</strong>
+                    <span>Target · Minneapolis</span>
+                    <span class="momentum-pill">Reply Momentum</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="comparison-section">
+      <!-- 5. Keyword Explorer Section -->
+      <section class="keyword-explorer-section">
         <div class="container">
-          <div class="section-heading">
-            <p class="section-kicker">What you get</p>
-            <h2>What you get vs. a normal job board</h2>
+          <div class="section-heading text-center">
+            <span class="kicker">Keyword Explorer</span>
+            <h2>Discover active opportunities by keyword</h2>
+            <p class="section-subtitle">Click on any tag below to filter active job listings instantly.</p>
+          </div>
+          
+          <div class="keyword-explorer-grid">
+            <div class="keyword-category-card">
+              <h3>Popular Roles</h3>
+              <div class="keyword-tags">
+                <button type="button" class="tag-pill" data-search-val="Software Engineer">Software Engineer</button>
+                <button type="button" class="tag-pill" data-search-val="Product Manager">Product Manager</button>
+                <button type="button" class="tag-pill" data-search-val="Financial Analyst">Financial Analyst</button>
+                <button type="button" class="tag-pill" data-search-val="Marketing Coordinator">Marketing Coordinator</button>
+                <button type="button" class="tag-pill" data-search-val="Data Analyst">Data Analyst</button>
+                <button type="button" class="tag-pill" data-search-val="Graphic Designer">Graphic Designer</button>
+                <button type="button" class="tag-pill" data-search-val="Account Executive">Account Executive</button>
+                <button type="button" class="tag-pill" data-search-val="UX Researcher">UX Researcher</button>
+              </div>
+            </div>
+            
+            <div class="keyword-category-card">
+              <h3>Flexibility & Type</h3>
+              <div class="keyword-tags">
+                <button type="button" class="tag-pill" data-search-val="Remote">Remote Only</button>
+                <button type="button" class="tag-pill" data-search-val="Hybrid">Hybrid Work</button>
+                <button type="button" class="tag-pill" data-search-val="Internship">Internship</button>
+                <button type="button" class="tag-pill" data-search-val="Entry Level">Entry Level</button>
+                <button type="button" class="tag-pill" data-search-val="Part-time">Part-time</button>
+                <button type="button" class="tag-pill" data-search-val="Full-time">Full-time</button>
+              </div>
+            </div>
+            
+            <div class="keyword-category-card">
+              <h3>Top Hiring Companies</h3>
+              <div class="keyword-tags">
+                <button type="button" class="tag-pill" data-search-val="Google">Google</button>
+                <button type="button" class="tag-pill" data-search-val="Target">Target</button>
+                <button type="button" class="tag-pill" data-search-val="Stripe">Stripe</button>
+                <button type="button" class="tag-pill" data-search-val="Linear">Linear</button>
+                <button type="button" class="tag-pill" data-search-val="Figma">Figma</button>
+                <button type="button" class="tag-pill" data-search-val="Vercel">Vercel</button>
+                <button type="button" class="tag-pill" data-search-val="Notion">Notion</button>
+                <button type="button" class="tag-pill" data-search-val="Best Buy">Best Buy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. All Features Grid -->
+      <section class="features-grid-section">
+        <div class="container">
+          <div class="section-heading text-center">
+            <span class="kicker">Core Capabilities</span>
+            <h2>Job search tools built for transparency</h2>
           </div>
 
-          <div class="comparison-grid">
-            <article class="comparison-column comparison-column-muted">
-              <h3>On a typical job board</h3>
-              <div class="comparison-list">
-                <div class="comparison-item"><span class="comparison-icon comparison-icon-muted">-</span><span>Job title and description</span></div>
-                <div class="comparison-item"><span class="comparison-icon comparison-icon-muted">-</span><span>Apply through the job board</span></div>
-                <div class="comparison-item"><span class="comparison-icon comparison-icon-muted">-</span><span>No idea if the job is real</span></div>
-                <div class="comparison-item"><span class="comparison-icon comparison-icon-muted">-</span><span>Salary sometimes listed</span></div>
-                <div class="comparison-item"><span class="comparison-icon comparison-icon-muted">-</span><span>No recruiter info</span></div>
-                <div class="comparison-item"><span class="comparison-icon comparison-icon-muted">-</span><span>Listings from one source</span></div>
+          <div class="features-grid">
+            <div class="feature-grid-card">
+              <div class="feature-icon orange-glow">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              </div>
+              <h4>Trust Score Engine</h4>
+              <p>Evaluates age, frequency, and employer parameters to spot artificial ghost listings.</p>
+            </div>
+            
+            <div class="feature-grid-card">
+              <div class="feature-icon orange-glow">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <h4>Resume Matcher</h4>
+              <p>Extracts roles and skills from your resume to suggest relevant job postings instantly.</p>
+            </div>
+            
+            <div class="feature-grid-card">
+              <div class="feature-icon orange-glow">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              </div>
+              <h4>Direct Source Links</h4>
+              <p>Bypasses career portals to link you directly with the hiring company's listing page.</p>
+            </div>
+            
+            <div class="feature-grid-card">
+              <div class="feature-icon orange-glow">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+              </div>
+              <h4>Application Kanban</h4>
+              <p>Track job applications, notes, contacts, and stages in a simple visual board.</p>
+            </div>
+            
+            <div class="feature-grid-card">
+              <div class="feature-icon orange-glow">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+              <h4>Salary Transparency</h4>
+              <p>Detects hidden wage scales and provides salary data gathered from public sources.</p>
+            </div>
+            
+            <div class="feature-grid-card">
+              <div class="feature-icon orange-glow">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </div>
+              <h4>Hiring Signals</h4>
+              <p>Detects active recruiter contacts, hiring names, and interview notes for postings.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. Methodology & Insights Blog -->
+      <section class="blog-section">
+        <div class="container">
+          <div class="section-heading text-center">
+            <span class="kicker">Hiring Insights</span>
+            <h2>Browse resource articles</h2>
+            <p class="section-subtitle">Read analysis and strategies on navigating modern applicant tracking loops.</p>
+          </div>
+
+          <div class="blog-grid">
+            <!-- Featured Blog Card -->
+            <article class="blog-card featured-blog" data-article-slug="ghost-jobs">
+              <div class="blog-image-placeholder">
+                <span class="blog-image-overlay">Featured</span>
+              </div>
+              <div class="blog-content">
+                <span class="blog-meta uppercase-label">Market Report · 8 min read</span>
+                <h3>The Rise of Ghost Jobs: Why 50% of Listings are Fake</h3>
+                <p>An in-depth investigation into why companies keep listings open when they aren't actively hiring, and how to spot them.</p>
+                <span class="blog-link">Read analysis →</span>
               </div>
             </article>
 
-            <article class="comparison-column comparison-column-strong">
-              <h3>On Emploid</h3>
-              <div class="comparison-list">
-                <div class="comparison-item"><span class="comparison-icon comparison-icon-check">✓</span><span>Job title, description, and trust score</span></div>
-                <div class="comparison-item"><span class="comparison-icon comparison-icon-check">✓</span><span>Apply directly on the company's website</span></div>
-                <div class="comparison-item"><span class="comparison-icon comparison-icon-check">✓</span><span>Listing Trust Score flags stale and suspicious listings</span></div>
-                <div class="comparison-item"><span class="comparison-icon comparison-icon-check">✓</span><span>Salary shown or estimated from market data</span></div>
-                <div class="comparison-item"><span class="comparison-icon comparison-icon-check">✓</span><span>Hiring contact identified when possible</span></div>
-                <div class="comparison-item"><span class="comparison-icon comparison-icon-check">✓</span><span>Aggregated from 6+ job boards and career pages</span></div>
-              </div>
-            </article>
+            <!-- Blog List Column -->
+            <div class="blog-list-column">
+              <article class="blog-list-item" data-article-slug="linkedin-hiring">
+                <div class="blog-list-content">
+                  <span class="blog-meta uppercase-label">Guide · 4 min read</span>
+                  <h4>How to identify a real hiring manager on LinkedIn</h4>
+                  <p>Skip the HR forms and reach out directly to team leaders with these templates.</p>
+                  <span class="blog-link-sub">Read guide →</span>
+                </div>
+              </article>
+              
+              <article class="blog-list-item" data-article-slug="career-pages">
+                <div class="blog-list-content">
+                  <span class="blog-meta uppercase-label">Research · 5 min read</span>
+                  <h4>Why career pages are 5x more effective than job boards</h4>
+                  <p>Analyzing direct submission success rates compared to aggregator portals.</p>
+                  <span class="blog-link-sub">Read research →</span>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10. Final Call to Action -->
+      <section class="final-cta-section">
+        <div class="container text-center">
+          <div class="final-cta-badge-row">
+            <span class="cta-badge">No Ads</span>
+            <span class="cta-badge">No Data Reselling</span>
+            <span class="cta-badge">Verified Listings</span>
+          </div>
+          <h2>Ready to search smarter?</h2>
+          <p class="final-cta-sub">Join thousands of students and professionals filtering out the noise and applying directly.</p>
+          
+          <div class="final-cta-buttons">
+            <button class="btn btn-primary btn-lg" id="final-cta-search-btn" type="button">Find Verified Jobs</button>
+            <button class="btn btn-secondary btn-lg" id="final-cta-resume-btn" type="button">Upload Resume</button>
           </div>
         </div>
       </section>
@@ -373,9 +1464,7 @@
           <article class="about-panel">
             <p class="section-kicker">Our origin</p>
             <p>
-              Emploid started as a class project for IBUS 3055 at the Carlson School of
-              Management. We were five students frustrated with the same problem every
-              job seeker faces: wasting time on listings that lead nowhere.
+              Emploid started with a simple idea: that finding a job shouldn't be a test of endurance against stale postings and automated rejection loops. We were a team of builders frustrated with the same problem every job seeker faces: wasting time on listings that lead nowhere.
             </p>
             <p>
               We use heuristic analysis of posting age, repost frequency, recent hiring
@@ -398,7 +1487,7 @@
         <div class="team-section">
           <div class="team-section-header">
             <p class="section-kicker">The team</p>
-            <h2>Built by students who got tired of wasting time.</h2>
+            <h2>Built by creators who got tired of wasting time.</h2>
           </div>
 
           <div class="team-grid">
@@ -470,6 +1559,153 @@
     <section id="page-tracker" class="page">
       <div id="tracker-app-root"></div>
     </section>
+
+    <!-- 11. Blog Page -->
+    <section id="page-blog" class="page">
+      <div class="container blog-reader-container">
+        <header class="blog-reader-header">
+          <button class="btn btn-secondary btn-back" id="blog-back-to-home" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Back to Home
+          </button>
+        </header>
+        <div class="blog-reader-layout">
+          <!-- Sidebar Table of Contents -->
+          <aside class="blog-sidebar">
+            <h3 class="blog-sidebar-title">Articles</h3>
+            <ul class="blog-toc-list">
+              <li class="blog-toc-item active" data-toc-slug="ghost-jobs">
+                <span class="toc-bullet"></span>
+                <a href="/blog?article=ghost-jobs">The Rise of Ghost Jobs</a>
+              </li>
+              <li class="blog-toc-item" data-toc-slug="linkedin-hiring">
+                <span class="toc-bullet"></span>
+                <a href="/blog?article=linkedin-hiring">LinkedIn Hiring Guide</a>
+              </li>
+              <li class="blog-toc-item" data-toc-slug="career-pages">
+                <span class="toc-bullet"></span>
+                <a href="/blog?article=career-pages">Career Pages Research</a>
+              </li>
+            </ul>
+          </aside>
+
+          <!-- Main Content Area -->
+          <main class="blog-article-content" id="blog-article-container">
+            <!-- Article 1: Ghost Jobs -->
+            <article class="blog-article" id="article-ghost-jobs">
+              <h1>The Rise of Ghost Jobs: Why 50% of Listings are Fake</h1>
+              <div class="blog-article-meta">
+                <span>Published May 21, 2026</span>
+                <span>•</span>
+                <span>8 min read</span>
+                <span>•</span>
+                <span>Market Report</span>
+              </div>
+              <div class="blog-article-body">
+                <p>Have you ever spent hours tailoring your resume and writing a cover letter for a job that seemed perfect, only to hear absolutely nothing back? You are not alone. According to recent surveys and industry data, <strong>up to 50% of online job postings are fake "ghost jobs"</strong>—listings for roles that companies are not actually looking to fill.</p>
+                
+                <h2>Why Companies Post Ghost Jobs</h2>
+                <p>It sounds counterintuitive. Why would a company spend time and money listing a job they don't intend to hire for? Research shows several key motivations:</p>
+                <ul>
+                  <li><strong>Building a Talent Pipeline:</strong> Companies keep evergreen listings active to accumulate resumes for future needs, ensuring they can hire quickly when a role eventually opens up.</li>
+                  <li><strong>Signaling Growth to Investors:</strong> A constant stream of job listings makes a company look healthy, growing, and attractive to investors and competitors.</li>
+                  <li><strong>Placating Overworked Staff:</strong> Keeping a listing active convinces existing, burnt-out employees that "help is on the way," even if management has no immediate plans to hire.</li>
+                </ul>
+
+                <blockquote>
+                  "Many hiring managers admit that they keep job ads active even when they aren't actively hiring, simply to keep their options open."
+                </blockquote>
+
+                <h2>How to Spot a Ghost Job</h2>
+                <p>Spotting fake listings requires looking for key behavioral signals rather than taking the posting at face value:</p>
+                <ol>
+                  <li><strong>Extreme Posting Age:</strong> Any listing that has been online for more than 30 days is highly suspicious. Genuine listings are typically filled or taken down within a few weeks.</li>
+                  <li><strong>Constant Reposting:</strong> Look out for listings that are constantly updated or refreshed to look "new" without any change in requirements or hiring contact.</li>
+                  <li><strong>Lack of Hiring Manager Contact:</strong> Authentic listings often identify a recruiter or team lead associated with the role. Ghost jobs are typically faceless and point to generic portal redirects.</li>
+                </ol>
+
+                <h3>How Emploid Can Help</h3>
+                <p>Emploid solves this by calculating a <strong>Listing Trust Score</strong> for every job we find. By analyzing historical posting patterns, salary transparency, and active recruiter signals, we verify if a job is real before you click apply. We bypass middleman aggregators entirely, linking you directly to the company's verified application portal.</p>
+              </div>
+            </article>
+
+            <!-- Article 2: LinkedIn Hiring -->
+            <article class="blog-article" id="article-linkedin-hiring">
+              <h1>How to Identify a Real Hiring Manager on LinkedIn</h1>
+              <div class="blog-article-meta">
+                <span>Published May 18, 2026</span>
+                <span>•</span>
+                <span>4 min read</span>
+                <span>•</span>
+                <span>Guide</span>
+              </div>
+              <div class="blog-article-body">
+                <p>Applying to a job through standard online forms can feel like throwing your resume into a black hole. To stand out, you need a direct human connection. Connecting with the actual hiring manager can increase your response rate by up to 500%.</p>
+                
+                <h2>Steps to Locate the Decision-Maker</h2>
+                <p>Recruiters are flooded with thousands of applicants. To bypass the initial screen, you must identify the team leader who will actually manage the role. Here is how:</p>
+                <ul>
+                  <li><strong>Use Advanced Search:</strong> Search for the job title's prospective manager. For example, if you are applying for a "Marketing Associate" role, search for "Marketing Manager" or "Director of Marketing" at that specific company.</li>
+                  <li><strong>Check Team Connections:</strong> Look at the company’s LinkedIn page, click on "People," and filter by department or location to see who heads the team.</li>
+                  <li><strong>Look for the "Hiring" Badge:</strong> Many team leads add a purple "#Hiring" frame to their profile pictures and share job details directly in their posts.</li>
+                </ul>
+
+                <blockquote>
+                  "Reaching out to a team lead directly shows initiative and ensures your experience is reviewed by the person who understands the daily tasks of the role."
+                </blockquote>
+
+                <h2>Drafting a High-Conversion Outreach Message</h2>
+                <p>When you find the manager, send a short, tailored connection request or InMail. Keep it under 150 words:</p>
+                <p><em>"Hi [Name], I noticed you lead the marketing team at [Company]. I recently applied for the Marketing Associate position on your career page and wanted to introduce myself. With my background in [Skill], I’m excited about your current projects. I'd love to connect and learn more about what you look for in a team member. Thanks!"</em></p>
+                
+                <h2>Building Long-Term Professional Rapport</h2>
+                <p>Even if the role is not actively hiring right now, starting a conversation establishes a relationship. Ask insightful questions about team structure or upcoming challenges, and follow up periodically with relevant updates on your work or industry insights.</p>
+              </div>
+            </article>
+
+            <!-- Article 3: Career Pages -->
+            <article class="blog-article" id="article-career-pages">
+              <h1>Why Career Pages Beat Aggregators 5-to-1</h1>
+              <div class="blog-article-meta">
+                <span>Published May 15, 2026</span>
+                <span>•</span>
+                <span>5 min read</span>
+                <span>•</span>
+                <span>Research</span>
+              </div>
+              <div class="blog-article-body">
+                <p>Third-party job boards and aggregators make applying easy. Features like "Easy Apply" allow you to submit dozens of applications in minutes. However, research reveals a harsh reality: <strong>easy applications have exceptionally low success rates.</strong></p>
+                
+                <h2>The Easy Apply Fallacy</h2>
+                <p>Because there is zero friction, millions of applicants click "Easy Apply." This results in a massive volume of resumes for hiring teams, who then rely heavily on strict automated filters (Applicant Tracking Systems) to weed out the noise. Your resume is highly likely to be rejected automatically before a human ever sees it.</p>
+                
+                <h2>The Power of Direct Submissions</h2>
+                <p>Applying directly on a company's own website (e.g., <code>company.com/careers</code>) offers significant advantages:</p>
+                <ul>
+                  <li><strong>Direct ATS Delivery:</strong> Direct submissions land directly in the company's internal applicant tracking database, bypassed by third-party parsing errors.</li>
+                  <li><strong>High-Intent Signaling:</strong> Taking the time to navigate to a company's page, create an account, and fill out their specific form shows genuine interest and high intent.</li>
+                  <li><strong>Access to Up-to-Date Postings:</strong> Company career pages are the source of truth. External aggregators often carry expired or scraping-related ghost posts that have long been filled.</li>
+                </ul>
+
+                <blockquote>
+                  "Our research shows that direct applications have a 5x higher interview conversion rate than those submitted through generic job aggregators."
+                </blockquote>
+
+                <h2>How to Optimize Your Application Method</h2>
+                <p>When searching for a job, use aggregators solely for discovery. Once you find an interesting role:</p>
+                <ol>
+                  <li>Navigate directly to the company's official website.</li>
+                  <li>Locate their "Careers" or "Join Us" link, usually found in the footer.</li>
+                  <li>Search for the job code or title on their official portal.</li>
+                  <li>Submit your tailored application directly through their system.</li>
+                </ol>
+                <p>This simple change in your strategy can dramatically improve your response rates and save you weeks of fruitless clicks.</p>
+              </div>
+            </article>
+          </main>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer>
@@ -484,11 +1720,12 @@
         </div>
 
         <div class="footer-col">
-          <h5>Platform Utilities</h5>
-          <a href="/browse" class="footer-link" data-page="jobs">Database Query</a>
+          <h5>Platform</h5>
+          <a href="/" class="footer-link" data-page="home">Home</a>
+          <a href="/browse" class="footer-link" data-page="jobs">Browse Jobs</a>
           <a href="/tracker" class="footer-link" data-page="tracker">Application Tracker</a>
-          <a href="/search" class="footer-link" data-page="home">Listing Trust Score Engine</a>
-          <a href="/about" class="footer-link" data-page="about">Methodology</a>
+          <a href="/about" class="footer-link" data-page="about">About & Methodology</a>
+          <a href="/blog" class="footer-link" data-page="blog">Resources & Blog</a>
         </div>
 
         <div class="footer-col">
@@ -498,7 +1735,7 @@
         </div>
       </div>
 
-      <div class="footer-bottom">© 2026 Emploid. Built at the Carlson School of Management.</div>
+      <div class="footer-bottom">© 2026 Emploid. All rights reserved.</div>
     </div>
   </footer>
 
@@ -646,5 +1883,62 @@
   <script src="/tracker-data.js"></script>
   <script type="text/babel" src="/tracker-components.jsx"></script>
   <script type="text/babel" src="/tracker-app.jsx"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Connect Callout Search banner inputs
+      const calloutInput = document.getElementById('callout-search');
+      const calloutBtn = document.getElementById('callout-search-btn');
+      if (calloutInput && calloutBtn) {
+        const handleCalloutSearch = () => {
+          const val = calloutInput.value.trim();
+          const mainSearch = document.getElementById('hero-search');
+          if (mainSearch) {
+            mainSearch.value = val;
+            const mainSearchBtn = document.getElementById('hero-search-btn');
+            if (mainSearchBtn) mainSearchBtn.click();
+          }
+        };
+        calloutBtn.addEventListener('click', handleCalloutSearch);
+        calloutInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') handleCalloutSearch();
+        });
+      }
+
+      // Connect popular tag pills
+      document.querySelectorAll('.tag-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          const val = pill.getAttribute('data-search-val');
+          const mainSearch = document.getElementById('hero-search');
+          if (mainSearch) {
+            mainSearch.value = val;
+            const mainSearchBtn = document.getElementById('hero-search-btn');
+            if (mainSearchBtn) mainSearchBtn.click();
+          }
+        });
+      });
+
+      // Connect final CTA search button
+      const finalSearchBtn = document.getElementById('final-cta-search-btn');
+      if (finalSearchBtn) {
+        finalSearchBtn.addEventListener('click', () => {
+          if (typeof navigateTo === 'function') {
+            navigateTo('jobs');
+          } else {
+            const jobsLink = document.getElementById('nav-jobs');
+            if (jobsLink) jobsLink.click();
+          }
+        });
+      }
+
+      // Connect final CTA resume button
+      const finalResumeBtn = document.getElementById('final-cta-resume-btn');
+      if (finalResumeBtn) {
+        finalResumeBtn.addEventListener('click', () => {
+          const mainResumeBtn = document.getElementById('hero-resume-trigger');
+          if (mainResumeBtn) mainResumeBtn.click();
+        });
+      }
+    });
+  </script>
 </body>
 </html>

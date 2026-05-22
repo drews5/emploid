@@ -1,0 +1,247 @@
+﻿diff --git a/public/index.html b/public/index.html
+index 0701d7b..e663154 100644
+--- a/public/index.html
++++ b/public/index.html
+@@ -16,19 +16,20 @@
+   <header>
+     <nav class="nav" id="main-nav">
+       <div class="container nav-inner">
+-        <a href="/search" class="nav-logo" data-page="home" aria-label="Emploid home">
++        <a href="/" class="nav-logo" data-page="home" aria-label="Emploid home">
+           <img src="/images/logoicon.svg" alt="Emploid logo mark" />
+           <span class="nav-logo-word">emploid</span>
+         </a>
+ 
+-        <div class="nav-links">
+-          <a href="/search" class="nav-link active" data-page="home" id="nav-home">Search</a>
+-          <a href="/browse" class="nav-link" data-page="jobs" id="nav-jobs">Browse Jobs</a>
+-          <a href="/tracker" class="nav-link" data-page="tracker" id="nav-tracker">Tracker</a>
+-          <a href="/about" class="nav-link" data-page="about" id="nav-about">About</a>
++        <div class="nav-search-shell" role="search">
++          <label class="sr-only" for="search-input">Search jobs</label>
++          <input type="text" class="input nav-search-input" id="search-input" placeholder="Search jobs, companies, or locations" autocomplete="off" />
++          <button class="btn btn-primary nav-search-btn" id="keyword-search-btn" type="button">Search</button>
+         </div>
+ 
+         <div class="nav-auth">
++          <button class="nav-utility-btn" type="button" id="nav-filter-trigger">Filters</button>
++          <button class="nav-utility-btn" type="button" id="nav-tracker-trigger">Tracker</button>
+           <div class="nav-auth-guest" id="nav-auth-guest">
+             <button class="nav-login" type="button" id="nav-login-trigger">Log in</button>
+             <button class="btn btn-secondary" type="button" id="nav-sign-up-trigger">Sign up</button>
+@@ -45,9 +46,8 @@
+       </div>
+ 
+       <div class="nav-mobile-menu" id="nav-mobile-menu">
+-        <a href="/search" class="nav-mobile-link active" data-page="home">Search</a>
+-        <a href="/browse" class="nav-mobile-link" data-page="jobs">Browse Jobs</a>
+-        <a href="/tracker" class="nav-mobile-link" data-page="tracker">Tracker</a>
++        <button class="nav-mobile-link" type="button" id="nav-mobile-filter-trigger">Filters</button>
++        <a href="/tracker" class="nav-mobile-link" data-page="tracker">Application Tracker</a>
+         <a href="/about" class="nav-mobile-link" data-page="about">About</a>
+         <div class="nav-mobile-auth">
+           <div class="nav-mobile-auth-guest" id="nav-mobile-auth-guest">
+@@ -59,170 +59,6 @@
+             <button class="nav-mobile-link nav-mobile-link-strong" type="button" id="nav-mobile-open-tracker">Open tracker</button>
+             <button class="nav-mobile-link" type="button" id="nav-mobile-sign-out-trigger">Sign out</button>
+           </div>
+-        </div>
+-      </div>
+-    </nav>
+-  </header>
+-
+-  <main>
+-    <section id="page-home" class="page active">
+-      <section class="hero">
+-        <div class="container hero-grid">
+-          <div class="hero-copy">
+-            <h1>
+-              <span class="hero-line">Find jobs</span>
+-              <span class="hero-line">that are</span>
+-              <span class="hero-line hero-squiggle-line">
+-                <span class="hero-squiggle-text">actually hiring.</span>
+-                <span class="hero-squiggle-mark" aria-hidden="true"></span>
+-              </span>
+-            </h1>
+-            <p class="hero-sub">
+-              Over 40% of online job postings are "ghost jobs" ΓÇö listings for roles that
+-              aren't really open. We scan thousands of postings across every major job board
+-              to filter out the fakes, so you only spend time on real opportunities.
+-            </p>
+-
+-            <div class="hero-search-stack">
+-              <label class="sr-only" for="hero-search">Search jobs</label>
+-              <div class="hero-search">
+-                <svg class="hero-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+-                  <circle cx="11" cy="11" r="8"></circle>
+-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+-                </svg>
+-                <input id="hero-search" type="text" class="input" placeholder="Role, company, or keyword (e.g., Marketing, Target)" autocomplete="off" />
+-                <button class="btn btn-primary hero-search-btn" id="hero-search-btn" type="button">Search</button>
+-                <div class="hero-upload-wrap">
+-                  <button class="btn btn-secondary hero-upload-btn" id="hero-resume-trigger" type="button">Upload Resume</button>
+-                  <div class="hero-upload-tooltip" role="note">
+-                    <p class="hero-upload-tooltip-title">UPLOAD RESUME</p>
+-                    <p class="hero-upload-tooltip-copy">Emploid will scan your resume and suggest jobs for you.</p>
+-                  </div>
+-                </div>
+-              </div>
+-
+-              <div class="resume-entry-card">
+-                <div>
+-                  <p class="resume-entry-kicker">Resume Match</p>
+-                  <p class="resume-entry-copy" id="home-resume-status">Upload your resume and weΓÇÖll tailor the search instantly.</p>
+-                </div>
+-                <button class="btn btn-secondary" id="home-resume-trigger" type="button">Upload Resume</button>
+-              </div>
+-            </div>
+-          </div>
+-
+-          <div class="hero-preview">
+-            <div class="browser-window">
+-              <div class="browser-bar">
+-                <div class="browser-dots">
+-                  <span></span>
+-                  <span></span>
+-                  <span></span>
+-                </div>
+-                <div class="browser-address">emploid.com/search</div>
+-              </div>
+-              <div class="browser-body">
+-                <div class="preview-header">
+-                  <div>
+-                    <p class="preview-kicker">Product preview</p>
+-                    <h2>Every result shows a Listing Trust Score before you click apply.</h2>
+-                  </div>
+-                </div>
+-                <div class="preview-list" id="home-preview-list"></div>
+-              </div>
+-            </div>
+-          </div>
+-        </div>
+-      </section>
+-
+-      <section class="stats-strip">
+-        <div class="container stats-strip-inner">
+-          <div class="stats-inline">
+-            <span><strong class="mono">12,000+</strong> listings scanned</span>
+-            <span class="stats-divider"></span>
+-            <span><strong class="mono">6</strong> job boards indexed</span>
+-            <span class="stats-divider"></span>
+-            <span><strong class="mono squiggle-wrap">43%</strong> flagged as low trust</span>
+-          </div>
+-        </div>
+-      </section>
+-
+-      <section class="process-section">
+-        <div class="container">
+-          <div class="section-heading">
+-            <p class="section-kicker">How it actually works</p>
+-            <h2>One search, a clearer signal, and a direct path to the employer.</h2>
+-          </div>
+-
+-          <div class="process-steps">
+-            <article class="process-step">
+-              <div class="process-number">01</div>
+-              <h3>We scan everything</h3>
+-              <p>
+-                One search covers every major job board and thousands of company
+-                career pages. LinkedIn, Indeed, Handshake, Glassdoor, and more.
+-              </p>
+-            </article>
+-            <article class="process-step">
+-              <div class="process-number">02</div>
+-              <h3>We score for trust</h3>
+-              <p>
+-                Our Listing Trust Score analyzes posting age, repost frequency,
+-                salary transparency, and hiring activity to estimate if a job is
+-                real. Scores range from 0 (likely fake) to 100 (likely real).
+-              </p>
+-            </article>
+-            <article class="process-step">
+-              <div class="process-number">03</div>
+-              <h3>You apply directly</h3>
+-              <p>
+-                Every apply link routes straight to the employer's own website.
+-                No middlemen, no redirects, no third-party portals.
+-              </p>
+-            </article>
+-          </div>
+-        </div>
+-      </section>
+-
+-      <section class="comparison-section">
+-        <div class="container">
+-          <div class="section-heading">
+-            <p class="section-kicker">What you get</p>
+-            <h2>What you get vs. a normal job board</h2>
+-          </div>
+-
+-          <div class="comparison-grid">
+-            <article class="comparison-column comparison-column-muted">
+-              <h3>On a typical job board</h3>
+-              <div class="comparison-list">
+-                <div class="comparison-item"><span class="comparison-icon comparison-icon-muted">-</span><span>Job title and description</span></div>
+-                <div class="comparison-item"><span class="comparison-icon comparison-icon-muted">-</span><span>Apply through the job board</span></div>
+-                <div class="comparison-item"><span class="comparison-icon comparison-icon-muted">-</span><span>No idea if the job is real</span></div>
+-                <div class="comparison-item"><span class="comparison-icon comparison-icon-muted">-</span><span>Salary sometimes listed</span></div>
+-                <div class="comparison-item"><span class="comparison-icon comparison-icon-muted">-</span><span>No recruiter info</span></div>
+-                <div class="comparison-item"><span class="comparison-icon comparison-icon-muted">-</span><span>Listings from one source</span></div>
+-              </div>
+-            </article>
+-
+-            <article class="comparison-column comparison-column-strong">
+-              <h3>On Emploid</h3>
+-              <div class="comparison-list">
+-                <div class="comparison-item"><span class="comparison-icon comparison-icon-check">Γ£ô</span><span>Job title, description, and trust score</span></div>
+-                <div class="comparison-item"><span class="comparison-icon comparison-icon-check">Γ£ô</span><span>Apply directly on the company's website</span></div>
+-                <div class="comparison-item"><span class="comparison-icon comparison-icon-check">Γ£ô</span><span>Listing Trust Score flags stale and suspicious listings</span></div>
+-                <div class="comparison-item"><span class="comparison-icon comparison-icon-check">Γ£ô</span><span>Salary shown or estimated from market data</span></div>
+-                <div class="comparison-item"><span class="comparison-icon comparison-icon-check">Γ£ô</span><span>Hiring contact identified when possible</span></div>
+-                <div class="comparison-item"><span class="comparison-icon comparison-icon-check">Γ£ô</span><span>Aggregated from 6+ job boards and career pages</span></div>
+-              </div>
+-            </article>
+-          </div>
+-        </div>
+-      </section>
+-    </section>
+-
+-    <section id="page-jobs" class="page">
+-      <div class="container jobs-shell">
+-        <div class="mobile-filter-bar">
+           <button
+             class="mobile-filter-toggle"
+             id="mobile-filter-toggle"
+@@ -242,11 +78,6 @@
+             <button class="filters-close" id="mobile-filter-close" type="button">Close</button>
+           </div>
+ 
+-          <div class="filter-group">
+-            <label class="filter-label" for="search-input">Keyword search</label>
+-            <input type="text" class="input" id="search-input" placeholder="Role, company, or keyword" />
+-          </div>
+-
+           <div class="filter-group">
+             <label class="filter-label" for="trust-score-filter">Minimum Trust Score: <span id="trust-score-val">0</span></label>
+             <input type="range" class="range-slider" id="trust-score-filter" min="0" max="100" value="0" step="1" />
+@@ -278,9 +109,9 @@
+           </div>
+ 
+           <div class="filter-group">
+-            <label class="filter-label">Direct signals</label>
++            <label class="filter-label">Source signals</label>
+             <label class="switch-label">
+-              <span>Direct Company Links only</span>
++              <span>Source links only</span>
+               <span class="switch">
+                 <input type="checkbox" id="direct-apply-toggle" checked />
+                 <span class="slider"></span>
+@@ -487,7 +318,7 @@
+           <h5>Platform Utilities</h5>
+           <a href="/browse" class="footer-link" data-page="jobs">Database Query</a>
+           <a href="/tracker" class="footer-link" data-page="tracker">Application Tracker</a>
+-          <a href="/search" class="footer-link" data-page="home">Listing Trust Score Engine</a>
++          <a href="/" class="footer-link" data-page="home">Listing Trust Score Engine</a>
+           <a href="/about" class="footer-link" data-page="about">Methodology</a>
+         </div>
+ 
