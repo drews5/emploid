@@ -4154,6 +4154,15 @@ footer {
   color: var(--text-muted);
   margin-bottom: 16px;
 }
+.blog-sidebar-group {
+  display: flex;
+  flex-direction: column;
+}
+.blog-toc-divider {
+  height: 1px;
+  background: #dbe4ef;
+  margin: 22px 0;
+}
 .blog-toc-list {
   list-style: none;
   padding: 0;
@@ -4202,6 +4211,15 @@ footer {
 }
 .blog-article {
   animation: pageFade 200ms ease-out;
+}
+.blog-article-hero-svg {
+  display: block;
+  width: 100%;
+  height: 200px;
+  margin-bottom: 28px;
+  border-radius: 12px;
+  background: var(--navy-950);
+  box-shadow: 0 18px 48px rgba(8, 17, 31, 0.18);
 }
 .blog-article h1 {
   font-size: 2.5rem;
@@ -4274,6 +4292,150 @@ footer {
   font-family: monospace;
   font-size: 0.9em;
   color: var(--navy-900);
+}
+.tool-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: linear-gradient(145deg, var(--navy-950), var(--navy-900));
+  border: 1px solid rgba(249, 115, 22, 0.32);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 28px 0;
+  color: var(--text-invert);
+  box-shadow: 0 18px 44px rgba(8, 17, 31, 0.18);
+}
+.tool-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+.tool-form input,
+.tool-form textarea {
+  width: 100%;
+  border: 1px solid rgba(237, 177, 143, 0.42);
+  border-radius: 12px;
+  background: rgba(8, 17, 31, 0.82);
+  color: var(--text-invert);
+  padding: 12px 14px;
+  font: inherit;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.tool-form textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+.tool-form input::placeholder,
+.tool-form textarea::placeholder {
+  color: rgba(248, 250, 252, 0.48);
+}
+.tool-form input:focus,
+.tool-form textarea:focus {
+  border-color: var(--orange-500);
+  background: rgba(8, 17, 31, 0.96);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.16);
+}
+.tool-form input[type="range"] {
+  accent-color: var(--orange-500);
+  padding: 0;
+  background: transparent;
+}
+.tool-form input[type="checkbox"] {
+  width: auto;
+  accent-color: var(--orange-500);
+}
+.tool-checkbox-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin: 4px 0;
+}
+.tool-checkbox-grid label {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(237, 177, 143, 0.26);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  font-weight: 600;
+}
+.tool-form .btn {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+.tool-inline-value {
+  color: var(--orange-300);
+  font-weight: 600;
+}
+.tool-result {
+  display: none;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0 8px;
+  border: 1px solid #dbe4ef;
+  background: #f8fafc;
+}
+.tool-result.is-visible {
+  display: block;
+}
+.tool-result-good {
+  border-color: rgba(31, 122, 66, 0.32);
+  background: linear-gradient(145deg, #ecf8f0, #ffffff);
+}
+.tool-result-caution {
+  border-color: rgba(249, 115, 22, 0.38);
+  background: linear-gradient(145deg, #fff7ed, #ffffff);
+}
+.tool-result-risk {
+  border-color: rgba(185, 28, 28, 0.28);
+  background: linear-gradient(145deg, #fef2f2, #ffffff);
+}
+.tool-result-kicker {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.tool-result-score {
+  font-size: clamp(2.4rem, 8vw, 4.5rem);
+  line-height: 1;
+  font-weight: 900;
+  color: var(--navy-950);
+  margin-bottom: 10px;
+}
+.tool-result-good .tool-result-score {
+  color: #1f7a42;
+}
+.tool-result-caution .tool-result-score {
+  color: var(--orange-500);
+}
+.tool-result-risk .tool-result-score {
+  color: #b91c1c;
+}
+.tool-result h3 {
+  color: var(--navy-950);
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+}
+.tool-result-detail p:last-child,
+.tool-result-detail ul:last-child {
+  margin-bottom: 0;
+}
+.tool-result-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 14px;
+}
+.tool-result-columns ul {
+  margin-bottom: 0;
 }
 
 /* Final CTA Section */
@@ -4508,8 +4670,20 @@ footer {
     position: static;
     width: 100%;
   }
+  .blog-article-hero-svg {
+    height: 180px;
+  }
   .blog-article h1 {
     font-size: 2rem;
+  }
+  .tool-form {
+    padding: 20px;
+  }
+  .tool-form .btn {
+    width: 100%;
+  }
+  .tool-result-columns {
+    grid-template-columns: 1fr;
   }
 
   /* Final CTA Section responsiveness */

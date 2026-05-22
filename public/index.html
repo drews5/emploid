@@ -1572,21 +1572,69 @@
         <div class="blog-reader-layout">
           <!-- Sidebar Table of Contents -->
           <aside class="blog-sidebar">
-            <h3 class="blog-sidebar-title">Articles</h3>
-            <ul class="blog-toc-list">
-              <li class="blog-toc-item active" data-toc-slug="ghost-jobs">
-                <span class="toc-bullet"></span>
-                <a href="/blog?article=ghost-jobs">The Rise of Ghost Jobs</a>
-              </li>
-              <li class="blog-toc-item" data-toc-slug="linkedin-hiring">
-                <span class="toc-bullet"></span>
-                <a href="/blog?article=linkedin-hiring">LinkedIn Hiring Guide</a>
-              </li>
-              <li class="blog-toc-item" data-toc-slug="career-pages">
-                <span class="toc-bullet"></span>
-                <a href="/blog?article=career-pages">Career Pages Research</a>
-              </li>
-            </ul>
+            <div class="blog-sidebar-group">
+              <h3 class="blog-sidebar-title">Interactive Tools</h3>
+              <ul class="blog-toc-list">
+                <li class="blog-toc-item" data-toc-slug="ghost-job-detector">
+                  <span class="toc-bullet"></span>
+                  <a href="/blog?article=ghost-job-detector">Ghost Job Detector</a>
+                </li>
+                <li class="blog-toc-item" data-toc-slug="company-hiring-index">
+                  <span class="toc-bullet"></span>
+                  <a href="/blog?article=company-hiring-index">Company Hiring Index</a>
+                </li>
+                <li class="blog-toc-item" data-toc-slug="ats-resume-scorer">
+                  <span class="toc-bullet"></span>
+                  <a href="/blog?article=ats-resume-scorer">ATS Resume Scorer</a>
+                </li>
+                <li class="blog-toc-item" data-toc-slug="job-link-verifier">
+                  <span class="toc-bullet"></span>
+                  <a href="/blog?article=job-link-verifier">Job Link Verifier</a>
+                </li>
+                <li class="blog-toc-item" data-toc-slug="hiring-velocity-calculator">
+                  <span class="toc-bullet"></span>
+                  <a href="/blog?article=hiring-velocity-calculator">Hiring Velocity Calculator</a>
+                </li>
+              </ul>
+            </div>
+            <div class="blog-toc-divider"></div>
+            <div class="blog-sidebar-group">
+              <h3 class="blog-sidebar-title">Articles &amp; Guides</h3>
+              <ul class="blog-toc-list">
+                <li class="blog-toc-item active" data-toc-slug="ghost-jobs">
+                  <span class="toc-bullet"></span>
+                  <a href="/blog?article=ghost-jobs">The Rise of Ghost Jobs</a>
+                </li>
+                <li class="blog-toc-item" data-toc-slug="linkedin-hiring">
+                  <span class="toc-bullet"></span>
+                  <a href="/blog?article=linkedin-hiring">LinkedIn Hiring Guide</a>
+                </li>
+                <li class="blog-toc-item" data-toc-slug="career-pages">
+                  <span class="toc-bullet"></span>
+                  <a href="/blog?article=career-pages">Career Pages Research</a>
+                </li>
+                <li class="blog-toc-item" data-toc-slug="bypass-ats-2026">
+                  <span class="toc-bullet"></span>
+                  <a href="/blog?article=bypass-ats-2026">Beat ATS Filters in 2026</a>
+                </li>
+                <li class="blog-toc-item" data-toc-slug="always-on-recruiting">
+                  <span class="toc-bullet"></span>
+                  <a href="/blog?article=always-on-recruiting">Always-On Recruiting</a>
+                </li>
+                <li class="blog-toc-item" data-toc-slug="negotiate-remote-perks">
+                  <span class="toc-bullet"></span>
+                  <a href="/blog?article=negotiate-remote-perks">Negotiate Remote Perks</a>
+                </li>
+                <li class="blog-toc-item" data-toc-slug="job-desc-red-flags">
+                  <span class="toc-bullet"></span>
+                  <a href="/blog?article=job-desc-red-flags">Job Description Red Flags</a>
+                </li>
+                <li class="blog-toc-item" data-toc-slug="emploid-detection-tech">
+                  <span class="toc-bullet"></span>
+                  <a href="/blog?article=emploid-detection-tech">Emploid Detection Tech</a>
+                </li>
+              </ul>
+            </div>
           </aside>
 
           <!-- Main Content Area -->
@@ -1700,6 +1748,434 @@
                   <li>Submit your tailored application directly through their system.</li>
                 </ol>
                 <p>This simple change in your strategy can dramatically improve your response rates and save you weeks of fruitless clicks.</p>
+              </div>
+            </article>
+
+            <!-- Tool 1: Ghost Job Detector -->
+            <article class="blog-article" id="article-ghost-job-detector">
+              <svg class="blog-article-hero-svg" viewBox="0 0 960 240" role="img" aria-label="Ghost job detector scanning a job post">
+                <defs>
+                  <linearGradient id="ghostDetectorGlow" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#f97316" stop-opacity="0.95"></stop>
+                    <stop offset="100%" stop-color="#ffbe7f" stop-opacity="0.5"></stop>
+                  </linearGradient>
+                </defs>
+                <rect width="960" height="240" rx="24" fill="#08111f"></rect>
+                <circle cx="790" cy="50" r="92" fill="#122035"></circle>
+                <circle cx="170" cy="205" r="120" fill="#0c1728"></circle>
+                <rect x="120" y="46" width="370" height="148" rx="18" fill="#0c1728" stroke="#203149" stroke-width="2"></rect>
+                <rect x="152" y="78" width="190" height="14" rx="7" fill="#f97316"></rect>
+                <rect x="152" y="112" width="282" height="10" rx="5" fill="#5d7088"></rect>
+                <rect x="152" y="140" width="230" height="10" rx="5" fill="#5d7088"></rect>
+                <rect x="152" y="166" width="96" height="12" rx="6" fill="#edb18f"></rect>
+                <path d="M610 92c0-35 27-60 62-60s62 25 62 60v68c0 12-13 20-24 14l-17-10-18 10-18-10-18 10-18-10-18 10c-11 6-24-2-24-14V92z" fill="#122035" stroke="url(#ghostDetectorGlow)" stroke-width="5"></path>
+                <circle cx="650" cy="96" r="9" fill="#f97316"></circle>
+                <circle cx="697" cy="96" r="9" fill="#f97316"></circle>
+                <path d="M640 138c20 14 48 14 68 0" fill="none" stroke="#ffbe7f" stroke-width="6" stroke-linecap="round"></path>
+                <path d="M506 120h78" stroke="#f97316" stroke-width="5" stroke-linecap="round" stroke-dasharray="12 12"></path>
+                <path d="M548 80l38 38-38 38" fill="none" stroke="#f97316" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <h1>Ghost Job Detector</h1>
+              <div class="blog-article-meta">
+                <span>Interactive Tool</span>
+                <span>â€¢</span>
+                <span>2 min check</span>
+                <span>â€¢</span>
+                <span>Ghost Risk Score</span>
+              </div>
+              <div class="blog-article-body">
+                <p>Use this quick signal check before you spend time on a tailored application. The detector weighs listing age, salary transparency, recruiter visibility, and whether the company looks active on LinkedIn.</p>
+                <form class="tool-form" id="ghost-job-detector-form">
+                  <label for="ghost-job-title">Job title</label>
+                  <input id="ghost-job-title" name="jobTitle" type="text" placeholder="Senior Product Designer" required>
+                  <label for="ghost-days-posted">Days posted</label>
+                  <input id="ghost-days-posted" name="daysPosted" type="number" min="0" max="365" placeholder="42" required>
+                  <div class="tool-checkbox-grid">
+                    <label><input id="ghost-has-salary" name="hasSalary" type="checkbox"> Salary is listed</label>
+                    <label><input id="ghost-has-recruiter" name="hasRecruiter" type="checkbox"> Named recruiter appears</label>
+                    <label><input id="ghost-known-linkedin" name="knownLinkedIn" type="checkbox"> Company is active on LinkedIn</label>
+                  </div>
+                  <button class="btn btn-primary" type="submit">Calculate ghost risk</button>
+                </form>
+                <div class="tool-result" id="ghost-job-detector-result" aria-live="polite"></div>
+              </div>
+            </article>
+
+            <!-- Tool 2: Company Hiring Index -->
+            <article class="blog-article" id="article-company-hiring-index">
+              <svg class="blog-article-hero-svg" viewBox="0 0 960 240" role="img" aria-label="Company hiring index dashboard">
+                <rect width="960" height="240" rx="24" fill="#08111f"></rect>
+                <path d="M0 190c130-48 245-48 346 0s210 46 326-6 212-48 288 12v44H0z" fill="#0c1728"></path>
+                <rect x="92" y="54" width="240" height="132" rx="18" fill="#122035" stroke="#203149" stroke-width="2"></rect>
+                <rect x="124" y="88" width="128" height="12" rx="6" fill="#5d7088"></rect>
+                <rect x="124" y="120" width="176" height="12" rx="6" fill="#5d7088"></rect>
+                <rect x="124" y="152" width="96" height="12" rx="6" fill="#f97316"></rect>
+                <g transform="translate(452 36)">
+                  <circle cx="96" cy="96" r="78" fill="#122035" stroke="#203149" stroke-width="2"></circle>
+                  <path d="M96 30a66 66 0 0 1 63 86" fill="none" stroke="#f97316" stroke-width="16" stroke-linecap="round"></path>
+                  <path d="M96 162a66 66 0 0 1-61-91" fill="none" stroke="#edb18f" stroke-width="16" stroke-linecap="round"></path>
+                  <text x="96" y="108" text-anchor="middle" fill="#ffffff" font-size="42" font-weight="800">A</text>
+                </g>
+                <rect x="710" y="72" width="42" height="112" rx="10" fill="#f97316"></rect>
+                <rect x="770" y="104" width="42" height="80" rx="10" fill="#ffbe7f"></rect>
+                <rect x="830" y="44" width="42" height="140" rx="10" fill="#f97316" opacity="0.75"></rect>
+              </svg>
+              <h1>Company Hiring Index</h1>
+              <div class="blog-article-meta">
+                <span>Interactive Tool</span>
+                <span>â€¢</span>
+                <span>3 min check</span>
+                <span>â€¢</span>
+                <span>Hiring Health Grade</span>
+              </div>
+              <div class="blog-article-body">
+                <p>Not every company with dozens of open roles is actually moving candidates through the funnel. This index blends open demand, recent closes, and employee sentiment into a simple hiring health grade.</p>
+                <form class="tool-form" id="company-hiring-index-form">
+                  <label for="hiring-company-name">Company name</label>
+                  <input id="hiring-company-name" name="companyName" type="text" placeholder="Acme Robotics" required>
+                  <label for="hiring-open-roles">Open roles count</label>
+                  <input id="hiring-open-roles" name="openRoles" type="number" min="0" max="10000" placeholder="38" required>
+                  <label for="hiring-closed-roles">Roles closed in the last 90 days</label>
+                  <input id="hiring-closed-roles" name="closedRoles" type="number" min="0" max="10000" placeholder="24" required>
+                  <label for="hiring-glassdoor-rating">Glassdoor rating <span class="tool-inline-value">1 to 5</span></label>
+                  <input id="hiring-glassdoor-rating" name="glassdoorRating" type="range" min="1" max="5" step="0.1" value="3.6">
+                  <button class="btn btn-primary" type="submit">Grade hiring health</button>
+                </form>
+                <div class="tool-result" id="company-hiring-index-result" aria-live="polite"></div>
+              </div>
+            </article>
+
+            <!-- Tool 3: ATS Resume Scorer -->
+            <article class="blog-article" id="article-ats-resume-scorer">
+              <svg class="blog-article-hero-svg" viewBox="0 0 960 240" role="img" aria-label="ATS resume scorer matching keywords">
+                <rect width="960" height="240" rx="24" fill="#08111f"></rect>
+                <rect x="92" y="42" width="310" height="156" rx="18" fill="#0c1728" stroke="#203149" stroke-width="2"></rect>
+                <rect x="126" y="78" width="130" height="12" rx="6" fill="#f97316"></rect>
+                <rect x="126" y="108" width="220" height="10" rx="5" fill="#5d7088"></rect>
+                <rect x="126" y="136" width="186" height="10" rx="5" fill="#5d7088"></rect>
+                <rect x="126" y="164" width="238" height="10" rx="5" fill="#5d7088"></rect>
+                <rect x="558" y="42" width="310" height="156" rx="18" fill="#0c1728" stroke="#203149" stroke-width="2"></rect>
+                <rect x="592" y="78" width="150" height="12" rx="6" fill="#ffbe7f"></rect>
+                <rect x="592" y="108" width="218" height="10" rx="5" fill="#5d7088"></rect>
+                <rect x="592" y="136" width="190" height="10" rx="5" fill="#5d7088"></rect>
+                <rect x="592" y="164" width="226" height="10" rx="5" fill="#5d7088"></rect>
+                <path d="M428 120h94" stroke="#f97316" stroke-width="6" stroke-linecap="round"></path>
+                <path d="M504 92l32 28-32 28" fill="none" stroke="#f97316" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>
+                <circle cx="480" cy="120" r="54" fill="#122035" stroke="#f97316" stroke-width="4"></circle>
+                <text x="480" y="132" text-anchor="middle" fill="#ffffff" font-size="38" font-weight="800">82%</text>
+              </svg>
+              <h1>ATS Resume Scorer</h1>
+              <div class="blog-article-meta">
+                <span>Interactive Tool</span>
+                <span>â€¢</span>
+                <span>Keyword audit</span>
+                <span>â€¢</span>
+                <span>ATS Match Score</span>
+              </div>
+              <div class="blog-article-body">
+                <p>Paste a job description and the keywords from your resume to estimate whether the applicant tracking system will see a strong match. Use the missing list to decide what to rewrite before applying.</p>
+                <form class="tool-form" id="ats-resume-scorer-form">
+                  <label for="ats-job-description">Job description</label>
+                  <textarea id="ats-job-description" name="jobDescription" rows="7" placeholder="Paste the role responsibilities, requirements, and preferred skills..." required></textarea>
+                  <label for="ats-resume-keywords">Resume keywords, comma-separated</label>
+                  <textarea id="ats-resume-keywords" name="resumeKeywords" rows="4" placeholder="React, SQL, stakeholder management, revenue analytics" required></textarea>
+                  <button class="btn btn-primary" type="submit">Score resume match</button>
+                </form>
+                <div class="tool-result" id="ats-resume-scorer-result" aria-live="polite"></div>
+              </div>
+            </article>
+
+            <!-- Tool 4: Job Link Verifier -->
+            <article class="blog-article" id="article-job-link-verifier">
+              <svg class="blog-article-hero-svg" viewBox="0 0 960 240" role="img" aria-label="Job link verifier separating aggregator links from direct career pages">
+                <rect width="960" height="240" rx="24" fill="#08111f"></rect>
+                <rect x="92" y="70" width="306" height="100" rx="50" fill="#122035" stroke="#203149" stroke-width="2"></rect>
+                <rect x="562" y="70" width="306" height="100" rx="50" fill="#122035" stroke="#203149" stroke-width="2"></rect>
+                <path d="M338 120h284" stroke="#f97316" stroke-width="8" stroke-linecap="round" stroke-dasharray="18 18"></path>
+                <path d="M438 76c22-22 58-22 80 0l88 88" fill="none" stroke="#ffbe7f" stroke-width="12" stroke-linecap="round"></path>
+                <path d="M354 164l88-88c22-22 58-22 80 0" fill="none" stroke="#f97316" stroke-width="12" stroke-linecap="round"></path>
+                <circle cx="245" cy="120" r="30" fill="#0c1728" stroke="#f97316" stroke-width="5"></circle>
+                <path d="M230 120l10 10 22-24" fill="none" stroke="#ffbe7f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>
+                <circle cx="715" cy="120" r="30" fill="#0c1728" stroke="#f97316" stroke-width="5"></circle>
+                <path d="M701 106l28 28M729 106l-28 28" stroke="#ffbe7f" stroke-width="6" stroke-linecap="round"></path>
+              </svg>
+              <h1>Job Link Verifier</h1>
+              <div class="blog-article-meta">
+                <span>Interactive Tool</span>
+                <span>â€¢</span>
+                <span>Client-side check</span>
+                <span>â€¢</span>
+                <span>Direct Link Signal</span>
+              </div>
+              <div class="blog-article-body">
+                <p>Direct company career pages are usually fresher than scraped listings. Paste a job URL to see whether it looks like an aggregator link or a direct application path.</p>
+                <form class="tool-form" id="job-link-verifier-form">
+                  <label for="job-link-url">Job posting URL</label>
+                  <input id="job-link-url" name="jobUrl" type="url" placeholder="https://company.com/careers/software-engineer" required>
+                  <button class="btn btn-primary" type="submit">Verify job link</button>
+                </form>
+                <div class="tool-result" id="job-link-verifier-result" aria-live="polite"></div>
+              </div>
+            </article>
+
+            <!-- Tool 5: Hiring Velocity Calculator -->
+            <article class="blog-article" id="article-hiring-velocity-calculator">
+              <svg class="blog-article-hero-svg" viewBox="0 0 960 240" role="img" aria-label="Hiring velocity calculator speed gauge">
+                <rect width="960" height="240" rx="24" fill="#08111f"></rect>
+                <circle cx="480" cy="138" r="112" fill="#0c1728" stroke="#203149" stroke-width="2"></circle>
+                <path d="M388 150a94 94 0 0 1 184 0" fill="none" stroke="#203149" stroke-width="22" stroke-linecap="round"></path>
+                <path d="M388 150a94 94 0 0 1 142-80" fill="none" stroke="#f97316" stroke-width="22" stroke-linecap="round"></path>
+                <path d="M480 138l80-58" stroke="#ffbe7f" stroke-width="8" stroke-linecap="round"></path>
+                <circle cx="480" cy="138" r="14" fill="#f97316"></circle>
+                <rect x="112" y="66" width="172" height="106" rx="18" fill="#122035" stroke="#203149" stroke-width="2"></rect>
+                <rect x="146" y="96" width="74" height="12" rx="6" fill="#f97316"></rect>
+                <rect x="146" y="128" width="104" height="12" rx="6" fill="#5d7088"></rect>
+                <rect x="676" y="66" width="172" height="106" rx="18" fill="#122035" stroke="#203149" stroke-width="2"></rect>
+                <rect x="710" y="96" width="92" height="12" rx="6" fill="#ffbe7f"></rect>
+                <rect x="710" y="128" width="70" height="12" rx="6" fill="#5d7088"></rect>
+              </svg>
+              <h1>Hiring Velocity Calculator</h1>
+              <div class="blog-article-meta">
+                <span>Interactive Tool</span>
+                <span>â€¢</span>
+                <span>Funnel speed</span>
+                <span>â€¢</span>
+                <span>Velocity Score</span>
+              </div>
+              <div class="blog-article-body">
+                <p>Hiring velocity is the difference between a company that posts jobs and one that closes them. Enter a few public or estimated funnel numbers to see whether the process looks alive.</p>
+                <form class="tool-form" id="hiring-velocity-calculator-form">
+                  <label for="velocity-roles-posted">Roles posted</label>
+                  <input id="velocity-roles-posted" name="rolesPosted" type="number" min="0" max="10000" placeholder="40" required>
+                  <label for="velocity-roles-filled">Roles filled</label>
+                  <input id="velocity-roles-filled" name="rolesFilled" type="number" min="0" max="10000" placeholder="22" required>
+                  <label for="velocity-days-fill">Average days to fill</label>
+                  <input id="velocity-days-fill" name="avgDaysToFill" type="number" min="1" max="365" placeholder="36" required>
+                  <button class="btn btn-primary" type="submit">Calculate velocity</button>
+                </form>
+                <div class="tool-result" id="hiring-velocity-calculator-result" aria-live="polite"></div>
+              </div>
+            </article>
+
+            <!-- Article 4: Bypass ATS 2026 -->
+            <article class="blog-article" id="article-bypass-ats-2026">
+              <svg class="blog-article-hero-svg" viewBox="0 0 960 240" role="img" aria-label="Resume passing through ATS filters">
+                <rect width="960" height="240" rx="24" fill="#08111f"></rect>
+                <rect x="124" y="42" width="248" height="156" rx="18" fill="#0c1728" stroke="#203149" stroke-width="2"></rect>
+                <rect x="158" y="76" width="128" height="12" rx="6" fill="#f97316"></rect>
+                <rect x="158" y="108" width="176" height="10" rx="5" fill="#5d7088"></rect>
+                <rect x="158" y="136" width="144" height="10" rx="5" fill="#5d7088"></rect>
+                <rect x="158" y="164" width="190" height="10" rx="5" fill="#5d7088"></rect>
+                <path d="M420 60h280l72 60-72 60H420l72-60z" fill="#122035" stroke="#203149" stroke-width="2"></path>
+                <path d="M504 120h168" stroke="#f97316" stroke-width="8" stroke-linecap="round"></path>
+                <path d="M646 88l36 32-36 32" fill="none" stroke="#ffbe7f" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"></path>
+                <circle cx="760" cy="120" r="38" fill="#0c1728" stroke="#f97316" stroke-width="5"></circle>
+                <path d="M742 120l12 12 28-32" fill="none" stroke="#ffbe7f" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <h1>How to Beat ATS Filters in 2026: The Complete Guide</h1>
+              <div class="blog-article-meta">
+                <span>Published May 22, 2026</span>
+                <span>â€¢</span>
+                <span>7 min read</span>
+                <span>â€¢</span>
+                <span>Resume Strategy</span>
+              </div>
+              <div class="blog-article-body">
+                <p>Applicant tracking systems are no longer simple keyword counters, but keywords still matter. In 2026, the strongest resumes combine exact language from the job description, clean formatting, measurable outcomes, and direct evidence that the applicant has done the work before. The goal is not to trick the ATS. The goal is to make your relevance impossible to miss.</p>
+                <h2>Start With the Source Text</h2>
+                <p>Before editing your resume, copy the job description into a plain document and highlight repeated nouns, tools, responsibilities, seniority signals, and required certifications. If the role asks for "customer lifecycle marketing," do not only write "email campaigns." Use the employer's phrase where it is honest and accurate.</p>
+                <blockquote>
+                  A good ATS resume reads like a clean answer key for the specific role, not a generic career biography.
+                </blockquote>
+                <h2>Use Human-Friendly Structure</h2>
+                <p>Modern parsers handle more layouts than they used to, but simple structure still wins. Use standard headings like Experience, Skills, Education, Projects, and Certifications. Avoid text boxes, image-only resumes, hidden white text, and multi-column layouts that can scramble the reading order.</p>
+                <ul>
+                  <li>Put role-critical skills in both the skills section and the work bullets where they were used.</li>
+                  <li>Match acronyms and full phrases, such as "search engine optimization" and "SEO."</li>
+                  <li>Use dates, titles, and company names consistently so the parser can build a clean timeline.</li>
+                </ul>
+                <h2>Write Bullets With Evidence</h2>
+                <p>ATS filters can rank the resume, but recruiters still decide whether to continue. Replace vague ownership with proof: "reduced onboarding time by 22%" beats "responsible for onboarding." If you do not have exact metrics, use scale signals such as team size, customer count, regions, budget, throughput, or technical environment.</p>
+                <h2>Apply Direct Whenever Possible</h2>
+                <p>Direct company career pages reduce aggregator parsing errors and expired listing risk. After tailoring your resume, submit through the company's own ATS and save the posting URL. Emploid favors direct links because fresher source pages give both humans and software a cleaner application path.</p>
+              </div>
+            </article>
+
+            <!-- Article 5: Always-On Recruiting -->
+            <article class="blog-article" id="article-always-on-recruiting">
+              <svg class="blog-article-hero-svg" viewBox="0 0 960 240" role="img" aria-label="Always-on recruiting pipeline">
+                <rect width="960" height="240" rx="24" fill="#08111f"></rect>
+                <path d="M100 124h760" stroke="#203149" stroke-width="18" stroke-linecap="round"></path>
+                <path d="M100 124h470" stroke="#f97316" stroke-width="18" stroke-linecap="round"></path>
+                <circle cx="164" cy="124" r="46" fill="#122035" stroke="#f97316" stroke-width="5"></circle>
+                <circle cx="348" cy="124" r="46" fill="#122035" stroke="#f97316" stroke-width="5"></circle>
+                <circle cx="532" cy="124" r="46" fill="#122035" stroke="#f97316" stroke-width="5"></circle>
+                <circle cx="716" cy="124" r="46" fill="#122035" stroke="#203149" stroke-width="5"></circle>
+                <rect x="138" y="104" width="52" height="12" rx="6" fill="#ffbe7f"></rect>
+                <rect x="322" y="104" width="52" height="12" rx="6" fill="#ffbe7f"></rect>
+                <rect x="506" y="104" width="52" height="12" rx="6" fill="#ffbe7f"></rect>
+                <path d="M142 140h44M326 140h44M510 140h44M694 140h44" stroke="#5d7088" stroke-width="8" stroke-linecap="round"></path>
+                <path d="M780 72l42 52-42 52" fill="none" stroke="#f97316" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <h1>Always-On Recruiting: Why Companies Never Stop Posting</h1>
+              <div class="blog-article-meta">
+                <span>Published May 22, 2026</span>
+                <span>â€¢</span>
+                <span>6 min read</span>
+                <span>â€¢</span>
+                <span>Hiring Market</span>
+              </div>
+              <div class="blog-article-body">
+                <p>Always-on recruiting is the practice of keeping job postings, talent communities, and recruiter outreach active even when a company does not have an immediate seat to fill. For employers, it creates optionality. For candidates, it can feel like shouting into a quiet room.</p>
+                <h2>Why the Strategy Exists</h2>
+                <p>Hiring managers know that approved headcount can appear suddenly after a budget change, resignation, product launch, or customer commitment. If the recruiting team waits until the role is urgent, the search starts cold. Evergreen posts let them collect qualified people in advance and contact warm candidates when timing improves.</p>
+                <ul>
+                  <li>High-turnover roles need a constant bench of interested applicants.</li>
+                  <li>Competitive technical roles can take months to source.</li>
+                  <li>Growth-stage companies use open roles to signal momentum to investors and competitors.</li>
+                </ul>
+                <h2>Where It Becomes a Problem</h2>
+                <p>The problem is not pipeline building by itself. The problem is unclear intent. A listing that says "urgent hiring" while no recruiter reviews applicants for six weeks wastes candidate time and weakens trust. The same job refreshed every Friday can look active even if the team is only collecting resumes.</p>
+                <blockquote>
+                  Candidates should judge hiring intent by movement: recruiter names, recent closes, salary clarity, and whether the job appears on the company career page.
+                </blockquote>
+                <h2>How to Respond</h2>
+                <p>Treat always-on listings differently from active reqs. Apply only when the posting is recent, specific, and verified at the source. Then find a team contact and ask a direct timing question: "Is this role currently interviewing, or is it a future pipeline opening?" That one sentence can save weeks.</p>
+                <p>Emploid tracks posting age, reposting behavior, and direct career page availability so candidates can prioritize jobs with visible movement. A healthy market still has evergreen posts, but your application strategy should reserve the most effort for roles that show real hiring velocity.</p>
+              </div>
+            </article>
+
+            <!-- Article 6: Negotiate Remote Perks -->
+            <article class="blog-article" id="article-negotiate-remote-perks">
+              <svg class="blog-article-hero-svg" viewBox="0 0 960 240" role="img" aria-label="Remote work and perks negotiation">
+                <rect width="960" height="240" rx="24" fill="#08111f"></rect>
+                <rect x="118" y="58" width="310" height="134" rx="18" fill="#122035" stroke="#203149" stroke-width="2"></rect>
+                <rect x="152" y="92" width="126" height="12" rx="6" fill="#f97316"></rect>
+                <rect x="152" y="124" width="220" height="10" rx="5" fill="#5d7088"></rect>
+                <rect x="152" y="152" width="184" height="10" rx="5" fill="#5d7088"></rect>
+                <path d="M532 70h250a36 36 0 0 1 36 36v28a36 36 0 0 1-36 36H660l-54 38v-38h-74a36 36 0 0 1-36-36v-28a36 36 0 0 1 36-36z" fill="#0c1728" stroke="#203149" stroke-width="2"></path>
+                <rect x="550" y="106" width="88" height="12" rx="6" fill="#ffbe7f"></rect>
+                <rect x="666" y="106" width="110" height="12" rx="6" fill="#5d7088"></rect>
+                <path d="M578 142h158" stroke="#f97316" stroke-width="10" stroke-linecap="round"></path>
+                <circle cx="786" cy="68" r="34" fill="#f97316" opacity="0.9"></circle>
+                <path d="M770 68l12 12 24-28" fill="none" stroke="#08111f" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <h1>How to Negotiate Remote Work and Perks Before Day One</h1>
+              <div class="blog-article-meta">
+                <span>Published May 22, 2026</span>
+                <span>â€¢</span>
+                <span>6 min read</span>
+                <span>â€¢</span>
+                <span>Offer Strategy</span>
+              </div>
+              <div class="blog-article-body">
+                <p>The best time to negotiate remote work and perks is after the company wants you and before you sign. At that point, the employer has invested time, compared candidates, and imagined you solving a real problem. Your leverage is highest, but the tone still matters.</p>
+                <h2>Get the Policy Before the Ask</h2>
+                <p>Start by understanding the baseline. Ask the recruiter how the team currently handles remote days, core hours, equipment budgets, travel expectations, and location-based pay. This gives you facts instead of assumptions and helps you shape a request that fits the company's operating model.</p>
+                <h2>Package Remote Work as Performance Support</h2>
+                <p>A strong remote negotiation is not framed as a personal favor. It explains how the setup helps you deliver. For example: "I do my deepest analysis work in long focus blocks. Could we structure the role as remote-first with one planned onsite week per quarter?" That language connects flexibility to outcomes.</p>
+                <ul>
+                  <li>Ask for the work model in writing, not just verbally.</li>
+                  <li>Clarify who pays for home office equipment and coworking space.</li>
+                  <li>Negotiate travel cadence, notice periods, and expense rules.</li>
+                  <li>Discuss async norms if the team spans time zones.</li>
+                </ul>
+                <blockquote>
+                  Perks are easiest to approve when they are specific, budgetable, and tied to the job you were hired to do.
+                </blockquote>
+                <h2>Look Beyond Salary</h2>
+                <p>If base pay is fixed, remote perks can still improve the offer. Consider a signing bonus for office setup, professional development budget, certification reimbursement, extra PTO, flexible Fridays, or a written review date after six months. These items often come from different budget lines than salary.</p>
+                <p>Close the conversation with appreciation and a clear decision path: "If we can confirm remote-first status and the equipment stipend in the offer letter, I am ready to move forward." That makes approval feel concrete and keeps momentum on your side.</p>
+              </div>
+            </article>
+
+            <!-- Article 7: Job Description Red Flags -->
+            <article class="blog-article" id="article-job-desc-red-flags">
+              <svg class="blog-article-hero-svg" viewBox="0 0 960 240" role="img" aria-label="Job description red flags">
+                <rect width="960" height="240" rx="24" fill="#08111f"></rect>
+                <rect x="128" y="40" width="330" height="160" rx="18" fill="#0c1728" stroke="#203149" stroke-width="2"></rect>
+                <rect x="166" y="76" width="146" height="12" rx="6" fill="#f97316"></rect>
+                <rect x="166" y="108" width="240" height="10" rx="5" fill="#5d7088"></rect>
+                <rect x="166" y="136" width="210" height="10" rx="5" fill="#5d7088"></rect>
+                <rect x="166" y="164" width="250" height="10" rx="5" fill="#5d7088"></rect>
+                <path d="M650 42l134 232H516z" fill="#122035" stroke="#f97316" stroke-width="6" stroke-linejoin="round"></path>
+                <path d="M650 104v62" stroke="#ffbe7f" stroke-width="12" stroke-linecap="round"></path>
+                <circle cx="650" cy="192" r="8" fill="#ffbe7f"></circle>
+                <path d="M470 120h78" stroke="#f97316" stroke-width="6" stroke-linecap="round" stroke-dasharray="14 14"></path>
+              </svg>
+              <h1>10 Job Description Red Flags That Signal a Ghost Job</h1>
+              <div class="blog-article-meta">
+                <span>Published May 22, 2026</span>
+                <span>â€¢</span>
+                <span>7 min read</span>
+                <span>â€¢</span>
+                <span>Ghost Job Guide</span>
+              </div>
+              <div class="blog-article-body">
+                <p>Ghost jobs rarely announce themselves. They look polished enough to attract applicants, but the description often contains clues that the company is not ready, funded, aligned, or motivated to hire. Reading those clues before applying protects your time.</p>
+                <h2>The 10 Red Flags</h2>
+                <ol>
+                  <li><strong>Posted for more than 45 days:</strong> Long age does not prove the job is fake, but it demands verification.</li>
+                  <li><strong>No salary range:</strong> Missing compensation can signal low urgency or an exploratory search.</li>
+                  <li><strong>Generic responsibilities:</strong> If the role could fit any company, it may be a recycled evergreen post.</li>
+                  <li><strong>Impossible scope:</strong> One person cannot be a strategist, analyst, designer, engineer, and support lead at once.</li>
+                  <li><strong>No recruiter or hiring team:</strong> Faceless posts are harder to validate.</li>
+                  <li><strong>Constant reposting:</strong> Fresh dates without changed content can mask stale demand.</li>
+                  <li><strong>Conflicting location rules:</strong> "Remote" plus mandatory local office language deserves a question.</li>
+                  <li><strong>Vague seniority:</strong> Entry-level pay with senior-level requirements is a warning sign.</li>
+                  <li><strong>Broken apply links:</strong> Dead or redirected pages often mean the source role expired.</li>
+                  <li><strong>Not on the company career page:</strong> If the source of truth lacks the role, slow down.</li>
+                </ol>
+                <blockquote>
+                  The strongest signal is not one red flag. It is a cluster of weak signals pointing in the same direction.
+                </blockquote>
+                <h2>What To Do Before Applying</h2>
+                <p>Search the company career page, check whether employees have posted about the role, and look for recent hires in similar titles. If the post is still interesting, send a short message asking whether interviews are active this month. Real hiring teams can usually answer that quickly.</p>
+                <p>Emploid scores listings by combining these surface details with posting history and source verification. You can still apply to uncertain roles, but your best applications should go to jobs with clear ownership, fresh movement, and a direct path to the employer.</p>
+              </div>
+            </article>
+
+            <!-- Article 8: Emploid Detection Tech -->
+            <article class="blog-article" id="article-emploid-detection-tech">
+              <svg class="blog-article-hero-svg" viewBox="0 0 960 240" role="img" aria-label="Emploid ghost detection algorithm">
+                <rect width="960" height="240" rx="24" fill="#08111f"></rect>
+                <circle cx="206" cy="120" r="62" fill="#122035" stroke="#f97316" stroke-width="5"></circle>
+                <circle cx="480" cy="120" r="82" fill="#0c1728" stroke="#203149" stroke-width="2"></circle>
+                <circle cx="754" cy="120" r="62" fill="#122035" stroke="#f97316" stroke-width="5"></circle>
+                <path d="M268 120h130M562 120h130" stroke="#f97316" stroke-width="6" stroke-linecap="round" stroke-dasharray="16 14"></path>
+                <path d="M450 92h60v56h-60z" fill="#122035" stroke="#f97316" stroke-width="4" stroke-linejoin="round"></path>
+                <path d="M464 120l12 12 24-30" fill="none" stroke="#ffbe7f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>
+                <rect x="174" y="96" width="64" height="10" rx="5" fill="#ffbe7f"></rect>
+                <rect x="174" y="128" width="64" height="10" rx="5" fill="#5d7088"></rect>
+                <path d="M728 98h52M728 122h52M728 146h34" stroke="#ffbe7f" stroke-width="9" stroke-linecap="round"></path>
+                <path d="M480 32v36M480 172v36M392 120h36M532 120h36" stroke="#203149" stroke-width="6" stroke-linecap="round"></path>
+              </svg>
+              <h1>Inside Emploid's Ghost Detection Algorithm: How It Works</h1>
+              <div class="blog-article-meta">
+                <span>Published May 22, 2026</span>
+                <span>â€¢</span>
+                <span>8 min read</span>
+                <span>â€¢</span>
+                <span>Methodology</span>
+              </div>
+              <div class="blog-article-body">
+                <p>Emploid's ghost detection algorithm is built around a simple idea: real hiring leaves traces of movement. A listing that is fresh, specific, source-verified, and connected to active recruiting behavior deserves more trust than a stale aggregator copy with no salary, no owner, and no company career page match.</p>
+                <h2>The Signals We Prioritize</h2>
+                <p>The model starts with source quality. Direct company career pages are treated as stronger evidence than third-party mirrors because they are closer to the employer's applicant tracking system. From there, Emploid looks at posting age, repost frequency, compensation transparency, recruiter visibility, job description specificity, and whether similar roles have recently closed.</p>
+                <ul>
+                  <li><strong>Freshness:</strong> Recent source updates suggest the requisition is still being managed.</li>
+                  <li><strong>Consistency:</strong> Matching title, location, and apply links across sources reduces scrape noise.</li>
+                  <li><strong>Accountability:</strong> Named recruiters, hiring managers, and team posts improve confidence.</li>
+                  <li><strong>Velocity:</strong> Companies that close roles while opening new ones show actual hiring flow.</li>
+                </ul>
+                <h2>Why We Avoid One-Signal Verdicts</h2>
+                <p>A 60-day-old role can still be real if it is highly specialized. A missing salary range can reflect local policy rather than bad intent. That is why the algorithm scores combinations instead of declaring a job fake from one clue. Multiple weak signals can compound into high ghost risk, while strong source verification can offset a single concern.</p>
+                <blockquote>
+                  The goal is not to shame employers. The goal is to help candidates spend their best effort on roles with visible hiring intent.
+                </blockquote>
+                <h2>How Candidates Should Use the Score</h2>
+                <p>A low-risk listing is a good candidate for a tailored resume and outreach. A medium-risk listing deserves a quick source check before applying. A high-risk listing may still be worth saving, but it should not consume your best application time unless you can verify active interviews.</p>
+                <p>As the job market changes, Emploid's scoring logic can evolve with new source patterns, ATS behavior, and recruiter workflows. The constant is the principle: applications should start from evidence, not hope.</p>
               </div>
             </article>
           </main>

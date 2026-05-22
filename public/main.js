@@ -1729,6 +1729,171 @@ function initBlogEvents() {
     });
   });
 
+  const renderToolResult = (targetId, tone, eyebrow, value, heading, detailsHtml) => {
+    const target = document.getElementById(targetId);
+    if (!target) return;
+    target.className = `tool-result is-visible tool-result-${tone}`;
+    target.innerHTML = `
+      <div class="tool-result-kicker">${escapeHtml(eyebrow)}</div>
+      <div class="tool-result-score">${escapeHtml(value)}</div>
+      <h3>${escapeHtml(heading)}</h3>
+      <div class="tool-result-detail">${detailsHtml}</div>
+    `;
+  };
+
+  const getNumber = (formData, field, fallback = 0) => {
+    const value = Number(formData.get(field));
+    return Number.isFinite(value) ? value : fallback;
+  };
+
+  const ghostJobForm = document.getElementById('ghost-job-detector-form');
+  if (ghostJobForm) {
+    ghostJobForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = new FormData(ghostJobForm);
+      const title = String(formData.get('jobTitle') || 'this role').trim();
+      const daysPosted = Math.max(0, getNumber(formData, 'daysPosted'));
+      let score = 0;
+
+      if (daysPosted > 90) score += 45;
+      else if (daysPosted > 60) score += 35;
+      else if (daysPosted > 30) score += 25;
+      else if (daysPosted > 14) score += 10;
+
+      if (!formData.has('hasSalary')) score += 20;
+      if (!formData.has('hasRecruiter')) score += 20;
+      if (!formData.has('knownLinkedIn')) score += 15;
+
+      const riskScore = Math.min(100, score);
+      const tone = riskScore >= 65 ? 'risk' : riskScore >= 35 ? 'caution' : 'good';
+      const label = riskScore >= 65 ? 'High ghost risk' : riskScore >= 35 ? 'Medium ghost risk' : 'Low ghost risk';
+      const details = `
+        <p>${escapeHtml(title)} scores ${riskScore}/100 based on listing age, salary visibility, recruiter accountability, and company LinkedIn presence.</p>
+        <p>${riskScore >= 65 ? 'Verify the role on the company career page and contact a recruiter before tailoring a full application.' : riskScore >= 35 ? 'Run one source check before applying, especially if the role has been refreshed more than once.' : 'This listing has several signs of active hiring intent. A tailored direct application is reasonable.'}</p>
+      `;
+
+      renderToolResult('ghost-job-detector-result', tone, 'Ghost risk score', `${riskScore}/100`, label, details);
+    });
+  }
+
+  const hiringIndexForm = document.getElementById('company-hiring-index-form');
+  if (hiringIndexForm) {
+    hiringIndexForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = new FormData(hiringIndexForm);
+      const companyName = String(formData.get('companyName') || 'This company').trim();
+      const openRoles = Math.max(0, getNumber(formData, 'openRoles'));
+      const closedRoles = Math.max(0, getNumber(formData, 'closedRoles'));
+      const rating = Math.min(5, Math.max(1, getNumber(formData, 'glassdoorRating', 3)));
+      const totalActivity = openRoles + closedRoles;
+      const closeRatio = totalActivity ? closedRoles / totalActivity : 0;
+      const activityScore = Math.min(20, totalActivity * 1.5);
+      const score = Math.round((closeRatio * 55) + (rating * 5) + activityScore);
+      const grade = score >= 85 ? 'A' : score >= 70 ? 'B' : score >= 55 ? 'C' : score >= 40 ? 'D' : 'F';
+      const tone = score >= 70 ? 'good' : score >= 45 ? 'caution' : 'risk';
+      const explanation = grade === 'A' || grade === 'B'
+        ? 'Recent closes and employee sentiment suggest a healthier hiring engine.'
+        : grade === 'C'
+          ? 'There is some movement, but verify the specific team before investing heavy effort.'
+          : 'Open roles are outpacing visible closes, so treat postings with caution until you confirm active interviews.';
+      const details = `
+        <p>${escapeHtml(companyName)} has ${openRoles} open roles, ${closedRoles} recently closed roles, and a ${rating.toFixed(1)}/5 employee rating signal.</p>
+        <p>${escapeHtml(explanation)}</p>
+      `;
+
+      renderToolResult('company-hiring-index-result', tone, 'Hiring health grade', grade, `${score}/100 hiring health`, details);
+    });
+  }
+
+  const atsScorerForm = document.getElementById('ats-resume-scorer-form');
+  if (atsScorerForm) {
+    atsScorerForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = new FormData(atsScorerForm);
+      const jobDescription = String(formData.get('jobDescription') || '').toLowerCase();
+      const keywords = String(formData.get('resumeKeywords') || '')
+        .split(',')
+        .map((keyword) => keyword.trim())
+        .filter(Boolean);
+      const uniqueKeywords = [...new Set(keywords.map((keyword) => keyword.toLowerCase()))];
+      const matched = uniqueKeywords.filter((keyword) => jobDescription.includes(keyword));
+      const missing = uniqueKeywords.filter((keyword) => !jobDescription.includes(keyword));
+      const score = uniqueKeywords.length ? Math.round((matched.length / uniqueKeywords.length) * 100) : 0;
+      const tone = score >= 75 ? 'good' : score >= 45 ? 'caution' : 'risk';
+      const heading = score >= 75 ? 'Strong ATS keyword match' : score >= 45 ? 'Partial ATS keyword match' : 'Weak ATS keyword match';
+      const listItems = (items) => items.length
+        ? items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')
+        : '<li>None</li>';
+      const details = `
+        <p>${matched.length} of ${uniqueKeywords.length} resume keywords appear in the job description.</p>
+        <div class="tool-result-columns">
+          <div><strong>Matched</strong><ul>${listItems(matched)}</ul></div>
+          <div><strong>Missing</strong><ul>${listItems(missing)}</ul></div>
+        </div>
+      `;
+
+      renderToolResult('ats-resume-scorer-result', tone, 'ATS match score', `${score}%`, heading, details);
+    });
+  }
+
+  const linkVerifierForm = document.getElementById('job-link-verifier-form');
+  if (linkVerifierForm) {
+    linkVerifierForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = new FormData(linkVerifierForm);
+      const urlValue = String(formData.get('jobUrl') || '').trim();
+      let parsedUrl;
+
+      try {
+        parsedUrl = new URL(urlValue);
+      } catch {
+        renderToolResult('job-link-verifier-result', 'risk', 'Link check', 'Invalid URL', 'Enter a full job posting URL', '<p>Include the protocol, such as https://company.com/careers/role.</p>');
+        return;
+      }
+
+      const host = parsedUrl.hostname.replace(/^www\./, '').toLowerCase();
+      const path = parsedUrl.pathname.toLowerCase();
+      const isAggregator = host.includes('indeed.com')
+        || (host.includes('linkedin.com') && path.includes('/jobs'))
+        || host.includes('ziprecruiter.com')
+        || host.includes('glassdoor.com');
+      const tone = isAggregator ? 'caution' : 'good';
+      const value = isAggregator ? 'Aggregator' : 'Direct';
+      const heading = isAggregator ? 'Aggregator link - find the direct career page' : 'Direct career page link ✓';
+      const details = `
+        <p>${escapeHtml(parsedUrl.hostname)} ${isAggregator ? 'looks like a third-party job board. Use it for discovery, then apply through the employer career page.' : 'does not match the common aggregator domains checked here. Confirm the page belongs to the employer before applying.'}</p>
+      `;
+
+      renderToolResult('job-link-verifier-result', tone, 'Job link type', value, heading, details);
+    });
+  }
+
+  const velocityForm = document.getElementById('hiring-velocity-calculator-form');
+  if (velocityForm) {
+    velocityForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = new FormData(velocityForm);
+      const rolesPosted = Math.max(0, getNumber(formData, 'rolesPosted'));
+      const rolesFilled = Math.max(0, getNumber(formData, 'rolesFilled'));
+      const avgDaysToFill = Math.max(1, getNumber(formData, 'avgDaysToFill', 45));
+      const fillRate = rolesPosted ? Math.min(100, Math.round((rolesFilled / rolesPosted) * 100)) : 0;
+      const speedScore = Math.max(0, Math.round(100 - ((avgDaysToFill - 20) * 1.8)));
+      const velocityScore = Math.round((fillRate * 0.65) + (Math.min(100, speedScore) * 0.35));
+      const tone = velocityScore >= 70 ? 'good' : velocityScore >= 45 ? 'caution' : 'risk';
+      const recommendation = velocityScore >= 70
+        ? 'Prioritize these roles. The company appears to be closing openings at a healthy pace.'
+        : velocityScore >= 45
+          ? 'Apply selectively and verify that the specific role is actively interviewing.'
+          : 'Treat the funnel as slow until a recruiter confirms timeline and urgency.';
+      const details = `
+        <p>Fill rate: ${fillRate}%. Average time to fill: ${avgDaysToFill} days.</p>
+        <p>${escapeHtml(recommendation)}</p>
+      `;
+
+      renderToolResult('hiring-velocity-calculator-result', tone, 'Velocity score', `${velocityScore}/100`, 'Hiring funnel movement', details);
+    });
+  }
+
   document.querySelectorAll('[data-article-slug]').forEach((card) => {
     card.addEventListener('click', (e) => {
       e.preventDefault();
