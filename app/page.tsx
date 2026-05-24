@@ -8,7 +8,7 @@ function extractBodyContents(html: string) {
     throw new Error('Could not find the body contents in public/index.html');
   }
 
-  return match[1].trim();
+  return match[1].replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '').trim();
 }
 
 export default async function Home() {

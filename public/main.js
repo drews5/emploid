@@ -1,106 +1,55 @@
 'use strict';
 
-const COMPANIES = [
-  { name: 'Target', context: 'Retail | Fortune 50', sentiment: 'growing' },
-  { name: 'Google', context: 'Technology | Public', sentiment: 'stable' },
-  { name: 'Best Buy', context: 'Retail | Public', sentiment: 'stable' },
-  { name: 'UnitedHealth Group', context: 'Healthcare | Public', sentiment: 'growing' },
-  { name: 'Adobe', context: 'Software | Public', sentiment: 'growing' },
-  { name: 'Airbnb', context: 'Travel | Public', sentiment: 'stable' },
-  { name: 'Spotify', context: 'Media | Public', sentiment: 'stable' },
-  { name: 'Stripe', context: 'Fintech | Private', sentiment: 'growing' },
-  { name: 'Lyft', context: 'Mobility | Public', sentiment: 'layoffs' },
-  { name: 'Peloton', context: 'Consumer | Public', sentiment: 'layoffs' }
-];
+function ensureFilsonProLoaded() {
+  const showHeroText = () => {
+    document.documentElement.classList.add('filson-pro-loaded');
+  };
 
-const JOB_TITLES = [
-  'Financial Analyst',
-  'Product Designer',
-  'Software Engineer',
-  'IT Support Intern',
-  'IT Operations Intern',
-  'Marketing Manager',
-  'Data Analyst',
-  'Business Operations Manager',
-  'Frontend Engineer',
-  'Program Coordinator',
-  'Customer Success Manager',
-  'Recruiting Coordinator'
-];
+  if (!document.fonts) {
+    showHeroText();
+    return;
+  }
+
+  document.fonts.load('1em "Filson Pro"').then(() => {
+    showHeroText();
+  }).catch(() => {
+    showHeroText();
+  });
+}
+
+function initHomeInteractions() {
+  const revealItems = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    revealItems.forEach((item) => revealObserver.observe(item));
+  } else {
+    revealItems.forEach((item) => item.classList.add('visible'));
+  }
+
+  const tabs = document.querySelectorAll('.showcase-tab');
+  const panels = document.querySelectorAll('.showcase-panel');
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const index = tab.getAttribute('data-tab');
+      tabs.forEach((item) => item.classList.remove('active'));
+      panels.forEach((panel) => panel.classList.remove('active'));
+      tab.classList.add('active');
+      const activePanel = document.getElementById(`showcase-panel-${index}`);
+      if (activePanel) activePanel.classList.add('active');
+    });
+  });
+}
 
 const LOCATIONS = ['Minneapolis, MN', 'Chicago, IL', 'Remote', 'Austin, TX', 'New York, NY', 'Seattle, WA'];
 const WORK_MODES = ['Remote', 'Hybrid', 'On-site'];
-const JOB_TYPES = ['Full-time', 'Full-time', 'Full-time', 'Contract'];
-const SOURCES = ['LinkedIn', 'Indeed', 'Handshake', 'Glassdoor', 'Company Direct'];
-
-const SALARY_BY_TITLE = {
-  'Financial Analyst': [75, 95],
-  'Product Designer': [105, 145],
-  'Software Engineer': [120, 170],
-  'IT Support Intern': [24, 32],
-  'IT Operations Intern': [26, 34],
-  'Marketing Manager': [95, 125],
-  'Data Analyst': [80, 115],
-  'Business Operations Manager': [95, 135],
-  'Frontend Engineer': [115, 160],
-  'Program Coordinator': [62, 84],
-  'Customer Success Manager': [72, 102],
-  'Recruiting Coordinator': [58, 82]
-};
-
-const DESCRIPTIONS = [
-  'This team is hiring for a role with immediate business impact and clear ownership from day one.',
-  'You will work across functions, communicate often, and ship practical outcomes in a fast-moving team.',
-  'The company is looking for someone who can keep quality high while navigating ambiguity and multiple stakeholders.',
-  'This is a strong fit for someone who wants visible work, steady collaboration, and a direct path to outcomes.'
-];
-
-const REQUIREMENTS_POOL = [
-  [
-    '2+ years of relevant experience in a comparable role',
-    'Strong communication across cross-functional teams',
-    'Comfort with ambiguity and evolving priorities',
-    'Evidence of delivering measurable outcomes'
-  ],
-  [
-    'Bachelor\'s degree or equivalent practical experience',
-    'Experience with modern tools and workflows in your discipline',
-    'Clear written communication and stakeholder management',
-    'Ability to work independently with good judgment'
-  ],
-  [
-    'Experience in a startup, agency, or high-growth environment',
-    'Ability to prioritize quickly without losing quality',
-    'Strong analytical thinking and operational rigor',
-    'Comfort presenting recommendations clearly'
-  ]
-];
-
-const PREVIEW_LISTINGS = [
-  { title: 'Financial Analyst', company: 'Target', location: 'Minneapolis, MN', source: 'LinkedIn', trustScore: 98, salary: '$75k-$90k', workMode: 'Hybrid', jobType: 'Full-time', age: '2d ago' },
-  { title: 'Senior Financial Planning and Strategy Analyst', company: 'Northwestern Mutual Life Insurance Company', location: 'Minneapolis, MN', source: 'LinkedIn', trustScore: 91, salary: '$120k-$145k', workMode: 'Remote', jobType: 'Full-time', age: '1d ago' },
-  { title: 'Marketing Manager', company: 'Best Buy', location: 'Minneapolis, MN', source: 'Handshake', trustScore: 67, salary: '$85k-$102k', workMode: 'Hybrid', jobType: 'Full-time', age: '5d ago' },
-  { title: 'Operations Coordinator', company: 'Peloton', location: 'New York, NY', source: 'Glassdoor', trustScore: 34, salary: '$58k-$68k', workMode: 'On-site', jobType: 'Full-time', age: '3w ago' },
-  { title: 'Software Engineer', company: 'Google', location: 'Chicago, IL', source: 'Company Direct', trustScore: 95, salary: '$135k-$168k', workMode: 'Hybrid', jobType: 'Full-time', age: '4d ago' }
-];
-
-const CURATED_TRACKER_JOBS = [
-  { id: 'tracker-linear-jpd', title: 'Junior Product Designer', company: 'Linear', location: 'Remote / US', source: 'Company Direct', workMode: 'Remote', jobType: 'Full-time', trustScore: 94, daysPosted: 4, domain: 'linear.app', sentiment: 'growing', description: 'Join the product design team shaping polished workflows for a fast-growing product used by modern software teams.', requirements: REQUIREMENTS_POOL[1], salary: { min: 110000, max: 140000 }, salaryDisclosed: true, repostCount: 0, recentHiringActivity: true, directCompanyLink: true, hiringContact: true, saved: false },
-  { id: 'tracker-stripe-growth-pm', title: 'Associate PM, Growth', company: 'Stripe', location: 'SF / Hybrid', source: 'Company Direct', workMode: 'Hybrid', jobType: 'Full-time', trustScore: 91, daysPosted: 5, domain: 'stripe.com', sentiment: 'growing', description: 'Partner with growth, marketing, and product teams to run experiments that improve activation and retention.', requirements: REQUIREMENTS_POOL[0], salary: { min: 135000, max: 160000 }, salaryDisclosed: true, repostCount: 0, recentHiringActivity: true, directCompanyLink: true, hiringContact: true, saved: false },
-  { id: 'tracker-ramp-product-analyst', title: 'Product Analyst', company: 'Ramp', location: 'New York, NY', source: 'Company Direct', workMode: 'Hybrid', jobType: 'Full-time', trustScore: 88, daysPosted: 7, domain: 'ramp.com', sentiment: 'growing', description: 'Support product and go-to-market teams with structured analytics, SQL-based analysis, and decision support.', requirements: REQUIREMENTS_POOL[2], salary: { min: 120000, max: 135000 }, salaryDisclosed: true, repostCount: 0, recentHiringActivity: true, directCompanyLink: true, hiringContact: true, saved: false },
-  { id: 'tracker-figma-associate-designer', title: 'Associate Designer', company: 'Figma', location: 'SF / Hybrid', source: 'Company Direct', workMode: 'Hybrid', jobType: 'Full-time', trustScore: 86, daysPosted: 6, domain: 'figma.com', sentiment: 'growing', description: 'Work with product teams to craft interaction details, visual systems, and prototyping flows used by millions.', requirements: REQUIREMENTS_POOL[1], salary: { min: 115000, max: 135000 }, salaryDisclosed: true, repostCount: 0, recentHiringActivity: true, directCompanyLink: true, hiringContact: true, saved: false },
-  { id: 'tracker-vercel-frontend', title: 'Jr Frontend Engineer', company: 'Vercel', location: 'Remote / Global', source: 'Company Direct', workMode: 'Remote', jobType: 'Full-time', trustScore: 92, daysPosted: 13, domain: 'vercel.com', sentiment: 'growing', description: 'Build polished frontend experiences for developer tooling and platform workflows with strong attention to performance.', requirements: REQUIREMENTS_POOL[0], salary: { min: 125000, max: 145000 }, salaryDisclosed: true, repostCount: 1, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
-  { id: 'tracker-databricks-ds', title: 'Data Scientist, New Grad', company: 'Databricks', location: 'Mountain View', source: 'Company Direct', workMode: 'On-site', jobType: 'Full-time', trustScore: 81, daysPosted: 8, domain: 'databricks.com', sentiment: 'growing', description: 'Solve product and business problems using experimentation, analytics, and applied modeling on large-scale data.', requirements: REQUIREMENTS_POOL[2], salary: { min: 140000, max: 155000 }, salaryDisclosed: true, repostCount: 0, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
-  { id: 'tracker-notion-product-designer', title: 'Product Designer I', company: 'Notion', location: 'Remote / US-CA', source: 'Company Direct', workMode: 'Remote', jobType: 'Full-time', trustScore: 89, daysPosted: 5, domain: 'notion.so', sentiment: 'stable', description: 'Design end-to-end product experiences with strong systems thinking and close collaboration across product and engineering.', requirements: REQUIREMENTS_POOL[1], salary: { min: 120000, max: 145000 }, salaryDisclosed: true, repostCount: 0, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
-  { id: 'tracker-plaid-backend', title: 'Software Engineer, Backend', company: 'Plaid', location: 'NYC / Hybrid', source: 'Company Direct', workMode: 'Hybrid', jobType: 'Full-time', trustScore: 84, daysPosted: 9, domain: 'plaid.com', sentiment: 'stable', description: 'Build backend systems for data products and developer infrastructure with a focus on reliability and scale.', requirements: REQUIREMENTS_POOL[0], salary: { min: 135000, max: 155000 }, salaryDisclosed: true, repostCount: 1, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
-  { id: 'tracker-airtable-growth-designer', title: 'Growth Designer', company: 'Airtable', location: 'SF', source: 'Company Direct', workMode: 'Hybrid', jobType: 'Full-time', trustScore: 76, daysPosted: 10, domain: 'airtable.com', sentiment: 'stable', description: 'Shape acquisition and onboarding journeys with clear UX writing, experimentation, and growth collaboration.', requirements: REQUIREMENTS_POOL[1], salary: { min: 115000, max: 130000 }, salaryDisclosed: true, repostCount: 1, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
-  { id: 'tracker-cloudflare-apm', title: 'Associate Product Manager', company: 'Cloudflare', location: 'Austin / Hybrid', source: 'Company Direct', workMode: 'Hybrid', jobType: 'Full-time', trustScore: 87, daysPosted: 3, domain: 'cloudflare.com', sentiment: 'growing', description: 'Support roadmap execution and product discovery for platform and developer-facing offerings.', requirements: REQUIREMENTS_POOL[2], salary: { min: 130000, max: 145000 }, salaryDisclosed: true, repostCount: 0, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
-  { id: 'tracker-anthropic-brand-designer', title: 'Brand Designer, New Grad', company: 'Anthropic', location: 'SF', source: 'Company Direct', workMode: 'On-site', jobType: 'Full-time', trustScore: 90, daysPosted: 4, domain: 'anthropic.com', sentiment: 'growing', description: 'Create long-form brand and editorial design work that helps explain frontier AI products clearly and responsibly.', requirements: REQUIREMENTS_POOL[1], salary: { min: 120000, max: 135000 }, salaryDisclosed: true, repostCount: 0, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
-  { id: 'tracker-snowflake-data-analyst', title: 'Data Analyst', company: 'Snowflake', location: 'Denver', source: 'Company Direct', workMode: 'Hybrid', jobType: 'Full-time', trustScore: 78, daysPosted: 6, domain: 'snowflake.com', sentiment: 'growing', description: 'Partner with operations and leadership teams to build reporting, uncover trends, and improve decision quality.', requirements: REQUIREMENTS_POOL[2], salary: { min: 105000, max: 120000 }, salaryDisclosed: true, repostCount: 0, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
-  { id: 'tracker-coinbase-business-analyst', title: 'Business Analyst', company: 'Coinbase', location: 'Remote / US', source: 'Company Direct', workMode: 'Remote', jobType: 'Full-time', trustScore: 66, daysPosted: 14, domain: 'coinbase.com', sentiment: 'stable', description: 'Support business planning with analytical rigor, cross-functional communication, and operational modeling.', requirements: REQUIREMENTS_POOL[2], salary: { min: 110000, max: 125000 }, salaryDisclosed: true, repostCount: 1, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
-  { id: 'tracker-datadog-ux-researcher', title: 'UX Researcher I', company: 'Datadog', location: 'NYC', source: 'Company Direct', workMode: 'Hybrid', jobType: 'Full-time', trustScore: 72, daysPosted: 11, domain: 'datadoghq.com', sentiment: 'growing', description: 'Run foundational and evaluative research to help product teams make better experience decisions.', requirements: REQUIREMENTS_POOL[1], salary: { min: 115000, max: 130000 }, salaryDisclosed: true, repostCount: 1, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
-  { id: 'tracker-scale-marketing-analyst', title: 'Marketing Analyst', company: 'Scale AI', location: 'SF', source: 'Company Direct', workMode: 'Hybrid', jobType: 'Full-time', trustScore: 60, daysPosted: 18, domain: 'scale.com', sentiment: 'stable', description: 'Analyze growth and campaign performance while helping the team prioritize the highest-leverage opportunities.', requirements: REQUIREMENTS_POOL[0], salary: { min: 95000, max: 110000 }, salaryDisclosed: true, repostCount: 2, recentHiringActivity: true, directCompanyLink: true, hiringContact: false, saved: false },
-];
+const PREVIEW_LISTINGS = [];
 
 const TRACKER_STAGES = ['Applied', 'Reviewing', 'Interview', 'Offer'];
 
@@ -276,10 +225,6 @@ const RESUME_ROLE_PROFILES = [
 const PAGE_SIZE = 8;
 const MAX_ASSISTANT_MESSAGES = 10;
 
-function pick(list) {
-  return list[Math.floor(Math.random() * list.length)];
-}
-
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
@@ -288,11 +233,12 @@ function formatSalary(value) {
   return `$${Math.round(value / 1000)}k`;
 }
 
-function buildSalary(title) {
-  const [low, high] = SALARY_BY_TITLE[title] || [70, 120];
-  const min = Math.round((low + Math.random() * (high - low) * 0.4) / 5) * 5;
-  const max = Math.round((min + (high - low) * 0.35 + Math.random() * (high - low) * 0.18) / 5) * 5;
-  return { min: min * 1000, max: max * 1000 };
+function formatJobSalaryLabel(job, estimatedSuffix = ' (Est.)') {
+  if (job.salaryDisclosed && job.salaryText) return job.salaryText;
+  const min = Number(job.salary && job.salary.min) || 0;
+  const max = Number(job.salary && job.salary.max) || 0;
+  if (!min && !max) return 'Salary not listed';
+  return `${formatSalary(min)}-${formatSalary(Math.max(max, min))}${job.salaryDisclosed ? '' : estimatedSuffix}`;
 }
 
 function formatPostedAge(days) {
@@ -313,7 +259,7 @@ function scoreColor(score) {
 }
 
 function sourceClass(source) {
-  return source.toLowerCase().replace(/\s+/g, '-');
+  return String(source || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'source';
 }
 
 function bookmarkIcon(saved) {
@@ -338,11 +284,11 @@ function buildTrustRing(score, size = 'small') {
 }
 
 function buildSourceMarkup(source) {
-  return `<span class="source-inline source-${sourceClass(source)}">via ${source}</span>`;
+  return `<span class="source-inline source-${sourceClass(source)}">via ${escapeHtml(source)}</span>`;
 }
 
 function buildSignalTag(type, label) {
-  return `<span class="signal-chip ${type}">${label}</span>`;
+  return `<span class="signal-chip ${type}">${escapeHtml(label)}</span>`;
 }
 
 function repostTagTone(score) {
@@ -352,7 +298,7 @@ function repostTagTone(score) {
 }
 
 function buildApplyLabel(domain) {
-  return `Apply on ${domain}/careers →`;
+  return domain ? `Open on ${domain} →` : 'Open listing →';
 }
 
 function trackerActionIcon(action) {
@@ -370,6 +316,13 @@ function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+function stripHtml(value) {
+  const withoutTags = String(value ?? '').replace(/<[^>]*>/g, ' ');
+  const decoder = document.createElement('textarea');
+  decoder.innerHTML = withoutTags;
+  return decoder.value.replace(/\s+/g, ' ').trim();
 }
 
 function safeParseJSON(value, fallback) {
@@ -440,7 +393,7 @@ function buildReactTrackerRecord(job) {
     source: job.source,
     stage: 'applied',
     trust: job.trustScore,
-    salary: `${formatSalary(job.salary.min)}-${formatSalary(job.salary.max)}${job.salaryDisclosed ? '' : ' (Est.)'}`,
+    salary: formatJobSalaryLabel(job),
     location: job.location,
     applied: todayIso(),
     updatedAt: todayIso(),
@@ -451,7 +404,7 @@ function buildReactTrackerRecord(job) {
     stall: false,
     listingUrl: buildInternalListingUrl(job),
     tags: [
-      job.directCompanyLink ? 'Direct company link' : 'Aggregator posting',
+      job.directCompanyLink ? 'Live source link' : 'No source link',
       job.hiringContact ? 'Hiring contact spotted' : 'No recruiter listed',
       `${job.workMode} role`
     ]
@@ -781,73 +734,26 @@ function getResumeMatchScore(job, profile) {
   return score;
 }
 
-function makeData() {
-  const generated = Array.from({ length: 240 }, (_, index) => {
-    const company = pick(COMPANIES);
-    const title = pick(JOB_TITLES);
-    const workMode = pick(WORK_MODES);
-    const location = workMode === 'Remote' ? 'Remote' : pick(LOCATIONS.filter((item) => item !== 'Remote'));
-    const source = pick(SOURCES);
-    const jobType = pick(JOB_TYPES);
-    const salary = buildSalary(title);
-    const salaryDisclosed = Math.random() > 0.28;
-    const directCompanyLink = source === 'Company Direct' || Math.random() > 0.2;
-    const recentHiringActivity = company.sentiment === 'growing' || Math.random() > 0.65;
-    const daysPosted = Math.floor(Math.random() * 36) + 1;
-    const repostCount = clamp(Math.floor(Math.random() * 4) + (daysPosted > 18 ? 1 : 0), 0, 4);
-    const hiringContact = Math.random() > 0.48;
-    const domain = `${company.name.toLowerCase().replace(/\s+/g, '')}.com`;
-
-    let trustScore = 44;
-    if (salaryDisclosed) trustScore += 18;
-    if (directCompanyLink) trustScore += 16;
-    if (recentHiringActivity) trustScore += 14;
-    if (daysPosted < 7) trustScore += 14;
-    else if (daysPosted > 24) trustScore -= 14;
-    if (repostCount > 1) trustScore -= 18;
-    if (company.sentiment === 'layoffs') trustScore -= 10;
-    if (company.sentiment === 'growing') trustScore += 8;
-    trustScore += Math.round((Math.random() - 0.5) * 12);
-    trustScore = clamp(trustScore, 8, 99);
-
-    return {
-      id: `generated-${index + 1}`,
-      title,
-      company: company.name,
-      companyContext: company.context,
-      location,
-      source,
-      jobType,
-      workMode,
-      salary,
-      salaryDisclosed,
-      daysPosted,
-      repostCount,
-      trustScore,
-      recentHiringActivity,
-      directCompanyLink,
-      hiringContact,
-      sentiment: company.sentiment,
-      description: DESCRIPTIONS[index % DESCRIPTIONS.length],
-      requirements: REQUIREMENTS_POOL[index % REQUIREMENTS_POOL.length],
-      domain,
-      url: `https://www.${domain}/careers/${8200 + index}`,
-      saved: false
-    };
-  });
-
-  return [...CURATED_TRACKER_JOBS, ...generated];
-}
-
-const allJobs = makeData();
+let allJobs = [];
 let filteredJobs = [];
 let currentPage = 1;
 let activeModalJobId = null;
+let liveJobSearchState = {
+  hasSearched: false,
+  isLoading: false,
+  query: '',
+  source: '',
+  error: '',
+};
 
 const mainNav = document.getElementById('main-nav');
 const heroSearch = document.getElementById('hero-search');
 const heroSearchButton = document.getElementById('hero-search-btn');
 const searchInput = document.getElementById('search-input');
+const jobsSearchCanvas = document.getElementById('jobs-search-canvas');
+const jobsSearchForm = document.getElementById('jobs-search-form');
+const jobsSearchQuery = document.getElementById('jobs-search-query');
+const jobsLiveSearchBtn = document.getElementById('jobs-live-search-btn');
 const trustFilter = document.getElementById('trust-score-filter');
 const trustFilterValue = document.getElementById('trust-score-val');
 const salaryFilter = document.getElementById('salary-filter');
@@ -1220,13 +1126,13 @@ function trackJobApplication(job) {
     status,
     trustScore: job.trustScore,
     location: job.location,
-    salary: `${formatSalary(job.salary.min)}-${formatSalary(job.salary.max)}${job.salaryDisclosed ? '' : ' (Est.)'}`,
+    salary: formatJobSalaryLabel(job),
     lastActivity: 'Added from search just now',
     nextAction: job.hiringContact
       ? 'A recruiter signal was found here. Follow up within 48 hours while the role is still warm.'
       : 'Give this role 5 business days, then send one concise follow-up if it still looks active.',
     tags: [
-      job.directCompanyLink ? 'Direct company link' : 'Aggregator posting',
+      job.directCompanyLink ? 'Live source link' : 'No source link',
       job.hiringContact ? 'Hiring contact spotted' : 'No recruiter listed',
       `${job.workMode} role`
     ],
@@ -1652,21 +1558,40 @@ function navigateTo(pageId, options = {}) {
     if (linkEl.classList.contains('nav-link') || linkEl.classList.contains('nav-mobile-link')) linkEl.classList.add('active');
   });
   document.body.dataset.page = normalizedPageId;
+
+  if (normalizedPageId === 'jobs') {
+    const q = params ? params.get('q') : '';
+    if (!q) {
+      liveJobSearchState.hasSearched = false;
+      if (jobsSearchQuery) jobsSearchQuery.value = '';
+      if (searchInput) searchInput.value = '';
+      const jobsSearchLocation = document.getElementById('jobs-search-location');
+      if (jobsSearchLocation) jobsSearchLocation.value = '';
+      renderJobs();
+    }
+  }
+
+  if (!['jobs', 'tracker'].includes(normalizedPageId)) setAssistantOpen(false);
   closeMobileMenu();
   closeMobileFilters();
 
   if (normalizedPageId === 'blog') {
-    let articleSlug = 'ghost-jobs';
+    let articleSlug = null;
     if (params) {
-      articleSlug = params.get('article') || 'ghost-jobs';
+      articleSlug = params.get('article');
     } else {
       const urlParams = new URLSearchParams(window.location.search);
-      articleSlug = urlParams.get('article') || 'ghost-jobs';
+      articleSlug = urlParams.get('article');
     }
-    setActiveBlogArticle(articleSlug, false);
+    if (articleSlug) {
+      setActiveBlogArticle(articleSlug, false);
+    } else {
+      showBlogIndex(false);
+    }
     if (syncLocation) {
       const nextParams = params ? new URLSearchParams(params) : new URLSearchParams();
-      nextParams.set('article', articleSlug);
+      if (articleSlug) nextParams.set('article', articleSlug);
+      else nextParams.delete('article');
       const targetUrl = buildPageUrl('blog', nextParams);
       const currentUrl = `${window.location.pathname}${window.location.search}`;
       if (targetUrl !== currentUrl) {
@@ -1688,7 +1613,32 @@ function navigateTo(pageId, options = {}) {
   if (scroll) window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+function showBlogIndex(updateUrl = true) {
+  const blogIndex = document.getElementById('blog-index');
+  const reader = document.getElementById('blog-reader');
+  if (blogIndex) blogIndex.hidden = false;
+  if (reader) reader.hidden = true;
+
+  document.querySelectorAll('.blog-article').forEach((article) => {
+    article.style.display = 'none';
+  });
+  document.querySelectorAll('.blog-toc-item').forEach((tocItem) => tocItem.classList.remove('active'));
+
+  if (updateUrl) {
+    const targetUrl = buildPageUrl('blog', new URLSearchParams());
+    const currentUrl = `${window.location.pathname}${window.location.search}`;
+    if (targetUrl !== currentUrl) {
+      window.history.pushState({}, '', targetUrl);
+    }
+  }
+}
+
 function setActiveBlogArticle(slug, updateUrl = true) {
+  const blogIndex = document.getElementById('blog-index');
+  const reader = document.getElementById('blog-reader');
+  if (blogIndex) blogIndex.hidden = true;
+  if (reader) reader.hidden = false;
+
   document.querySelectorAll('.blog-article').forEach((article) => {
     article.style.display = article.id === `article-${slug}` ? 'block' : 'none';
   });
@@ -1717,9 +1667,23 @@ function initBlogEvents() {
   if (backBtn) {
     backBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      navigateTo('home');
+      showBlogIndex(true);
     });
   }
+
+  document.querySelectorAll('[data-blog-index-article]').forEach((card) => {
+    const openCard = () => {
+      const slug = card.getAttribute('data-blog-index-article');
+      if (slug) setActiveBlogArticle(slug, true);
+    };
+    card.addEventListener('click', openCard);
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openCard();
+      }
+    });
+  });
 
   document.querySelectorAll('.blog-toc-item a').forEach((link) => {
     link.addEventListener('click', (e) => {
@@ -1920,6 +1884,7 @@ function applyInitialPageState() {
   });
 
   if (searchInput) searchInput.value = query || '';
+  if (jobsSearchQuery) jobsSearchQuery.value = query || '';
   pendingInitialJobId = jobId || null;
 }
 
@@ -1927,8 +1892,7 @@ function submitHeroSearch() {
   const query = heroSearch && heroSearch.value.trim();
   if (!query || !searchInput) return;
   searchInput.value = query;
-  navigateTo('jobs', { params: new URLSearchParams({ q: query }) });
-  applyFilters();
+  runLiveJobSearch(query);
 }
 
 document.querySelectorAll('[data-page]').forEach((el) => {
@@ -1984,6 +1948,28 @@ if (authModal) authModal.addEventListener('click', (event) => event.stopPropagat
 if (authCloseButton) authCloseButton.addEventListener('click', closeAuthModal);
 if (heroSearch) heroSearch.addEventListener('keypress', (event) => { if (event.key === 'Enter') submitHeroSearch(); });
 if (heroSearchButton) heroSearchButton.addEventListener('click', submitHeroSearch);
+if (jobsSearchForm) {
+  jobsSearchForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    runLiveJobSearch(jobsSearchQuery && jobsSearchQuery.value);
+  });
+}
+if (jobsLiveSearchBtn) jobsLiveSearchBtn.addEventListener('click', () => runLiveJobSearch(searchInput && searchInput.value));
+if (searchInput) {
+  searchInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      runLiveJobSearch(searchInput.value);
+    }
+  });
+}
+document.querySelectorAll('[data-live-query]').forEach((button) => {
+  button.addEventListener('click', () => {
+    const query = button.getAttribute('data-live-query') || '';
+    if (jobsSearchQuery) jobsSearchQuery.value = query;
+    runLiveJobSearch(query);
+  });
+});
 if (heroResumeTrigger) heroResumeTrigger.addEventListener('click', openResumeUpload);
 if (jobsResumeTrigger) jobsResumeTrigger.addEventListener('click', openResumeUpload);
 if (resumeUploadInput) resumeUploadInput.addEventListener('change', handleResumeUpload);
@@ -2107,25 +2093,169 @@ function sortJobs(list, sortValue, query) {
   });
 }
 
+function normalizeLiveJob(job) {
+  const salary = job && job.salary && typeof job.salary === 'object' ? job.salary : {};
+  const minSalary = Number(salary.min) || 0;
+  const maxSalary = Number(salary.max) || minSalary || 0;
+  let url = String(job && job.url ? job.url : '');
+  let domain = String(job && job.domain ? job.domain : '');
+
+  try {
+    const parsedUrl = new URL(url);
+    if (!/^https?:$/i.test(parsedUrl.protocol)) url = '';
+  } catch {
+    url = '';
+  }
+
+  if (!domain && url) {
+    try {
+      domain = new URL(url).hostname.replace(/^www\./, '');
+    } catch {
+      domain = '';
+    }
+  }
+
+  const source = stripHtml(job && job.source ? job.source : liveJobSearchState.source || 'Live source');
+  const directSignal = Boolean(job && job.directCompanyLink);
+  const aggregatorDomain = /(^|\.)google\.com$|(^|\.)linkedin\.com$|(^|\.)indeed\.com$|(^|\.)glassdoor\.com$|(^|\.)ziprecruiter\.com$|(^|\.)monster\.com$|(^|\.)adzuna\.com$|(^|\.)greenhouse\.io$|(^|\.)lever\.co$/i.test(domain);
+  const aggregatorSource = /google|linkedin|indeed|glassdoor|ziprecruiter|monster|adzuna/i.test(source);
+
+  return {
+    id: String(job && job.id ? job.id : `live-${Date.now()}-${Math.random().toString(36).slice(2)}`),
+    title: stripHtml(job && job.title ? job.title : 'Untitled role'),
+    company: stripHtml(job && job.company ? job.company : 'Company not listed'),
+    companyContext: stripHtml(job && job.companyContext ? job.companyContext : 'Live job listing'),
+    location: stripHtml(job && job.location ? job.location : 'Location not listed'),
+    source,
+    jobType: stripHtml(job && job.jobType ? job.jobType : 'Full-time'),
+    workMode: stripHtml(job && job.workMode ? job.workMode : 'On-site'),
+    salary: {
+      min: minSalary,
+      max: Math.max(maxSalary, minSalary),
+    },
+    salaryText: String(job && job.salaryText ? job.salaryText : ''),
+    salaryDisclosed: Boolean(job && job.salaryDisclosed),
+    daysPosted: Math.max(0, Number(job && job.daysPosted) || 0),
+    repostCount: Math.max(0, Number(job && job.repostCount) || 0),
+    trustScore: Math.max(0, Math.min(100, Number(job && job.trustScore) || 50)),
+    recentHiringActivity: Boolean(job && job.recentHiringActivity),
+    directCompanyLink: directSignal || Boolean(url && domain && !aggregatorDomain && !aggregatorSource),
+    hiringContact: Boolean(job && job.hiringContact),
+    sentiment: stripHtml(job && job.sentiment ? job.sentiment : 'stable'),
+    description: stripHtml(job && job.description ? job.description : 'Open the source listing to verify details and apply.'),
+    requirements: Array.isArray(job && job.requirements) ? job.requirements.map(stripHtml).filter(Boolean) : ['Review the source listing for role-specific requirements.'],
+    domain,
+    url,
+    saved: Boolean(job && job.saved),
+  };
+}
+
+function setLiveSearchLoading(isLoading, query = liveJobSearchState.query) {
+  liveJobSearchState = {
+    ...liveJobSearchState,
+    hasSearched: liveJobSearchState.hasSearched || isLoading,
+    isLoading,
+    query,
+    error: isLoading ? '' : liveJobSearchState.error,
+  };
+  renderJobs();
+}
+
+async function runLiveJobSearch(rawQuery) {
+  const query = String(rawQuery || '').trim();
+  if (!query) {
+    showToast('Enter a role, company, skill, or location to search.');
+    if (jobsSearchQuery) jobsSearchQuery.focus();
+    else if (searchInput) searchInput.focus();
+    return;
+  }
+
+  if (searchInput) searchInput.value = query;
+  if (jobsSearchQuery) jobsSearchQuery.value = query;
+
+  if (typeof saveSearchToHistory === 'function') {
+    saveSearchToHistory(query);
+    renderPreviousSearches();
+  }
+  if (typeof hideAutocompletePanel === 'function') {
+    hideAutocompletePanel();
+  }
+
+  // Read location selection and construct API query
+  let apiQuery = query;
+  const jobsSearchLocation = document.getElementById('jobs-search-location');
+  if (jobsSearchLocation && jobsSearchLocation.value) {
+    const loc = jobsSearchLocation.value;
+    if (loc !== 'anywhere' && !query.toLowerCase().includes(loc.toLowerCase())) {
+      apiQuery = `${query} ${loc}`;
+    }
+  }
+
+  navigateTo('jobs', { params: new URLSearchParams({ q: query }), scroll: false });
+  setLiveSearchLoading(true, query);
+
+  try {
+    const response = await fetch(`/api/google-jobs?q=${encodeURIComponent(apiQuery)}&max=40`, { cache: 'no-store' });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error || 'Live job search failed.');
+
+    allJobs = Array.isArray(payload.data) ? payload.data.map(normalizeLiveJob).filter((job) => job.url) : [];
+    liveJobSearchState = {
+      hasSearched: true,
+      isLoading: false,
+      query,
+      source: payload.meta && payload.meta.source ? String(payload.meta.source) : 'live',
+      error: '',
+    };
+    applyFilters();
+  } catch (error) {
+    allJobs = [];
+    filteredJobs = [];
+    liveJobSearchState = {
+      hasSearched: true,
+      isLoading: false,
+      query,
+      source: '',
+      error: error instanceof Error ? error.message : 'Live job search failed.',
+    };
+    renderJobs();
+    showToast('Live job search is unavailable right now.');
+  }
+}
+
 function applyFilters() {
+  if (typeof syncQuickFiltersUI === 'function') {
+    syncQuickFiltersUI();
+  }
   const query = (searchInput && searchInput.value.trim()) || '';
   const minTrustScore = parseInt((trustFilter && trustFilter.value) || '0', 10);
   const minSalary = parseInt((salaryFilter && salaryFilter.value) || '0', 10);
   const sentiment = (sentimentFilter && sentimentFilter.value) || 'all';
   const directOnly = Boolean(directToggle && directToggle.checked);
   const recruiterOnly = Boolean(recruiterToggle && recruiterToggle.checked);
-  const selectedModes = Array.from(workModeCheckboxes).filter((checkbox) => checkbox.checked).map((checkbox) => checkbox.value);
+  const selectedModes = Array.from(workModeCheckboxes).filter((cb) => cb.checked).map((cb) => cb.value);
 
   if (trustFilterValue) trustFilterValue.textContent = String(minTrustScore);
 
+  const chipHighTrust = activeChipFilters.has('high-trust');
+  const chipSalary50k = activeChipFilters.has('salary-50k');
+  const chipDirect = activeChipFilters.has('direct-apply');
+  const effectiveMinTrustScore = chipHighTrust ? Math.max(minTrustScore, 85) : minTrustScore;
+  const effectiveMinSalary = chipSalary50k ? Math.max(minSalary, 50000) : minSalary;
+  const effectiveDirectOnly = directOnly || chipDirect;
+  const selectedModeSet = new Set(selectedModes);
+  if (activeChipFilters.has('remote')) selectedModeSet.add('Remote');
+  if (activeChipFilters.has('hybrid')) selectedModeSet.add('Hybrid');
+  const effectiveModes = Array.from(selectedModeSet);
+
   const baseJobs = allJobs.filter((job) => {
     if (query && getJobQueryMatchScore(job, query) === 0) return false;
-    if (job.trustScore < minTrustScore) return false;
-    if (job.salary.max < minSalary) return false;
+    if (job.trustScore < effectiveMinTrustScore) return false;
+    if (job.salary.max < effectiveMinSalary) return false;
     if (sentiment !== 'all' && job.sentiment !== sentiment) return false;
-    if (directOnly && !job.directCompanyLink) return false;
+    if (effectiveDirectOnly && !job.directCompanyLink) return false;
     if (recruiterOnly && !job.hiringContact) return false;
-    if (selectedModes.length && !selectedModes.includes(job.workMode)) return false;
+    if (effectiveModes.length && !effectiveModes.includes(job.workMode)) return false;
     return true;
   });
 
@@ -2160,9 +2290,10 @@ function applyFilters() {
 [directToggle, recruiterToggle].forEach((el) => el && el.addEventListener('change', applyFilters));
 workModeCheckboxes.forEach((checkbox) => checkbox.addEventListener('change', applyFilters));
 
+
 function buildSmartTags(job) {
   const tags = [];
-  if (job.directCompanyLink) tags.push(buildSignalTag('green', 'Direct Company Link'));
+  if (job.directCompanyLink) tags.push(buildSignalTag('green', 'Live Source Link'));
   if (job.recentHiringActivity) tags.push(buildSignalTag('green', 'Actively Hiring'));
   if (!job.salaryDisclosed) tags.push(buildSignalTag('amber', 'Salary Not Disclosed'));
   if (job.repostCount > 1) tags.push(buildSignalTag(repostTagTone(job.trustScore), 'Reposted'));
@@ -2172,13 +2303,53 @@ function buildSmartTags(job) {
 function renderJobs() {
   if (!jobsList || !jobsCount || !jobsCountSub || !paginationEl) return;
 
+  const dirASearchWorkspace = document.getElementById('dirA-search-workspace');
+  const jobsShell = document.getElementById('jobs-shell');
+  if (dirASearchWorkspace) {
+    if (liveJobSearchState.hasSearched) {
+      dirASearchWorkspace.setAttribute('hidden', '');
+      dirASearchWorkspace.style.display = 'none';
+    } else {
+      dirASearchWorkspace.removeAttribute('hidden');
+      dirASearchWorkspace.style.display = 'block';
+    }
+  }
+  if (jobsShell) {
+    if (liveJobSearchState.hasSearched) {
+      jobsShell.removeAttribute('hidden');
+      jobsShell.style.display = 'grid';
+    } else {
+      jobsShell.setAttribute('hidden', '');
+      jobsShell.style.display = 'none';
+    }
+  }
+
   jobsList.innerHTML = '';
   paginationEl.innerHTML = '';
 
+  if (!liveJobSearchState.hasSearched) {
+    jobsCount.textContent = 'Search live jobs';
+    jobsCountSub.textContent = 'Start with a role, company, skill, or location.';
+    return;
+  }
+
+  if (liveJobSearchState.isLoading) {
+    jobsCount.textContent = 'Searching live jobs...';
+    jobsCountSub.textContent = liveJobSearchState.query ? `Looking for "${liveJobSearchState.query}"` : 'Contacting live job providers.';
+    jobsList.innerHTML = `
+      <div class="jobs-loading-state">
+        <span></span>
+        <strong>Scanning live listings</strong>
+        <p>We are pulling current openings and keeping source links attached.</p>
+      </div>
+    `;
+    return;
+  }
+
   if (filteredJobs.length === 0) {
-    jobsCount.textContent = '0 openings across 6 job boards';
-    jobsCountSub.textContent = 'Scanning job boards...';
-    jobsList.innerHTML = '<div class="empty-state"><h3>No matches for that search.</h3><p>Try broadening your filters or searching for a different role.</p></div>';
+    jobsCount.textContent = '0 openings';
+    jobsCountSub.textContent = liveJobSearchState.error || (liveJobSearchState.query ? `No live matches for "${liveJobSearchState.query}".` : 'No live matches yet.');
+    jobsList.innerHTML = '<div class="empty-state"><h3>No live jobs found.</h3><p>Try a broader title, remove strict filters, or search a nearby location.</p></div>';
     return;
   }
 
@@ -2187,12 +2358,12 @@ function renderJobs() {
   const end = Math.min(start + PAGE_SIZE, filteredJobs.length);
   const pageJobs = filteredJobs.slice(start, end);
 
-  jobsCount.textContent = `${filteredJobs.length.toLocaleString()} openings across 6 job boards`;
-  jobsCountSub.textContent = `Showing ${start + 1}-${end} of ${filteredJobs.length.toLocaleString()} matches`;
+  jobsCount.textContent = `${filteredJobs.length.toLocaleString()} openings`;
+  jobsCountSub.textContent = `Showing ${start + 1}-${end} of ${filteredJobs.length.toLocaleString()} live matches${liveJobSearchState.query ? ` for "${liveJobSearchState.query}"` : ''}`;
 
   pageJobs.forEach((job) => {
     const trustInfo = getTrustInfo(job.trustScore);
-    const salaryLabel = `${formatSalary(job.salary.min)}-${formatSalary(job.salary.max)}${job.salaryDisclosed ? '' : ' (Est.)'}`;
+    const salaryLabel = formatJobSalaryLabel(job);
     const resumeChip = resumeProfile && job.resumeMatchScore > 0
       ? `<span class="meta-pill meta-pill-highlight">Resume Match ${Math.min(99, 58 + job.resumeMatchScore * 6)}%</span>`
       : '';
@@ -2203,14 +2374,14 @@ function renderJobs() {
       <div class="job-card-grid">
         <div class="job-card-content">
           <div class="job-card-title-row">
-            <h3 class="job-title">${job.title}</h3>
+            <h3 class="job-title">${escapeHtml(job.title)}</h3>
           </div>
           <p class="job-company-line">${job.company} · ${job.location} · ${buildSourceMarkup(job.source)}</p>
           <div class="job-meta-line">
             ${resumeChip}
-            <span class="meta-pill">${salaryLabel}</span>
-            <span class="meta-pill">${job.workMode}</span>
-            <span class="meta-pill">${job.jobType}</span>
+            <span class="meta-pill">${escapeHtml(salaryLabel)}</span>
+            <span class="meta-pill">${escapeHtml(job.workMode)}</span>
+            <span class="meta-pill">${escapeHtml(job.jobType)}</span>
             <span class="job-posted-age">${formatPostedAge(job.daysPosted)}</span>
           </div>
           <div class="job-smart-tags">${buildSmartTags(job)}</div>
@@ -2223,7 +2394,7 @@ function renderJobs() {
       </div>
 
       <div class="job-card-footer">
-        <a href="${job.url}" target="_blank" rel="noopener" class="btn btn-primary job-apply-btn">${buildApplyLabel(job.domain)}</a>
+        <a href="${escapeHtml(job.url)}" target="_blank" rel="noopener" class="btn btn-primary job-apply-btn">${escapeHtml(buildApplyLabel(job.domain))}</a>
       </div>
     `;
 
@@ -2445,7 +2616,7 @@ function openModal(id) {
         <p>${job.description}</p>
         <h3>What we found</h3>
         <div class="modal-signal-grid">
-          ${job.directCompanyLink ? buildSignalTag('green', 'Direct Company Link') : ''}
+          ${job.directCompanyLink ? buildSignalTag('green', 'Live Source Link') : ''}
           ${job.recentHiringActivity ? buildSignalTag('green', 'Recent Hiring Activity') : ''}
           ${!job.salaryDisclosed ? buildSignalTag('amber', 'Salary Not Disclosed') : ''}
           ${job.repostCount > 1 ? buildSignalTag(repostTagTone(job.trustScore), 'Reposted') : ''}
@@ -2457,7 +2628,7 @@ function openModal(id) {
       <aside class="modal-sidebar">
         <div class="sidebar-apply-block">
           <a href="${job.url}" target="_blank" rel="noopener" class="btn btn-primary btn-lg sidebar-apply-btn">${buildApplyLabel(job.domain)}</a>
-          <p class="sidebar-apply-note">Routes straight to the employer's own site</p>
+          <p class="sidebar-apply-note">Opens the live source listing in a new tab</p>
         </div>
         <div class="intel-card">
           <p class="intel-card-label">Trust Breakdown</p>
@@ -2471,7 +2642,7 @@ function openModal(id) {
           <div class="factor-list">
             ${buildBreakdownRow('Salary transparency', salaryScore)}
             ${buildBreakdownRow('Posting freshness', freshnessScore)}
-            ${buildBreakdownRow('Direct Company Link', directScore)}
+            ${buildBreakdownRow('Live source link', directScore)}
             ${buildBreakdownRow('Recent Hiring Activity', activityScore)}
           </div>
         </div>
@@ -2522,7 +2693,7 @@ function getAssistantJobContext() {
       source: job.source,
       domain: job.domain,
       url: job.url,
-      salary: `${formatSalary(job.salary.min)}-${formatSalary(job.salary.max)}${job.salaryDisclosed ? '' : ' est.'}`,
+      salary: formatJobSalaryLabel(job, ' est.'),
       daysPosted: job.daysPosted,
       directCompanyLink: job.directCompanyLink,
       recentHiringActivity: job.recentHiringActivity,
@@ -2647,6 +2818,21 @@ function findAssistantRecommendedJobs(answer, prompt) {
   return [];
 }
 
+function mergeLiveJobsIntoBoard(jobs) {
+  const normalizedJobs = (jobs || []).map(normalizeLiveJob).filter((job) => job.url);
+  if (!normalizedJobs.length) return [];
+
+  const existingIds = new Set(allJobs.map((job) => job.id));
+  normalizedJobs.forEach((job) => {
+    if (!existingIds.has(job.id)) {
+      allJobs.push(job);
+      existingIds.add(job.id);
+    }
+  });
+
+  return normalizedJobs;
+}
+
 function appendAssistantJobCards(jobs) {
   if (!assistantMessagesEl || !jobs.length) return;
 
@@ -2656,7 +2842,7 @@ function appendAssistantJobCards(jobs) {
 
   jobs.forEach((job) => {
     const trustInfo = getTrustInfo(job.trustScore);
-    const salaryLabel = `${formatSalary(job.salary.min)}-${formatSalary(job.salary.max)}${job.salaryDisclosed ? '' : ' est.'}`;
+    const salaryLabel = formatJobSalaryLabel(job, ' est.');
     const card = document.createElement('article');
     card.className = `assistant-job-card tone-${trustInfo.tone}`;
     card.innerHTML = `
@@ -2734,6 +2920,7 @@ async function sendAssistantMessage(event) {
     const decoder = new TextDecoder();
     let buffer = '';
     let answer = '';
+    let assistantRecommendedJobs = [];
 
     while (true) {
       const { value, done } = await reader.read();
@@ -2748,6 +2935,10 @@ async function sendAssistantMessage(event) {
         const payload = safeParseJSON(line.slice(6), null);
         if (!payload) return;
         if (payload.error) throw new Error(payload.error);
+        if (payload.done && Array.isArray(payload.jobs)) {
+          assistantRecommendedJobs = mergeLiveJobsIntoBoard(payload.jobs);
+          return;
+        }
         if (payload.delta) {
           answer += payload.delta;
           if (assistantMessageEl) assistantMessageEl.textContent = answer;
@@ -2760,7 +2951,7 @@ async function sendAssistantMessage(event) {
     if (assistantMessageEl) assistantMessageEl.innerHTML = renderAssistantMarkdown(finalAnswer);
     assistantMessages.push({ role: 'assistant', content: finalAnswer });
     assistantMessages = assistantMessages.slice(-MAX_ASSISTANT_MESSAGES);
-    appendAssistantJobCards(findAssistantRecommendedJobs(finalAnswer, content));
+    appendAssistantJobCards(assistantRecommendedJobs);
     setAssistantStatus('Ready');
   } catch (error) {
     console.warn('[ASSISTANT]', error);
@@ -2798,11 +2989,530 @@ document.addEventListener('keydown', (event) => {
   if (activeModalJobId !== null) closeModal();
 });
 
+
+/* ==========================================================================
+   Redesigned Search & Smart Suggest logic
+   ========================================================================== */
+
+const autocompleteSuggestions = {
+  roles: [
+    { title: 'Software Engineer', meta: '2.8k+ jobs scanned · 73 avg trust' },
+    { title: 'Product Designer', meta: '840 jobs scanned · 81 avg trust' },
+    { title: 'Product Analyst', meta: '620 jobs scanned · 79 avg trust' },
+    { title: 'Data Scientist', meta: '430 jobs scanned · 75 avg trust' },
+    { title: 'Frontend Engineer', meta: '1.2k+ jobs scanned · 78 avg trust' },
+    { title: 'Product Manager', meta: '950 jobs scanned · 80 avg trust' },
+    { title: 'Operations Manager', meta: '310 jobs scanned · 72 avg trust' },
+    { title: 'Marketing Specialist', meta: '540 jobs scanned · 70 avg trust' }
+  ],
+  companies: [
+    { name: 'Stripe', initial: 'S', color: '#635bff', openings: 84 },
+    { name: 'Anthropic', initial: 'A', color: '#cc785c', openings: 62 },
+    { name: 'Vercel', initial: 'V', color: '#000000', openings: 28 },
+    { name: 'Figma', initial: 'F', color: '#f24e1e', openings: 41 },
+    { name: 'Ramp', initial: 'R', color: '#1a1f2c', openings: 33 },
+    { name: 'Linear', initial: 'L', color: '#5e6ad2', openings: 15 }
+  ]
+};
+
+var selectedSuggestionIndex = -1;
+var currentFilteredSuggestions = [];
+
+// Active chip filters — independent state so they work even before jobs-shell is visible
+const activeChipFilters = new Set();
+
+const QUICK_FILTERS_CONFIG = {
+  'high-trust':    { label: 'High Trust Score',   emoji: '⭐' },
+  'remote':        { label: 'Remote-only',         emoji: '🌐' },
+  'salary-50k':    { label: '$50k+',               emoji: '💰' },
+  'hybrid':        { label: 'Hybrid',               emoji: '🏢' },
+  'direct-apply':  { label: 'Direct Apply',         emoji: '✅' }
+};
+
+// Cookie utilities
+function setCookie(name, value, days) {
+  let expires = "";
+  if (days) {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    expires = "; expires=" + date.toUTCString();
+  }
+  document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax";
+}
+
+function getCookie(name) {
+  const nameEQ = name + "=";
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+}
+
+function loadPreviousSearches() {
+  const raw = getCookie('emploid_prev_searches');
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveSearchToHistory(query) {
+  const term = String(query || '').trim();
+  if (!term) return;
+  
+  let history = loadPreviousSearches();
+  history = history.filter(h => h.toLowerCase() !== term.toLowerCase());
+  history.unshift(term);
+  history = history.slice(0, 5);
+  
+  setCookie('emploid_prev_searches', JSON.stringify(history), 30);
+}
+
+function renderPreviousSearches() {
+  const container = document.getElementById('dirA-previous-searches');
+  const list = document.getElementById('previous-searches-list');
+  if (!container || !list) return;
+  
+  const history = loadPreviousSearches();
+  if (history.length === 0) {
+    container.style.display = 'none';
+    return;
+  }
+  
+  container.style.display = 'block';
+  list.innerHTML = history.map((h, idx) => `
+    <div class="dirA-activity-row previous-search-item" data-query="${escapeHtml(h)}" data-index="${idx}">
+      <div class="text">
+        <span class="query">${escapeHtml(h)}</span>
+      </div>
+      <button type="button" class="prev-search-delete" data-index="${idx}" title="Remove this search" aria-label="Remove search: ${escapeHtml(h)}">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+      </button>
+      <span class="go">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="8 7 17 7 17 16"></polyline></svg>
+      </span>
+    </div>
+  `).join('');
+  
+  // Click on row to re-run search
+  list.querySelectorAll('.previous-search-item').forEach((item) => {
+    item.addEventListener('click', (e) => {
+      // Don't trigger if delete button was clicked
+      if (e.target.closest('.prev-search-delete')) return;
+      const query = item.getAttribute('data-query');
+      if (jobsSearchQuery) jobsSearchQuery.value = query;
+      runLiveJobSearch(query);
+    });
+  });
+
+  // Per-item delete
+  list.querySelectorAll('.prev-search-delete').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.getAttribute('data-index'), 10);
+      let history = loadPreviousSearches();
+      history.splice(idx, 1);
+      setCookie('emploid_prev_searches', JSON.stringify(history), 30);
+      renderPreviousSearches();
+    });
+  });
+}
+
+function clearSearchHistory() {
+  setCookie('emploid_prev_searches', '', -1);
+  renderPreviousSearches();
+  showToast('Search history cleared.');
+}
+
+// Autocomplete suggestions panel logic
+function hideAutocompletePanel() {
+  const panel = document.getElementById('search-autocomplete-panel');
+  if (panel) {
+    panel.hidden = true;
+  }
+  selectedSuggestionIndex = -1;
+}
+
+function showAutocompletePanel() {
+  const panel = document.getElementById('search-autocomplete-panel');
+  if (panel && currentFilteredSuggestions.length > 0) {
+    panel.hidden = false;
+  }
+}
+
+function updateFilteredSuggestions(typed) {
+  const val = String(typed || '').trim().toLowerCase();
+  
+  if (!val) {
+    currentFilteredSuggestions = [];
+    selectedSuggestionIndex = -1;
+    hideAutocompletePanel();
+    return;
+  }
+
+  // Filter roles
+  const filteredRoles = autocompleteSuggestions.roles.filter(r => 
+    r.title.toLowerCase().includes(val)
+  );
+  
+  // Filter companies
+  const filteredCompanies = autocompleteSuggestions.companies.filter(c => 
+    c.name.toLowerCase().includes(val)
+  );
+  
+  currentFilteredSuggestions = [];
+  
+  if (filteredRoles.length > 0) {
+    currentFilteredSuggestions.push({ type: 'section', label: 'Suggested Roles' });
+    filteredRoles.forEach(r => {
+      currentFilteredSuggestions.push({
+        type: 'role',
+        title: r.title,
+        meta: r.meta,
+        value: r.title
+      });
+    });
+  }
+  
+  if (filteredCompanies.length > 0) {
+    currentFilteredSuggestions.push({ type: 'section', label: 'Suggested Companies' });
+    filteredCompanies.forEach(c => {
+      currentFilteredSuggestions.push({
+        type: 'company',
+        title: c.name,
+        meta: `${c.openings} open roles`,
+        value: c.name,
+        initial: c.initial,
+        color: c.color
+      });
+    });
+  }
+  
+  selectedSuggestionIndex = -1;
+  renderAutocompletePanel();
+}
+
+function renderAutocompletePanel() {
+  const panel = document.getElementById('search-autocomplete-panel');
+  if (!panel) return;
+  
+  if (currentFilteredSuggestions.length === 0) {
+    panel.hidden = true;
+    return;
+  }
+  
+  panel.hidden = false;
+  
+  let html = '';
+  let selectableIndex = 0;
+  
+  currentFilteredSuggestions.forEach((item) => {
+    if (item.type === 'section') {
+      html += `<div class="autocomplete-section-label">${item.label}</div>`;
+    } else {
+      item.selectableIndex = selectableIndex;
+      const isSelected = selectableIndex === selectedSuggestionIndex;
+      
+      const iconMarkup = item.type === 'role' 
+        ? `<div class="autocomplete-row-icon" style="background: var(--orange-soft); color: var(--orange-500);">
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7.5"></circle><line x1="20.5" y1="20.5" x2="17" y2="17"></line></svg>
+           </div>`
+        : `<div class="autocomplete-row-icon" style="background: ${item.color || '#bcc9d8'}; color: #fff;">${item.initial}</div>`;
+        
+      html += `
+        <button type="button" class="autocomplete-row ${isSelected ? 'is-selected' : ''}" data-index="${selectableIndex}">
+          ${iconMarkup}
+          <div class="autocomplete-row-text">
+            <div class="autocomplete-row-title">${escapeHtml(item.title)}</div>
+            <div class="autocomplete-row-meta">${escapeHtml(item.meta)}</div>
+          </div>
+          ${isSelected ? '<span class="autocomplete-row-enter"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 10 4 15 9 20"></polyline><path d="M20 4v7a4 4 0 0 1-4 4H4"></path></svg></span>' : ''}
+        </button>
+      `;
+      selectableIndex++;
+    }
+  });
+  
+  html += `
+    <div class="autocomplete-footer">
+      <div class="hints">
+        <span class="hint"><span class="kbd">↵</span> open</span>
+        <span class="hint"><span class="kbd">↑</span><span class="kbd">↓</span> navigate</span>
+        <span class="hint"><span class="kbd">esc</span> close</span>
+      </div>
+      <span class="brand">Emploid Smart Suggest</span>
+    </div>
+  `;
+  
+  panel.innerHTML = html;
+  
+  panel.querySelectorAll('.autocomplete-row').forEach(row => {
+    row.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(row.getAttribute('data-index'), 10);
+      selectAutocompleteIndex(idx);
+    });
+  });
+}
+
+function selectAutocompleteIndex(idx) {
+  const item = currentFilteredSuggestions.find(i => i.selectableIndex === idx);
+  if (item) {
+    if (jobsSearchQuery) {
+      jobsSearchQuery.value = item.value;
+    }
+    hideAutocompletePanel();
+    runLiveJobSearch(item.value);
+  }
+}
+
+function handleSearchInputKeydown(event) {
+  const panel = document.getElementById('search-autocomplete-panel');
+  if (!panel || panel.hidden) {
+    return;
+  }
+  
+  const selectableCount = currentFilteredSuggestions.filter(i => i.type !== 'section').length;
+  
+  if (event.key === 'ArrowDown') {
+    event.preventDefault();
+    if (selectedSuggestionIndex < selectableCount - 1) {
+      selectedSuggestionIndex++;
+    } else {
+      selectedSuggestionIndex = 0;
+    }
+    renderAutocompletePanel();
+  } else if (event.key === 'ArrowUp') {
+    event.preventDefault();
+    if (selectedSuggestionIndex > 0) {
+      selectedSuggestionIndex--;
+    } else {
+      selectedSuggestionIndex = selectableCount - 1;
+    }
+    renderAutocompletePanel();
+  } else if (event.key === 'Enter') {
+    if (selectedSuggestionIndex >= 0) {
+      event.preventDefault();
+      selectAutocompleteIndex(selectedSuggestionIndex);
+    }
+  } else if (event.key === 'Escape') {
+    event.preventDefault();
+    hideAutocompletePanel();
+    if (jobsSearchQuery) {
+      jobsSearchQuery.blur();
+    }
+  }
+}
+
+// Quick Filters Sync logic — reads from activeChipFilters set
+function syncQuickFiltersUI() {
+  for (const filterId of Object.keys(QUICK_FILTERS_CONFIG)) {
+    const chip = document.getElementById(`qf-${filterId}`);
+    if (!chip) continue;
+    const isActive = activeChipFilters.has(filterId);
+    chip.classList.toggle('is-active', isActive);
+    chip.setAttribute('aria-pressed', String(isActive));
+  }
+}
+
+function getWorkModeCheckbox(mode) {
+  return Array.from(workModeCheckboxes).find((checkbox) => checkbox.value === mode);
+}
+
+function applyQuickFilterToControls(filterId, isActive) {
+  if (filterId === 'high-trust' && trustFilter) {
+    if (isActive && Number(trustFilter.value) < 85) {
+      trustFilter.value = '85';
+      trustFilter.dataset.quickFilter = filterId;
+    } else if (!isActive && trustFilter.dataset.quickFilter === filterId) {
+      trustFilter.value = '0';
+      delete trustFilter.dataset.quickFilter;
+    }
+    if (trustFilterValue) trustFilterValue.textContent = String(trustFilter.value);
+  }
+
+  if (filterId === 'salary-50k' && salaryFilter) {
+    if (isActive && Number(salaryFilter.value) < 50000) {
+      salaryFilter.value = '50000';
+      salaryFilter.dataset.quickFilter = filterId;
+    } else if (!isActive && salaryFilter.dataset.quickFilter === filterId) {
+      salaryFilter.value = '0';
+      delete salaryFilter.dataset.quickFilter;
+    }
+  }
+
+  if (filterId === 'direct-apply' && directToggle) {
+    if (isActive) {
+      directToggle.checked = true;
+      directToggle.dataset.quickFilter = filterId;
+    } else if (directToggle.dataset.quickFilter === filterId) {
+      directToggle.checked = false;
+      delete directToggle.dataset.quickFilter;
+    }
+  }
+
+  const modeByFilter = { remote: 'Remote', hybrid: 'Hybrid' };
+  const mode = modeByFilter[filterId];
+  const modeCheckbox = mode ? getWorkModeCheckbox(mode) : null;
+  if (modeCheckbox) {
+    if (isActive) {
+      modeCheckbox.checked = true;
+      modeCheckbox.dataset.quickFilter = filterId;
+    } else if (modeCheckbox.dataset.quickFilter === filterId) {
+      modeCheckbox.checked = false;
+      delete modeCheckbox.dataset.quickFilter;
+    }
+  }
+}
+
+function clearQuickFilterFromManualControls(event) {
+  const target = event.currentTarget;
+  if (!target || !target.dataset || !target.dataset.quickFilter) return;
+
+  const filterId = target.dataset.quickFilter;
+  const shouldClear =
+    (filterId === 'high-trust' && Number(target.value) < 85) ||
+    (filterId === 'salary-50k' && Number(target.value) < 50000) ||
+    (filterId === 'direct-apply' && !target.checked) ||
+    ((filterId === 'remote' || filterId === 'hybrid') && !target.checked);
+
+  if (shouldClear) {
+    activeChipFilters.delete(filterId);
+    delete target.dataset.quickFilter;
+    syncQuickFiltersUI();
+  }
+}
+
+function handleQuickFilterClick(filterId) {
+  if (!QUICK_FILTERS_CONFIG[filterId]) return;
+
+  const chip = document.getElementById(`qf-${filterId}`);
+  if (!chip) return;
+
+  if (activeChipFilters.has(filterId)) {
+    activeChipFilters.delete(filterId);
+  } else {
+    activeChipFilters.add(filterId);
+  }
+
+  applyQuickFilterToControls(filterId, activeChipFilters.has(filterId));
+
+  chip.classList.remove('is-flipping');
+  void chip.offsetWidth;
+  chip.classList.add('is-flipping');
+  window.setTimeout(() => chip.classList.remove('is-flipping'), 560);
+
+  syncQuickFiltersUI();
+
+  if (liveJobSearchState && liveJobSearchState.hasSearched) {
+    applyFilters();
+    return;
+  }
+
+  const pendingQuery = jobsSearchQuery && jobsSearchQuery.value.trim();
+  if (pendingQuery) {
+    runLiveJobSearch(pendingQuery);
+  }
+}
+
+// Initialize Redesigned Search Page
+function initSearchRedesign() {
+  if (!jobsSearchQuery) return;
+  
+  // 1. Previous Searches from Cookies
+  renderPreviousSearches();
+  const clearHistBtn = document.getElementById('clear-history-btn');
+  if (clearHistBtn) {
+    clearHistBtn.addEventListener('click', clearSearchHistory);
+  }
+  
+  // 2. Autocomplete Panel setup — only show suggestions when user has typed something
+  jobsSearchQuery.addEventListener('focus', () => {
+    if (jobsSearchQuery.value.trim()) {
+      updateFilteredSuggestions(jobsSearchQuery.value);
+      showAutocompletePanel();
+    }
+  });
+  
+  jobsSearchQuery.addEventListener('input', () => {
+    updateFilteredSuggestions(jobsSearchQuery.value);
+    showAutocompletePanel();
+  });
+  
+  jobsSearchQuery.addEventListener('keydown', handleSearchInputKeydown);
+  
+  // Hide panel when clicking outside
+  document.addEventListener('click', (e) => {
+    const wrapper = document.querySelector('.search-input-wrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+      hideAutocompletePanel();
+    }
+  });
+  
+  // 3. Quick Filters Click Listeners
+  for (const filterId of Object.keys(QUICK_FILTERS_CONFIG)) {
+    const chip = document.getElementById(`qf-${filterId}`);
+    if (chip) {
+      chip.setAttribute('aria-pressed', 'false');
+      chip.addEventListener('click', () => handleQuickFilterClick(filterId));
+    }
+  }
+
+  [trustFilter, salaryFilter].forEach((el) => {
+    if (el) el.addEventListener('input', clearQuickFilterFromManualControls);
+  });
+  [directToggle, ...Array.from(workModeCheckboxes)].forEach((el) => {
+    if (el) el.addEventListener('change', clearQuickFilterFromManualControls);
+  });
+  
+  // Initial sync
+  syncQuickFiltersUI();
+
+  // 5. Activity Rail Click Listeners
+  document.querySelectorAll('.dirA-activity-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const query = row.getAttribute('data-activity-query');
+      if (query) {
+        if (jobsSearchQuery) jobsSearchQuery.value = query;
+        runLiveJobSearch(query);
+      }
+    });
+  });
+  
+  // 4. Global Keyboard Shortcut '/' to focus search
+  window.addEventListener('keydown', (e) => {
+    if (e.key === '/' && !['input', 'textarea'].includes(document.activeElement.tagName.toLowerCase()) && !document.activeElement.isContentEditable) {
+      if (jobsSearchQuery) {
+        e.preventDefault();
+        jobsSearchQuery.focus();
+        jobsSearchQuery.select();
+        // Trigger suggestions dropdown on focus
+        updateFilteredSuggestions(jobsSearchQuery.value);
+        showAutocompletePanel();
+      }
+    }
+  });
+}
+
+// Page initialization
+ensureFilsonProLoaded();
 renderAuthState();
 setAuthMode('signup');
 renderHomePreview();
 renderResumeMatchUI();
 renderTracker();
 initBlogEvents();
+initHomeInteractions();
+initSearchRedesign(); // Initialize search redesign
 applyInitialPageState();
-applyFilters();
+if (document.body.dataset.page === 'jobs' && searchInput && searchInput.value.trim()) {
+  runLiveJobSearch(searchInput.value.trim());
+} else {
+  applyFilters();
+}
