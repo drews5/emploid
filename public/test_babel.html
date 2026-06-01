@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script>
+    window.errors = [];
+    window.onerror = function(message, source, lineno, colno, error) {
+      window.errors.push({message: message, source: source, lineno: lineno, colno: colno, error: error ? error.stack : null});
+    };
+    window.addEventListener('unhandledrejection', function(event) {
+      window.errors.push({message: 'Unhandled Rejection: ' + event.reason});
+    });
+  </script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+</head>
+<body>
+  <div id="tracker-app-root"></div>
+  <script src="/tracker-data.js"></script>
+  <script type="text/babel" src="/tracker-components.jsx"></script>
+  <script type="text/babel" src="/tracker-app.jsx"></script>
+  <script>
+    setTimeout(() => {
+      var scriptErrors = [];
+      // Babel standalone wraps errors or throws them
+      console.log("DIAGNOSTIC_ERRORS:", JSON.stringify(window.errors));
+      console.log("DIAGNOSTIC_ROOT:", document.getElementById('tracker-app-root').innerHTML);
+    }, 3000);
+  </script>
+</body>
+</html>

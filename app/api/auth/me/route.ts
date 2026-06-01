@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
 import { ProfileUpdateSchema } from '@/lib/validations';
+import { upsertUserProfile } from '@/lib/auth-profile';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +13,14 @@ export const GET = withAuth(async (req, { user, supabase }) => {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+    const { data: syncedProfile, error: syncError } = await upsertUserProfile(supabase, user);
+
+    if (syncError) {
+      console.error('[PROFILE_SYNC]', syncError);
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ profile: syncedProfile }, { status: 200 });
   }
 
   return NextResponse.json({ profile }, { status: 200 });

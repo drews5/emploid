@@ -244,7 +244,7 @@ function adzunaJobToEmploidJob(job: any, index: number) {
     company,
     companyContext: job.category?.label || 'Job listing',
     location,
-    source: 'Listing source',
+    source: 'Adzuna',
     jobType,
     workMode: /remote/i.test(`${title} ${location} ${job.description || ''}`) ? 'Remote' : /hybrid/i.test(`${title} ${location} ${job.description || ''}`) ? 'Hybrid' : 'On-site',
     salary: {

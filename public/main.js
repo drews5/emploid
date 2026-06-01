@@ -178,6 +178,10 @@ const TRACKER_STORAGE_KEY = 'emploid-tracker-applications-v1';
 const REACT_TRACKER_STORAGE_KEY = 'emploid-tracker-board-v2';
 const RESUME_STORAGE_KEY = 'emploid-resume-profile-v1';
 const AI_INSIGHTS_STORAGE_KEY = 'emploid-ai-insights-v1';
+const AUTH_SESSION_STORAGE_KEY = 'emploid-auth-session-v1';
+const AUTH_ACCOUNTS_STORAGE_KEY = 'emploid-auth-accounts-v1';
+const AUTH_LAST_EMAIL_STORAGE_KEY = 'emploid-auth-last-email-v1';
+const PREVIOUS_SEARCHES_STORAGE_KEY = 'emploid-prev-searches-v1';
 
 const RESUME_ROLE_PROFILES = [
   {
@@ -333,6 +337,122 @@ function safeParseJSON(value, fallback) {
   }
 }
 
+function normalizeAuthEmail(email) {
+  return String(email || '').trim().toLowerCase();
+}
+
+function authAccountKey(email) {
+  return normalizeAuthEmail(email).replace(/[^a-z0-9._-]+/g, '_');
+}
+
+function loadRawAuthSession() {
+  const stored = safeParseJSON(window.localStorage.getItem(AUTH_SESSION_STORAGE_KEY), null);
+  if (!stored || typeof stored.email !== 'string') return null;
+  const email = normalizeAuthEmail(stored.email);
+  if (!email) return null;
+  return {
+    ...stored,
+    email,
+    accountKey: stored.accountKey || authAccountKey(email),
+  };
+}
+
+function activeAccountKey() {
+  const session = loadRawAuthSession();
+  return session && session.accountKey ? session.accountKey : null;
+}
+
+function scopedStorageKey(baseKey, accountKey = activeAccountKey()) {
+  return accountKey ? `${baseKey}:account:${accountKey}` : baseKey;
+}
+
+window.emploidScopedStorageKey = scopedStorageKey;
+
+function readStorageArray(baseKey, accountKey = activeAccountKey()) {
+  const parsed = safeParseJSON(window.localStorage.getItem(scopedStorageKey(baseKey, accountKey)), []);
+  return Array.isArray(parsed) ? parsed : [];
+}
+
+function writeStorageArray(baseKey, values, accountKey = activeAccountKey()) {
+  window.localStorage.setItem(scopedStorageKey(baseKey, accountKey), JSON.stringify(Array.isArray(values) ? values : []));
+}
+
+function mergeUniqueBy(items, getKey) {
+  const seen = new Set();
+  const merged = [];
+  items.forEach((item) => {
+    const key = getKey(item);
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    merged.push(item);
+  });
+  return merged;
+}
+
+function mergeSearchHistory(primary, secondary) {
+  return mergeUniqueBy([...(primary || []), ...(secondary || [])], (item) => String(item || '').trim().toLowerCase())
+    .filter(Boolean)
+    .slice(0, 5);
+}
+
+function trackerMergeKey(item) {
+  if (!item) return '';
+  return item.id || `${String(item.company || '').toLowerCase()}::${String(item.role || item.title || '').toLowerCase()}`;
+}
+
+function mergeTrackerRecords(primary, secondary) {
+  return mergeUniqueBy([...(primary || []), ...(secondary || [])], trackerMergeKey);
+}
+
+function loadAuthAccounts() {
+  const accounts = safeParseJSON(window.localStorage.getItem(AUTH_ACCOUNTS_STORAGE_KEY), {});
+  return accounts && typeof accounts === 'object' && !Array.isArray(accounts) ? accounts : {};
+}
+
+function saveAuthAccounts(accounts) {
+  window.localStorage.setItem(AUTH_ACCOUNTS_STORAGE_KEY, JSON.stringify(accounts || {}));
+}
+
+function makeLocalPasswordToken(password) {
+  return window.btoa(unescape(encodeURIComponent(String(password || ''))));
+}
+
+function migrateCookieSearchesToStorage() {
+  const cookieSearches = loadPreviousSearchesFromCookie();
+  if (!cookieSearches.length) return;
+  const guestSearches = readStorageArray(PREVIOUS_SEARCHES_STORAGE_KEY, null);
+  writeStorageArray(PREVIOUS_SEARCHES_STORAGE_KEY, mergeSearchHistory(guestSearches, cookieSearches), null);
+  setCookie('emploid_prev_searches', '', -1);
+}
+
+function syncGuestDataToAccount(accountKey) {
+  if (!accountKey) return;
+
+  const guestSearches = readStorageArray(PREVIOUS_SEARCHES_STORAGE_KEY, null);
+  const accountSearches = readStorageArray(PREVIOUS_SEARCHES_STORAGE_KEY, accountKey);
+  writeStorageArray(PREVIOUS_SEARCHES_STORAGE_KEY, mergeSearchHistory(accountSearches, guestSearches), accountKey);
+
+  const guestTracker = readStorageArray(TRACKER_STORAGE_KEY, null);
+  const accountTracker = readStorageArray(TRACKER_STORAGE_KEY, accountKey);
+  if (guestTracker.length || accountTracker.length) {
+    writeStorageArray(TRACKER_STORAGE_KEY, mergeTrackerRecords(accountTracker, guestTracker), accountKey);
+  }
+
+  const guestBoard = readStorageArray(REACT_TRACKER_STORAGE_KEY, null);
+  const accountBoard = readStorageArray(REACT_TRACKER_STORAGE_KEY, accountKey);
+  if (guestBoard.length || accountBoard.length) {
+    writeStorageArray(REACT_TRACKER_STORAGE_KEY, mergeTrackerRecords(accountBoard, guestBoard), accountKey);
+  }
+}
+
+function syncAccountBoundState() {
+  trackerApplications = loadTrackerApplications();
+  renderTracker();
+  renderPreviousSearches();
+  window.dispatchEvent(new CustomEvent('emploid:tracker-updated'));
+  window.dispatchEvent(new CustomEvent('emploid:auth-changed', { detail: { accountKey: activeAccountKey() } }));
+}
+
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -412,7 +532,7 @@ function buildReactTrackerRecord(job) {
 }
 
 function syncReactTrackerStorage(job) {
-  const current = safeParseJSON(window.localStorage.getItem(REACT_TRACKER_STORAGE_KEY), []);
+  const current = safeParseJSON(window.localStorage.getItem(scopedStorageKey(REACT_TRACKER_STORAGE_KEY)), []);
   const tracker = Array.isArray(current) ? current : [];
   const existingIndex = tracker.findIndex((application) => application.company === job.company && application.role === job.title);
   const nextRecord = buildReactTrackerRecord(job);
@@ -429,12 +549,12 @@ function syncReactTrackerStorage(job) {
     tracker.unshift(nextRecord);
   }
 
-  window.localStorage.setItem(REACT_TRACKER_STORAGE_KEY, JSON.stringify(tracker));
+  window.localStorage.setItem(scopedStorageKey(REACT_TRACKER_STORAGE_KEY), JSON.stringify(tracker));
   window.dispatchEvent(new CustomEvent('emploid:tracker-updated'));
 }
 
 function loadTrackerApplications() {
-  const saved = safeParseJSON(window.localStorage.getItem(TRACKER_STORAGE_KEY), []);
+  const saved = safeParseJSON(window.localStorage.getItem(scopedStorageKey(TRACKER_STORAGE_KEY)), []);
   if (!Array.isArray(saved) || !saved.length) return DEFAULT_TRACKER_APPLICATIONS.map((application) => ({ ...application }));
 
   const defaultMap = new Map(DEFAULT_TRACKER_APPLICATIONS.map((application) => [application.id, application]));
@@ -451,7 +571,7 @@ function loadTrackerApplications() {
 }
 
 function saveTrackerApplications() {
-  window.localStorage.setItem(TRACKER_STORAGE_KEY, JSON.stringify(trackerApplications));
+  window.localStorage.setItem(scopedStorageKey(TRACKER_STORAGE_KEY), JSON.stringify(trackerApplications));
 }
 
 function loadResumeProfile() {
@@ -472,15 +592,7 @@ function saveInsightsCache(cache) {
 }
 
 function loadAuthSession() {
-  const stored = safeParseJSON(window.localStorage.getItem(AUTH_SESSION_STORAGE_KEY), null);
-  if (!stored || typeof stored.email !== 'string') return null;
-  const email = stored.email.trim();
-  if (!email) return null;
-  return {
-    email,
-    mode: stored.mode === 'login' ? 'login' : 'signup',
-    createdAt: stored.createdAt || null,
-  };
+  return loadRawAuthSession();
 }
 
 function saveAuthSession(session) {
@@ -497,7 +609,7 @@ function rememberAuthEmail(email) {
 }
 
 function authDisplayEmail(session) {
-  return session && session.email ? session.email : 'you@example.com';
+  return session && (session.name || session.email) ? (session.name || session.email) : 'you@example.com';
 }
 
 function renderAuthState() {
@@ -513,46 +625,25 @@ function renderAuthState() {
   if (navMobileUserEmail) navMobileUserEmail.textContent = email;
 }
 
-function setAuthMode(mode) {
-  currentAuthMode = mode === 'login' ? 'login' : 'signup';
-
-  if (authTabSignUp) authTabSignUp.classList.toggle('is-active', currentAuthMode === 'signup');
-  if (authTabLogin) authTabLogin.classList.toggle('is-active', currentAuthMode === 'login');
-
-  if (currentAuthMode === 'signup') {
-    if (authKicker) authKicker.textContent = 'Sign up';
-    if (authTitle) authTitle.textContent = 'Create your Emploid account';
-    if (authSubtitle) authSubtitle.textContent = 'Save jobs, keep your tracker in sync, and get back in instantly. This demo accepts any email and password.';
-    if (authSubmit) authSubmit.textContent = 'Sign up';
-    if (authNote) authNote.textContent = 'No verification or password rules in this demo. Just enter any email and password to continue.';
-    if (authSwitchCopy) authSwitchCopy.textContent = 'Already have an account?';
-    if (authSwitchMode) authSwitchMode.textContent = 'Log in';
-  } else {
-    if (authKicker) authKicker.textContent = 'Log in';
-    if (authTitle) authTitle.textContent = 'Welcome back';
-    if (authSubtitle) authSubtitle.textContent = 'Pick up where you left off. Use any email and password and we will sign you right in.';
-    if (authSubmit) authSubmit.textContent = 'Log in';
-    if (authNote) authNote.textContent = 'Your saved jobs and tracker stay on this device for the demo.';
-    if (authSwitchCopy) authSwitchCopy.textContent = 'Need an account?';
-    if (authSwitchMode) authSwitchMode.textContent = 'Sign up';
-  }
-
-  if (authPasswordInput) {
-    authPasswordInput.setAttribute('autocomplete', currentAuthMode === 'signup' ? 'new-password' : 'current-password');
-  }
+function setAuthMode() {
+  currentAuthMode = 'google';
+  if (authKicker) authKicker.textContent = 'Google sign in';
+  if (authTitle) authTitle.textContent = 'Continue to Emploid';
+  if (authSubtitle) authSubtitle.textContent = 'Use your Google account to save searches, tracker activity, and account details in Supabase.';
+  if (authSubmit) authSubmit.querySelector('span:last-child').textContent = 'Continue with Google';
+  if (authNote) authNote.textContent = 'Your Google name, email, and profile image are synced to your Emploid profile.';
 }
 
 function openAuthModal(mode = 'signup') {
   if (!authOverlay) return;
   setAuthMode(mode);
-  if (authEmailInput) authEmailInput.value = authSession ? authSession.email : loadRememberedAuthEmail();
-  if (authPasswordInput) authPasswordInput.value = '';
   authOverlay.classList.add('open');
   authOverlay.setAttribute('aria-hidden', 'false');
   closeMobileMenu();
   syncModalLock();
+  initializeGoogleSignIn({ showPrompt: false });
   window.setTimeout(() => {
-    if (authEmailInput) authEmailInput.focus();
+    if (authGoogleSubmit) authGoogleSubmit.focus();
   }, 0);
 }
 
@@ -563,38 +654,268 @@ function closeAuthModal() {
   syncModalLock();
 }
 
-function submitAuthForm(event) {
-  event.preventDefault();
-  const email = String(authEmailInput && authEmailInput.value ? authEmailInput.value : '').trim();
-  const password = String(authPasswordInput && authPasswordInput.value ? authPasswordInput.value : '');
+function buildAuthSessionFromProfile(profile, user = {}) {
+  const email = normalizeAuthEmail(profile && profile.email ? profile.email : user.email);
+  if (!email) return null;
 
-  if (!email || !password) {
-    showToast('Enter any email and password to continue.');
-    if (!email && authEmailInput) authEmailInput.focus();
-    else if (authPasswordInput) authPasswordInput.focus();
-    return;
-  }
-
-  authSession = {
+  return {
     email,
-    mode: currentAuthMode,
+    name: profile && profile.name ? profile.name : user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name),
+    avatarUrl: profile && profile.avatar_url ? profile.avatar_url : user.user_metadata && (user.user_metadata.avatar_url || user.user_metadata.picture),
+    provider: profile && profile.auth_provider ? profile.auth_provider : 'google',
+    accountKey: user.id || (profile && profile.id) || authAccountKey(email),
     createdAt: new Date().toISOString(),
   };
-
-  saveAuthSession(authSession);
-  rememberAuthEmail(email);
-  renderAuthState();
-  closeAuthModal();
-  showToast(currentAuthMode === 'signup' ? `Account created for ${email}.` : `Logged in as ${email}.`);
 }
 
-function signOutAuth() {
+function applySignedInSession(nextSession, announce = true) {
+  if (!nextSession) return;
+  syncGuestDataToAccount(nextSession.accountKey);
+  authSession = nextSession;
+  saveAuthSession(authSession);
+  rememberAuthEmail(authSession.email);
+  renderAuthState();
+  syncAccountBoundState();
+  closeAuthModal();
+  if (announce) showToast(`Signed in as ${authSession.email}.`);
+}
+
+function setGoogleAuthBusy(isBusy) {
+  if (!authGoogleSubmit) return;
+  authGoogleSubmit.disabled = isBusy;
+  const label = authGoogleSubmit.querySelector('span:last-child');
+  if (label) label.textContent = isBusy ? 'Connecting...' : 'Continue with Google';
+}
+
+async function fetchAuthConfig() {
+  if (!authConfigPromise) {
+    authConfigPromise = fetch('/api/auth/config', { credentials: 'same-origin' })
+      .then((response) => response.ok ? response.json() : {})
+      .catch(() => ({}));
+  }
+  return authConfigPromise;
+}
+
+async function generateGoogleNonce() {
+  const bytes = new Uint8Array(32);
+  window.crypto.getRandomValues(bytes);
+  const nonce = window.btoa(String.fromCharCode(...bytes));
+  const encoded = new TextEncoder().encode(nonce);
+  const hashBuffer = await window.crypto.subtle.digest('SHA-256', encoded);
+  const hashedNonce = Array.from(new Uint8Array(hashBuffer))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+
+  return { nonce, hashedNonce };
+}
+
+function waitForGoogleIdentity(timeout = 5000) {
+  if (window.google && window.google.accounts && window.google.accounts.id) return Promise.resolve(true);
+
+  return new Promise((resolve) => {
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => {
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        window.clearInterval(timer);
+        resolve(true);
+      } else if (Date.now() - startedAt > timeout) {
+        window.clearInterval(timer);
+        resolve(false);
+      }
+    }, 100);
+  });
+}
+
+async function syncCurrentSupabaseSession() {
+  try {
+    const response = await fetch('/api/auth/me', { credentials: 'same-origin' });
+    if (!response.ok) return;
+    const payload = await response.json();
+    const nextSession = buildAuthSessionFromProfile(payload.profile);
+    if (nextSession) applySignedInSession(nextSession, false);
+  } catch (error) {
+    console.warn('[AUTH_SESSION]', error);
+  }
+}
+
+async function handleGoogleCredentialResponse(response) {
+  if (!response || !response.credential) return;
+  setGoogleAuthBusy(true);
+
+  try {
+    const signInResponse = await fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        credential: response.credential,
+        nonce: googleNonce && googleNonce.nonce,
+      }),
+    });
+    const payload = await signInResponse.json().catch(() => ({}));
+
+    if (!signInResponse.ok) {
+      throw new Error(payload.error || 'Google sign in failed');
+    }
+
+    const nextSession = buildAuthSessionFromProfile(payload.profile || {}, payload.user || {});
+    applySignedInSession(nextSession);
+  } catch (error) {
+    console.warn('[GOOGLE_AUTH]', error);
+    showToast(error.message || 'Google sign in could not finish.');
+  } finally {
+    setGoogleAuthBusy(false);
+  }
+}
+
+async function initializeGoogleSignIn(options = {}) {
+  const { showPrompt = true } = options;
+  const config = await fetchAuthConfig();
+
+  if (!config.googleConfigured || !config.supabaseConfigured) {
+    if (authNote) authNote.textContent = 'Add Supabase keys and NEXT_PUBLIC_GOOGLE_CLIENT_ID to enable Google sign in.';
+    return false;
+  }
+
+  const googleReady = await waitForGoogleIdentity();
+  if (!googleReady) {
+    showToast('Google sign in is still loading. Try again in a moment.');
+    return false;
+  }
+
+  if (!googleNonce) googleNonce = await generateGoogleNonce();
+
+  if (!googleSignInInitialized) {
+    window.google.accounts.id.initialize({
+      client_id: config.googleClientId,
+      callback: handleGoogleCredentialResponse,
+      context: 'signin',
+      auto_select: false,
+      cancel_on_tap_outside: true,
+      itp_support: true,
+      nonce: googleNonce.hashedNonce,
+    });
+
+    if (authGoogleButton) {
+      window.google.accounts.id.renderButton(authGoogleButton, {
+        type: 'standard',
+        theme: 'outline',
+        size: 'large',
+        text: 'continue_with',
+        shape: 'rectangular',
+        logo_alignment: 'left',
+        width: Math.min(400, authGoogleButton.clientWidth || 400),
+      });
+    }
+
+    googleSignInInitialized = true;
+  }
+
+  if (showPrompt && !authSession) {
+    window.google.accounts.id.prompt();
+  }
+
+  return true;
+}
+
+async function startGoogleSignIn() {
+  const initialized = await initializeGoogleSignIn({ showPrompt: false });
+  if (!initialized) return;
+  window.google.accounts.id.prompt();
+}
+
+async function initializeAuth() {
+  await syncCurrentSupabaseSession();
+  if (!authSession) {
+    await initializeGoogleSignIn({ showPrompt: true });
+  }
+}
+
+async function signOutAuth() {
+  try {
+    await fetch('/api/auth/signout', { method: 'POST', credentials: 'same-origin' });
+    if (window.google && window.google.accounts && window.google.accounts.id) {
+      window.google.accounts.id.disableAutoSelect();
+    }
+  } catch (error) {
+    console.warn('[SIGN_OUT]', error);
+  }
+
   authSession = null;
   saveAuthSession(null);
   renderAuthState();
+  syncAccountBoundState();
   closeAuthModal();
   closeMobileMenu();
   showToast('Signed out.');
+}
+
+function normalizeHeroScannerCards() {
+  const cards = document.querySelectorAll('.scanner-layer-detailed .job-card-detailed');
+  if (!cards.length) return;
+
+  cards.forEach((card) => {
+    const info = card.querySelector('.card-info');
+    if (info) {
+      const company = info.textContent.split('•')[0].trim();
+      info.textContent = company || 'Hiring company';
+    }
+
+    const tags = card.querySelector('.card-tags');
+    if (tags) tags.setAttribute('hidden', '');
+
+    const scoreValue = card.querySelector('.trust-ring-value');
+    const targetScore = Number.parseInt(scoreValue && scoreValue.textContent ? scoreValue.textContent : '0', 10);
+    if (scoreValue && Number.isFinite(targetScore)) {
+      scoreValue.dataset.score = String(targetScore);
+      scoreValue.textContent = '0';
+    }
+  });
+}
+
+function animateHeroTrustScores() {
+  const scoreEls = Array.from(document.querySelectorAll('.scanner-layer-detailed .trust-ring-value'));
+  if (!scoreEls.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    scoreEls.forEach((scoreEl) => {
+      if (scoreEl.dataset.score) scoreEl.textContent = scoreEl.dataset.score;
+    });
+    return;
+  }
+
+  const cycleMs = 5800;
+  const rampStartMs = 1450;
+  const rampMs = 900;
+
+  function updateScores(now) {
+    scoreEls.forEach((scoreEl, index) => {
+      const targetScore = Number.parseInt(scoreEl.dataset.score || scoreEl.textContent || '0', 10);
+      const delay = (index % 3) * 350;
+      const elapsed = (now - delay) % cycleMs;
+
+      if (elapsed < rampStartMs) {
+        scoreEl.textContent = '0';
+        return;
+      }
+
+      if (elapsed > rampStartMs + rampMs) {
+        scoreEl.textContent = String(targetScore);
+        return;
+      }
+
+      const progress = Math.min(1, Math.max(0, (elapsed - rampStartMs) / rampMs));
+      const eased = 1 - Math.pow(1 - progress, 3);
+      scoreEl.textContent = String(Math.round(targetScore * eased));
+    });
+
+    window.requestAnimationFrame(updateScores);
+  }
+
+  window.requestAnimationFrame(updateScores);
+}
+
+function initHeroScannerAnimation() {
+  normalizeHeroScannerCards();
+  animateHeroTrustScores();
 }
 
 function wait(ms) {
@@ -753,6 +1074,14 @@ const searchInput = document.getElementById('search-input');
 const jobsSearchCanvas = document.getElementById('jobs-search-canvas');
 const jobsSearchForm = document.getElementById('jobs-search-form');
 const jobsSearchQuery = document.getElementById('jobs-search-query');
+const jobsLocationPicker = document.getElementById('jobs-location-picker');
+const jobsLocationInput = document.getElementById('jobs-search-location');
+const jobsLocationTrigger = document.getElementById('jobs-location-trigger');
+const jobsLocationMenu = document.getElementById('jobs-location-menu');
+const jobsLocationLabel = document.getElementById('jobs-location-label');
+const jobsLocationHint = document.getElementById('jobs-location-hint');
+const jobsIpLocationLabel = document.getElementById('jobs-ip-location-label');
+const jobsLocationCustom = document.getElementById('jobs-location-custom');
 const jobsLiveSearchBtn = document.getElementById('jobs-live-search-btn');
 const trustFilter = document.getElementById('trust-score-filter');
 const trustFilterValue = document.getElementById('trust-score-val');
@@ -802,18 +1131,13 @@ const jobsFilters = document.getElementById('jobs-filters');
 const authOverlay = document.getElementById('auth-overlay');
 const authModal = document.getElementById('auth-modal');
 const authCloseButton = document.getElementById('auth-close');
-const authForm = document.getElementById('auth-form');
-const authEmailInput = document.getElementById('auth-email');
-const authPasswordInput = document.getElementById('auth-password');
 const authKicker = document.getElementById('auth-kicker');
 const authTitle = document.getElementById('auth-title');
 const authSubtitle = document.getElementById('auth-subtitle');
-const authSubmit = document.getElementById('auth-submit');
+const authGoogleSubmit = document.getElementById('auth-google-submit');
+const authGoogleButton = document.getElementById('auth-google-button');
 const authNote = document.getElementById('auth-note');
-const authSwitchCopy = document.getElementById('auth-switch-copy');
-const authSwitchMode = document.getElementById('auth-switch-mode');
-const authTabSignUp = document.getElementById('auth-tab-signup');
-const authTabLogin = document.getElementById('auth-tab-login');
+const authSubmit = authGoogleSubmit;
 const assistantTrigger = document.getElementById('assistant-trigger');
 const assistantDrawer = document.getElementById('assistant-drawer');
 const assistantClose = document.getElementById('assistant-close');
@@ -844,10 +1168,11 @@ let waveTrackerTimer;
 let resumeUploadBusy = false;
 let assistantMessages = [];
 let assistantBusy = false;
-const AUTH_SESSION_STORAGE_KEY = 'emploid-auth-session-v1';
-const AUTH_LAST_EMAIL_STORAGE_KEY = 'emploid-auth-last-email-v1';
 let authSession = loadAuthSession();
-let currentAuthMode = 'signup';
+let currentAuthMode = 'google';
+let authConfigPromise = null;
+let googleSignInInitialized = false;
+let googleNonce = null;
 
 function renderHomePreview() {
   if (!homePreviewList) return;
@@ -1565,8 +1890,7 @@ function navigateTo(pageId, options = {}) {
       liveJobSearchState.hasSearched = false;
       if (jobsSearchQuery) jobsSearchQuery.value = '';
       if (searchInput) searchInput.value = '';
-      const jobsSearchLocation = document.getElementById('jobs-search-location');
-      if (jobsSearchLocation) jobsSearchLocation.value = '';
+      selectLocation('remote');
       renderJobs();
     }
   }
@@ -1935,14 +2259,7 @@ if (navMobileOpenTracker) {
   });
 }
 if (navMobileSignOutTrigger) navMobileSignOutTrigger.addEventListener('click', signOutAuth);
-if (authTabSignUp) authTabSignUp.addEventListener('click', () => setAuthMode('signup'));
-if (authTabLogin) authTabLogin.addEventListener('click', () => setAuthMode('login'));
-if (authSwitchMode) {
-  authSwitchMode.addEventListener('click', () => {
-    setAuthMode(currentAuthMode === 'signup' ? 'login' : 'signup');
-  });
-}
-if (authForm) authForm.addEventListener('submit', submitAuthForm);
+if (authGoogleSubmit) authGoogleSubmit.addEventListener('click', startGoogleSignIn);
 if (authOverlay) authOverlay.addEventListener('click', closeAuthModal);
 if (authModal) authModal.addEventListener('click', (event) => event.stopPropagation());
 if (authCloseButton) authCloseButton.addEventListener('click', closeAuthModal);
@@ -2150,6 +2467,244 @@ function normalizeLiveJob(job) {
   };
 }
 
+function normalizeStoredJob(job) {
+  const company = job && job.companies ? job.companies : {};
+  const title = job && job.title ? job.title : 'Untitled role';
+  const companyName = company.name || job.company_name || 'Company not listed';
+  const location = job && job.location ? job.location : 'Location not listed';
+  const applyUrl = job && job.apply_url ? job.apply_url : job && job.source_url ? job.source_url : '';
+  const sourceProvider = job && (job.external_source || job.source_provider || job.source) ? (job.external_source || job.source_provider || job.source) : 'Stored listing';
+  const postedAt = job && (job.posted_at || job.first_seen_at) ? new Date(job.posted_at || job.first_seen_at) : null;
+  const daysPosted = postedAt && !Number.isNaN(postedAt.getTime())
+    ? Math.max(0, Math.round((Date.now() - postedAt.getTime()) / 86400000))
+    : 7;
+  const salaryMin = Number(job && job.salary_min) || 0;
+  const salaryMax = Number(job && job.salary_max) || salaryMin || 0;
+  let domain = '';
+  try {
+    domain = applyUrl ? new URL(applyUrl).hostname.replace(/^www\./, '') : '';
+  } catch {
+    domain = '';
+  }
+
+  return normalizeLiveJob({
+    id: job && job.id,
+    title,
+    company: companyName,
+    companyContext: company.trust_score
+      ? `Company trust ${Math.round(Number(company.trust_score) * 100)}`
+      : 'Stored Supabase listing',
+    location,
+    source: sourceProvider,
+    jobType: job && job.job_type ? job.job_type : 'Full-time',
+    workMode: job && job.remote_type === 'remote' ? 'Remote' : job && job.remote_type === 'hybrid' ? 'Hybrid' : 'On-site',
+    salary: { min: salaryMin, max: Math.max(salaryMax, salaryMin) },
+    salaryText: salaryMin || salaryMax ? `$${(salaryMin || salaryMax).toLocaleString()}-${Math.max(salaryMax, salaryMin).toLocaleString()} a year` : '',
+    salaryDisclosed: Boolean(salaryMin || salaryMax),
+    daysPosted,
+    repostCount: Array.isArray(job && job.trust_flags) && job.trust_flags.some((flag) => /repost/i.test(flag)) ? 2 : 0,
+    trustScore: Number(job && job.ghost_score) || Math.round(Number(job && job.company_trust_score ? job.company_trust_score : 0.6) * 100),
+    recentHiringActivity: daysPosted <= 14 || (Array.isArray(job && job.trust_flags) && job.trust_flags.includes('recently_edited')),
+    directCompanyLink: Boolean(applyUrl && !/(linkedin|indeed|glassdoor|ziprecruiter|google|adzuna)/i.test(domain)),
+    hiringContact: false,
+    sentiment: daysPosted <= 14 ? 'growing' : 'stable',
+    description: job && job.description ? job.description : 'Open the source listing to verify details and apply.',
+    requirements: Array.isArray(job && job.trust_flags) && job.trust_flags.length
+      ? job.trust_flags.map((flag) => String(flag).replace(/_/g, ' '))
+      : ['Review the source listing for role-specific requirements.'],
+    domain,
+    url: applyUrl,
+    saved: false,
+  });
+}
+
+const LOCATION_PRESETS = {
+  remote: { label: 'Remote', hint: 'Work from home', query: 'remote' },
+  hybrid: { label: 'Hybrid', hint: 'Office + home', query: 'hybrid' },
+  anywhere: { label: 'Anywhere', hint: 'No location filter', query: '' },
+};
+
+function formatLocationParts(city, region, fallback) {
+  const cleanCity = String(city || '').trim();
+  const cleanRegion = String(region || '').trim();
+  if (cleanCity && cleanRegion) return `${cleanCity}, ${cleanRegion}`;
+  if (cleanCity) return cleanCity;
+  if (cleanRegion) return cleanRegion;
+  return String(fallback || '').trim();
+}
+
+function openLocationMenu() {
+  if (!jobsLocationMenu || !jobsLocationTrigger) return;
+  jobsLocationMenu.hidden = false;
+  jobsLocationTrigger.setAttribute('aria-expanded', 'true');
+  if (typeof hideAutocompletePanel === 'function') hideAutocompletePanel();
+}
+
+function closeLocationMenu() {
+  if (!jobsLocationMenu || !jobsLocationTrigger) return;
+  jobsLocationMenu.hidden = true;
+  jobsLocationTrigger.setAttribute('aria-expanded', 'false');
+}
+
+function getLocationSearchValue() {
+  const value = jobsLocationInput ? String(jobsLocationInput.value || '').trim() : '';
+  if (!value || value === 'anywhere') return '';
+  return LOCATION_PRESETS[value] ? LOCATION_PRESETS[value].query : value;
+}
+
+function selectLocation(value, label, hint, source = 'custom') {
+  const normalizedValue = String(value || '').trim();
+  const preset = LOCATION_PRESETS[normalizedValue];
+  const nextLabel = label || (preset && preset.label) || normalizedValue || 'Anywhere';
+  const nextHint = hint || (preset && preset.hint) || (source === 'ip' ? 'Approximate from IP' : source === 'precise' ? 'Precise location' : 'Specific location');
+
+  if (jobsLocationInput) jobsLocationInput.value = preset ? normalizedValue : nextLabel;
+  if (jobsLocationLabel) jobsLocationLabel.textContent = nextLabel;
+  if (jobsLocationHint) jobsLocationHint.textContent = nextHint;
+
+  if (jobsLocationMenu) {
+    jobsLocationMenu.querySelectorAll('.location-option').forEach((option) => {
+      const optionValue = option.getAttribute('data-value') || '';
+      const isSelected = preset
+        ? optionValue === normalizedValue
+        : option.getAttribute('data-location-option') === source && source !== 'custom';
+      option.classList.toggle('is-selected', isSelected);
+      option.setAttribute('aria-selected', String(isSelected));
+    });
+  }
+}
+
+async function fetchIpLocationSuggestion() {
+  const option = jobsLocationMenu && jobsLocationMenu.querySelector('[data-location-option="ip"]');
+  if (!option || !jobsIpLocationLabel) return;
+
+  try {
+    const response = await fetch('https://ipapi.co/json/', { cache: 'no-store' });
+    if (!response.ok) throw new Error('IP location unavailable');
+    const payload = await response.json();
+    const location = formatLocationParts(payload.city, payload.region_code || payload.region, payload.country_name);
+    if (!location) throw new Error('IP location unavailable');
+
+    option.dataset.value = location;
+    option.classList.remove('is-loading');
+    jobsIpLocationLabel.textContent = location;
+  } catch (error) {
+    option.dataset.value = '';
+    option.classList.remove('is-loading');
+    jobsIpLocationLabel.textContent = 'Use my approximate area';
+    const detail = option.querySelector('small');
+    if (detail) detail.textContent = 'IP lookup unavailable';
+  }
+}
+
+async function reverseGeocodeLocation(latitude, longitude) {
+  const lat = Number(latitude);
+  const lon = Number(longitude);
+  const coordinates = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&zoom=10&addressdetails=1`;
+    const response = await fetch(url, { cache: 'no-store' });
+    if (!response.ok) throw new Error('Reverse geocode unavailable');
+    const payload = await response.json();
+    const address = payload && payload.address ? payload.address : {};
+    const city = address.city || address.town || address.village || address.hamlet || address.county;
+    const region = address.state_code || address.state;
+    return formatLocationParts(city, region, coordinates) || coordinates;
+  } catch (error) {
+    return coordinates;
+  }
+}
+
+function requestPreciseLocation() {
+  const preciseOption = jobsLocationMenu && jobsLocationMenu.querySelector('[data-location-option="precise"]');
+  if (!navigator.geolocation) {
+    showToast('Precise location is not available in this browser.');
+    return;
+  }
+
+  if (preciseOption) preciseOption.classList.add('is-loading');
+  navigator.geolocation.getCurrentPosition(async (position) => {
+    const location = await reverseGeocodeLocation(position.coords.latitude, position.coords.longitude);
+    if (preciseOption) {
+      preciseOption.classList.remove('is-loading');
+      preciseOption.dataset.value = location;
+      const label = preciseOption.querySelector('strong');
+      const detail = preciseOption.querySelector('small');
+      if (label) label.textContent = location;
+      if (detail) detail.textContent = 'Precise browser location';
+    }
+    selectLocation(location, location, 'Precise location', 'precise');
+    closeLocationMenu();
+  }, () => {
+    if (preciseOption) preciseOption.classList.remove('is-loading');
+    showToast('Location permission was not granted.');
+  }, {
+    enableHighAccuracy: true,
+    timeout: 9000,
+    maximumAge: 300000,
+  });
+}
+
+function initLocationPicker() {
+  if (!jobsLocationPicker || !jobsLocationInput || !jobsLocationTrigger || !jobsLocationMenu) return;
+
+  selectLocation(jobsLocationInput.value || 'remote');
+  fetchIpLocationSuggestion();
+
+  jobsLocationTrigger.addEventListener('click', () => {
+    if (jobsLocationMenu.hidden) openLocationMenu();
+    else closeLocationMenu();
+  });
+
+  jobsLocationMenu.addEventListener('click', (event) => {
+    const option = event.target.closest('.location-option');
+    if (!option) return;
+
+    const type = option.getAttribute('data-location-option');
+    if (type === 'precise') {
+      requestPreciseLocation();
+      return;
+    }
+
+    const value = option.dataset.value || '';
+    if (!value) return;
+    const strong = option.querySelector('strong');
+    const small = option.querySelector('small');
+    selectLocation(value, strong ? strong.textContent : value, small ? small.textContent : '', type === 'ip' ? 'ip' : 'preset');
+    closeLocationMenu();
+  });
+
+  if (jobsLocationCustom) {
+    jobsLocationCustom.addEventListener('input', () => {
+      const value = jobsLocationCustom.value.trim();
+      if (value) selectLocation(value, value, 'Specific location', 'custom');
+    });
+    jobsLocationCustom.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const value = jobsLocationCustom.value.trim();
+        if (value) {
+          selectLocation(value, value, 'Specific location', 'custom');
+          closeLocationMenu();
+          if (jobsSearchQuery) jobsSearchQuery.focus();
+        }
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        closeLocationMenu();
+      }
+    });
+  }
+
+  document.addEventListener('click', (event) => {
+    if (!jobsLocationPicker.contains(event.target)) closeLocationMenu();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeLocationMenu();
+  });
+}
+
 function setLiveSearchLoading(isLoading, query = liveJobSearchState.query) {
   liveJobSearchState = {
     ...liveJobSearchState,
@@ -2183,28 +2738,25 @@ async function runLiveJobSearch(rawQuery) {
 
   // Read location selection and construct API query
   let apiQuery = query;
-  const jobsSearchLocation = document.getElementById('jobs-search-location');
-  if (jobsSearchLocation && jobsSearchLocation.value) {
-    const loc = jobsSearchLocation.value;
-    if (loc !== 'anywhere' && !query.toLowerCase().includes(loc.toLowerCase())) {
-      apiQuery = `${query} ${loc}`;
-    }
+  const loc = getLocationSearchValue();
+  if (loc && !query.toLowerCase().includes(loc.toLowerCase())) {
+    apiQuery = `${query} ${loc}`;
   }
 
   navigateTo('jobs', { params: new URLSearchParams({ q: query }), scroll: false });
   setLiveSearchLoading(true, query);
 
   try {
-    const response = await fetch(`/api/google-jobs?q=${encodeURIComponent(apiQuery)}&max=40`, { cache: 'no-store' });
+    const response = await fetch(`/api/jobs?q=${encodeURIComponent(apiQuery)}&per_page=50&sort=trust`, { cache: 'no-store' });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(payload.error || 'Live job search failed.');
 
-    allJobs = Array.isArray(payload.data) ? payload.data.map(normalizeLiveJob).filter((job) => job.url) : [];
+    allJobs = Array.isArray(payload.data) ? payload.data.map(normalizeStoredJob).filter((job) => job.url) : [];
     liveJobSearchState = {
       hasSearched: true,
       isLoading: false,
       query,
-      source: payload.meta && payload.meta.source ? String(payload.meta.source) : 'live',
+      source: 'supabase',
       error: '',
     };
     applyFilters();
@@ -3051,7 +3603,7 @@ function getCookie(name) {
   return null;
 }
 
-function loadPreviousSearches() {
+function loadPreviousSearchesFromCookie() {
   const raw = getCookie('emploid_prev_searches');
   if (!raw) return [];
   try {
@@ -3060,6 +3612,11 @@ function loadPreviousSearches() {
   } catch (e) {
     return [];
   }
+}
+
+function loadPreviousSearches() {
+  migrateCookieSearchesToStorage();
+  return readStorageArray(PREVIOUS_SEARCHES_STORAGE_KEY);
 }
 
 function saveSearchToHistory(query) {
@@ -3071,7 +3628,7 @@ function saveSearchToHistory(query) {
   history.unshift(term);
   history = history.slice(0, 5);
   
-  setCookie('emploid_prev_searches', JSON.stringify(history), 30);
+  writeStorageArray(PREVIOUS_SEARCHES_STORAGE_KEY, history);
 }
 
 function renderPreviousSearches() {
@@ -3118,14 +3675,14 @@ function renderPreviousSearches() {
       const idx = parseInt(btn.getAttribute('data-index'), 10);
       let history = loadPreviousSearches();
       history.splice(idx, 1);
-      setCookie('emploid_prev_searches', JSON.stringify(history), 30);
+      writeStorageArray(PREVIOUS_SEARCHES_STORAGE_KEY, history);
       renderPreviousSearches();
     });
   });
 }
 
 function clearSearchHistory() {
-  setCookie('emploid_prev_searches', '', -1);
+  writeStorageArray(PREVIOUS_SEARCHES_STORAGE_KEY, []);
   renderPreviousSearches();
   showToast('Search history cleared.');
 }
@@ -3403,10 +3960,10 @@ function handleQuickFilterClick(filterId) {
 
   applyQuickFilterToControls(filterId, activeChipFilters.has(filterId));
 
-  chip.classList.remove('is-flipping');
+  chip.classList.remove('is-toggling');
   void chip.offsetWidth;
-  chip.classList.add('is-flipping');
-  window.setTimeout(() => chip.classList.remove('is-flipping'), 560);
+  chip.classList.add('is-toggling');
+  window.setTimeout(() => chip.classList.remove('is-toggling'), 560);
 
   syncQuickFiltersUI();
 
@@ -3424,6 +3981,7 @@ function handleQuickFilterClick(filterId) {
 // Initialize Redesigned Search Page
 function initSearchRedesign() {
   if (!jobsSearchQuery) return;
+  initLocationPicker();
   
   // 1. Previous Searches from Cookies
   renderPreviousSearches();
@@ -3503,7 +4061,8 @@ function initSearchRedesign() {
 // Page initialization
 ensureFilsonProLoaded();
 renderAuthState();
-setAuthMode('signup');
+setAuthMode();
+initializeAuth();
 renderHomePreview();
 renderResumeMatchUI();
 renderTracker();

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=1440" />
+  <title>Browse Jobs — Redesign</title>
+  <link rel="icon" href="ds/assets/favicon.svg" />
+  <link rel="stylesheet" href="ds/colors_and_type.css" />
+  <link rel="stylesheet" href="browse.css" />
+  <style>
+    html, body { margin: 0; padding: 0; background: #1a1f2a; }
+    body { font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+  </style>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="browse-shared.jsx"></script>
+  <script type="text/babel" src="DirectionA.jsx"></script>
+  <script type="text/babel" src="DirectionB.jsx"></script>
+  <script type="text/babel" src="DirectionC.jsx"></script>
+
+  <script type="text/babel">
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "promptCopy": "What kind of work are you looking for?",
+      "showActivityRail": true,
+      "showCornerStats": true
+    }/*EDITMODE-END*/;
+
+    const App = () => {
+      const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+      React.useEffect(() => {
+        const ss = document.getElementById('__bp_tweak_style') || (() => {
+          const s = document.createElement('style');
+          s.id = '__bp_tweak_style';
+          document.head.appendChild(s);
+          return s;
+        })();
+        ss.textContent = [
+          !t.showActivityRail ? '.dirA-activity { display: none !important; }' : '',
+          !t.showCornerStats  ? '.dirB-corner   { display: none !important; }' : '',
+        ].filter(Boolean).join('\n');
+      }, [t.showActivityRail, t.showCornerStats]);
+
+      // Push prompt copy through CSS var so directions A and C can use it (we read in React below)
+      React.useEffect(() => {
+        document.documentElement.style.setProperty('--bp-prompt-copy', JSON.stringify(t.promptCopy));
+      }, [t.promptCopy]);
+
+      return (
+        <>
+          <DesignCanvas
+            title="Browse Jobs — v2: search workspace, not a landing page"
+            subtitle="Each direction drops the hero pattern entirely. One question, one search, minimal scaffolding."
+          >
+            <DCSection
+              id="browse-redesign"
+              title="Three minimal directions"
+              subtitle="All three fit in a single viewport. Pick the bones you want."
+            >
+              <DCArtboard id="dirA" label="A · Workspace — utility header + live activity rail" width={1440} height={900}>
+                <DirectionA promptCopy={t.promptCopy} />
+              </DCArtboard>
+
+              <DCArtboard id="dirB" label="B · Command palette — tool panel, autocomplete-style" width={1440} height={900}>
+                <DirectionB />
+              </DCArtboard>
+
+              <DCArtboard id="dirC" label="C · Zen prompt — one question, one search bar" width={1440} height={900}>
+                <DirectionC promptCopy={t.promptCopy} />
+              </DCArtboard>
+            </DCSection>
+          </DesignCanvas>
+
+          <TweaksPanel title="Tweaks">
+            <TweakSection label="Copy" />
+            <TweakText
+              label="Prompt question"
+              value={t.promptCopy}
+              onChange={(v) => setTweak('promptCopy', v)}
+            />
+            <TweakSection label="Direction A" />
+            <TweakToggle
+              label="Show live activity rail"
+              value={t.showActivityRail}
+              onChange={(v) => setTweak('showActivityRail', v)}
+            />
+            <TweakSection label="Direction B" />
+            <TweakToggle
+              label="Show corner stats"
+              value={t.showCornerStats}
+              onChange={(v) => setTweak('showCornerStats', v)}
+            />
+          </TweaksPanel>
+        </>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('app')).render(<App />);
+  </script>
+</body>
+</html>

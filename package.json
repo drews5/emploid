@@ -9,6 +9,7 @@
     "lint": "next lint",
     "seed": "npx tsx scripts/seed.ts",
     "scrape": "python scripts/run_scrapes.py",
+    "harvest": "python -m scripts.harvester.main",
     "db:types": "npx supabase gen types typescript --local > lib/database.types.ts"
   },
   "dependencies": {

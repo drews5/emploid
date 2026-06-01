@@ -12,6 +12,7 @@
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body data-page="home">
   <header>
@@ -31,8 +32,8 @@
 
         <div class="nav-auth">
           <div class="nav-auth-guest" id="nav-auth-guest">
-            <button class="nav-login" type="button" id="nav-login-trigger">Log in</button>
-            <button class="btn btn-secondary" type="button" id="nav-sign-up-trigger">Sign up</button>
+            <button class="nav-login" type="button" id="nav-login-trigger">Sign in</button>
+            <button class="btn btn-secondary" type="button" id="nav-sign-up-trigger">Continue with Google</button>
           </div>
           <div class="nav-auth-user" id="nav-auth-user" hidden>
             <span class="nav-account-pill" id="nav-user-email">you@example.com</span>
@@ -52,8 +53,8 @@
         <a href="/about" class="nav-mobile-link" data-page="about">About</a>
         <div class="nav-mobile-auth">
           <div class="nav-mobile-auth-guest" id="nav-mobile-auth-guest">
-            <button class="nav-mobile-link" type="button" id="nav-mobile-login-trigger">Log in</button>
-            <button class="nav-mobile-link nav-mobile-link-strong" type="button" id="nav-mobile-sign-up-trigger">Sign up</button>
+            <button class="nav-mobile-link" type="button" id="nav-mobile-login-trigger">Sign in</button>
+            <button class="nav-mobile-link nav-mobile-link-strong" type="button" id="nav-mobile-sign-up-trigger">Continue with Google</button>
           </div>
           <div class="nav-mobile-auth-user" id="nav-mobile-auth-user" hidden>
             <div class="nav-mobile-account-pill" id="nav-mobile-user-email">you@example.com</div>
@@ -731,16 +732,32 @@
               <input id="jobs-search-query" type="text" placeholder="Role, company, skill…" autocomplete="off" />
               <span class="search-kbd-hint" title="Press / to focus search">/</span>
               <span class="dirA-search-divider"></span>
-              <span class="dirA-search-loc">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                <select id="jobs-search-location">
-                  <option value="">Remote-friendly</option>
-                  <option value="anywhere">Anywhere</option>
-                  <option value="Minneapolis, MN">Minneapolis, MN</option>
-                  <option value="New York, NY">New York, NY</option>
-                  <option value="San Francisco, CA">San Francisco, CA</option>
-                </select>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: -4px;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              <span class="dirA-search-loc" id="jobs-location-picker">
+                <input type="hidden" id="jobs-search-location" value="remote" />
+                <button class="location-trigger" id="jobs-location-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+                  <svg class="location-trigger-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  <span class="location-trigger-copy">
+                    <span class="location-trigger-label" id="jobs-location-label">Remote</span>
+                    <span class="location-trigger-hint" id="jobs-location-hint">Work from home</span>
+                  </span>
+                  <svg class="location-trigger-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="location-menu" id="jobs-location-menu" role="listbox" aria-label="Location filter" hidden>
+                  <button class="location-option is-loading" type="button" data-location-option="ip" data-value="" role="option">
+                    <span class="location-option-icon" aria-hidden="true">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 0 20"></path><path d="M12 2a15.3 15.3 0 0 0 0 20"></path></svg>
+                    </span>
+                    <span><strong id="jobs-ip-location-label">Finding your area</strong><small>Approximate from IP</small></span>
+                  </button>
+                  <button class="location-option is-selected" type="button" data-location-option="preset" data-value="remote" role="option" aria-selected="true"><span class="location-option-dot"></span><span><strong>Remote</strong><small>Work from home roles</small></span></button>
+                  <button class="location-option" type="button" data-location-option="preset" data-value="hybrid" role="option"><span class="location-option-dot"></span><span><strong>Hybrid</strong><small>Mix office and home</small></span></button>
+                  <button class="location-option" type="button" data-location-option="preset" data-value="anywhere" role="option"><span class="location-option-dot"></span><span><strong>Anywhere</strong><small>No location preference</small></span></button>
+                  <button class="location-option" type="button" data-location-option="precise" role="option"><span class="location-option-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v3"></path><path d="M12 19v3"></path><path d="M2 12h3"></path><path d="M19 12h3"></path><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="2"></circle></svg></span><span><strong>Use precise location</strong><small>Requires browser permission</small></span></button>
+                  <label class="location-specific" for="jobs-location-custom">
+                    <span>Specific location</span>
+                    <input id="jobs-location-custom" type="text" placeholder="City, state, or ZIP" autocomplete="off" />
+                  </label>
+                </div>
               </span>
               <button class="dirA-search-btn" type="submit">
                 Search
@@ -1834,37 +1851,28 @@
     <div class="auth-modal" id="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
       <div class="auth-head">
         <div class="auth-copy">
-          <p class="auth-kicker" id="auth-kicker">Sign up</p>
-          <h2 id="auth-title">Create your Emploid account</h2>
-          <p class="auth-sub" id="auth-subtitle">Save jobs, keep your tracker in sync, and get back in instantly. This demo accepts any email and password.</p>
+          <p class="auth-kicker" id="auth-kicker">Google sign in</p>
+          <h2 id="auth-title">Continue to Emploid</h2>
+          <p class="auth-sub" id="auth-subtitle">Use your Google account to save searches, tracker activity, and account details in Supabase.</p>
         </div>
         <button class="btn btn-secondary auth-close" id="auth-close" type="button">Close</button>
       </div>
 
-      <div class="auth-tabs" role="tablist" aria-label="Authentication mode">
-        <button class="auth-tab is-active" id="auth-tab-signup" type="button">Sign up</button>
-        <button class="auth-tab" id="auth-tab-login" type="button">Log in</button>
+      <div class="auth-google-panel">
+        <div class="auth-google-mark" aria-hidden="true">G</div>
+        <div>
+          <strong>Google is the main account method</strong>
+          <span>Emploid opens Google's account prompt automatically when possible.</span>
+        </div>
       </div>
 
-      <form class="auth-form" id="auth-form">
-        <label class="auth-field">
-          <span>Email</span>
-          <input id="auth-email" type="text" inputmode="email" autocomplete="email" placeholder="you@example.com" />
-        </label>
+      <button class="btn btn-primary auth-submit auth-google-submit" id="auth-google-submit" type="button">
+        <span class="auth-google-icon" aria-hidden="true">G</span>
+        <span>Continue with Google</span>
+      </button>
 
-        <label class="auth-field">
-          <span>Password</span>
-          <input id="auth-password" type="password" autocomplete="current-password" placeholder="Enter any password" />
-        </label>
-
-        <button class="btn btn-primary auth-submit" id="auth-submit" type="submit">Sign up</button>
-      </form>
-
-      <p class="auth-note" id="auth-note">No verification or password rules in this demo. Just enter any email and password to continue.</p>
-      <p class="auth-switch-row">
-        <span id="auth-switch-copy">Already have an account?</span>
-        <button class="auth-switch-btn" id="auth-switch-mode" type="button">Log in</button>
-      </p>
+      <div id="auth-google-button" class="auth-google-button"></div>
+      <p class="auth-note" id="auth-note">Your Google name, email, and profile image are synced to your Emploid profile.</p>
     </div>
   </div>
 

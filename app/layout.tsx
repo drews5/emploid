@@ -34,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           crossOrigin="anonymous"
         />
         {/* Set data-page on body synchronously from URL before paint — main.js reads this */}
+        <script src="https://accounts.google.com/gsi/client" async defer />
         <script dangerouslySetInnerHTML={{ __html: `
 (function(){
   var p = window.location.pathname;

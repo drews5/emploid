@@ -1,0 +1,213 @@
+/* Emploid Design System — colors + type tokens */
+
+/* ---------- Fonts ---------- */
+@font-face {
+  font-family: 'Filson Pro';
+  src: url('fonts/filson/FilsonProHeavy.woff') format('woff');
+  font-weight: 900; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Filson Pro';
+  src: url('fonts/filson/FilsonProBold.woff') format('woff');
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Filson Pro';
+  src: url('fonts/filson/FilsonProMedium.woff') format('woff');
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Filson Pro';
+  src: url('fonts/filson/FilsonProRegular.woff') format('woff');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  src: url('fonts/satoshi/Satoshi-Regular.woff') format('woff');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  src: url('fonts/satoshi/Satoshi-Medium.woff') format('woff');
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  src: url('fonts/satoshi/Satoshi-Bold.woff') format('woff');
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  src: url('fonts/satoshi/Satoshi-Black.woff') format('woff');
+  font-weight: 900; font-style: normal; font-display: swap;
+}
+
+:root {
+  /* ---------- Type families ---------- */
+  --font-heading: 'Filson Pro', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'Satoshi', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+
+  /* ---------- Brand / palette ---------- */
+  /* Primary: Emploid orange */
+  --orange-500: #c85b24;   /* Primary CTA */
+  --orange-600: #a9491b;   /* Hover */
+  --orange-300: #edb18f;   /* Decorative border */
+  --orange-soft: #fff1e9;  /* Soft bg / chip */
+  --orange-hero: #ffbe7f;  /* On-dark accent / squiggle */
+
+  /* Navy — dark surfaces */
+  --navy-950: #08111f;
+  --navy-900: #0c1728;
+  --navy-800: #122035;
+  --navy-700: #203149;
+
+  /* Neutrals / surfaces */
+  --bg: #f5f7fb;
+  --bg-light: #edf3fa;
+  --bg-white: #ffffff;
+  --surface: #e8eef6;
+  --border: #bcc9d8;
+  --border-strong: #8da0b6;
+  --ring-track: #d7e0ea;
+
+  /* Text */
+  --text-primary: #0d1726;
+  --text-body: #223247;
+  --text-muted: #5d7088;
+  --text-invert: #ffffff;
+
+  /* Semantic — Listing Trust Score */
+  --score-high: #1f7a42;
+  --score-high-soft: #ecf8f0;
+  --score-mid: #b8611b;
+  --score-mid-soft: #fff3e7;
+  --score-low: #b33a3a;
+  --score-low-soft: #fff0f0;
+
+  /* Semantic chips (signals) */
+  --green-soft: #d7f0de;
+  --green-text: #165b2f;
+  --green-border: #b8dfc5;
+  --amber-soft: #fce6b8;
+  --amber-text: #a86b16;
+  --amber-border: #f4cf7f;
+  --red-soft: #f6d3d6;
+  --red-text: #b33a3a;
+  --red-border: #ebb1b6;
+  --gray-soft: #f3f4f6;
+  --gray-text: #4b5563;
+  --gray-border: #e5e7eb;
+
+  /* Source brand colors (job-board pills) */
+  --source-linkedin: #0a66c2;
+  --source-indeed:   #2164f3;
+  --source-handshake:#ff7043;
+  --source-glassdoor:#0caa41;
+  --source-direct:   var(--text-muted);
+
+  /* ---------- Spacing / elevation ---------- */
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  --shadow-sm: 0 10px 24px rgba(8, 17, 31, 0.06);
+  --shadow-md: 0 18px 40px rgba(8, 17, 31, 0.08);
+  --shadow-lg: 0 28px 64px rgba(8, 17, 31, 0.18);
+  --shadow-cta: 0 14px 26px rgba(200, 91, 36, 0.20);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  --nav-height: 68px;
+  --max-width: 1200px;
+  --transition: 180ms ease;
+
+  /* ---------- Type sizes (semantic) ---------- */
+  --fs-h1: clamp(2.8rem, 5vw, 4.6rem); /* 45-74 */
+  --fs-h2: clamp(2rem, 3.4vw, 3rem);
+  --fs-h3: 1.15rem;   /* 18px */
+  --fs-kicker: 0.76rem;
+  --fs-body: 1rem;
+  --fs-small: 0.88rem;
+  --fs-micro: 0.76rem;
+
+  --lh-tight: 1.04;
+  --lh-body: 1.6;
+
+  --tracking-kicker: 0.08em;
+  --tracking-h1: -0.04em;
+  --tracking-h2: -0.03em;
+}
+
+/* ---------- Semantic type classes ---------- */
+.h1, h1 {
+  font-family: var(--font-heading);
+  color: var(--text-primary);
+  font-weight: 900;
+  font-size: var(--fs-h1);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-h1);
+}
+.h2, h2 {
+  font-family: var(--font-heading);
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: var(--fs-h2);
+  line-height: 1.08;
+  letter-spacing: var(--tracking-h2);
+}
+.h3, h3 {
+  font-family: var(--font-heading);
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: var(--fs-h3);
+  letter-spacing: -0.01em;
+}
+.body, p {
+  font-family: var(--font-body);
+  color: var(--text-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.small { font-size: var(--fs-small); }
+.muted { color: var(--text-muted); }
+.mono  { font-family: var(--font-mono); }
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: var(--fs-kicker);
+  font-weight: 700;
+  letter-spacing: var(--tracking-kicker);
+  text-transform: uppercase;
+  color: var(--orange-500);
+}
+
+/* Signature hero underline / squiggle (orange gradient bar) */
+.emp-underline {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.18em;
+}
+.emp-underline::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0.01em;
+  height: 0.15em;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ffbe7f, #f3a05a);
+}

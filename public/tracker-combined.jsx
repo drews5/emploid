@@ -37,6 +37,12 @@ function trackerSafeParseJSON(value, fallback) {
   }
 }
 
+function trackerStorageKey(baseKey) {
+  return typeof window.emploidScopedStorageKey === 'function'
+    ? window.emploidScopedStorageKey(baseKey)
+    : baseKey;
+}
+
 function slugify(value) {
   return String(value || '')
     .trim()
@@ -152,7 +158,7 @@ function loadTrackerBoard(initialApps) {
   const defaults = (initialApps || []).map(normalizeApp);
   const findDefaultMatch = (app) => defaults.find((defaultApp) => defaultApp.id === app.id || (defaultApp.company === app.company && defaultApp.role === app.role));
 
-  const saved = trackerSafeParseJSON(window.localStorage.getItem(TRACKER_BOARD_STORAGE_KEY), null);
+  const saved = trackerSafeParseJSON(window.localStorage.getItem(trackerStorageKey(TRACKER_BOARD_STORAGE_KEY)), null);
   if (Array.isArray(saved) && saved.length) {
     const merged = saved.map((savedApp) => {
       const matchedDefault = findDefaultMatch(savedApp);
@@ -165,7 +171,7 @@ function loadTrackerBoard(initialApps) {
     return enforceExclusiveFlags(merged);
   }
 
-  const legacy = trackerSafeParseJSON(window.localStorage.getItem(TRACKER_LEGACY_STORAGE_KEY), null);
+  const legacy = trackerSafeParseJSON(window.localStorage.getItem(trackerStorageKey(TRACKER_LEGACY_STORAGE_KEY)), null);
   if (Array.isArray(legacy) && legacy.length) {
     const merged = legacy.map((legacyApp) => {
       const converted = fromLegacyApplication(legacyApp);
@@ -183,7 +189,7 @@ function loadTrackerBoard(initialApps) {
 }
 
 function saveTrackerBoard(apps) {
-  window.localStorage.setItem(TRACKER_BOARD_STORAGE_KEY, JSON.stringify(enforceExclusiveFlags(apps)));
+  window.localStorage.setItem(trackerStorageKey(TRACKER_BOARD_STORAGE_KEY), JSON.stringify(enforceExclusiveFlags(apps)));
 }
 
 function enforceExclusiveFlags(apps) {

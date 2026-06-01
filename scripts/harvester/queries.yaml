@@ -1,0 +1,14 @@
+# Keep this small on paid API tiers. The scheduled GitHub cron does not run
+# JSearch by default because the current quota is only 200 requests/month.
+# Client-facing searches use a separate 6/day cap in the Next API.
+jsearch:
+  - title: software engineer
+    location: remote
+  - title: data analyst
+    location: remote
+  - title: product manager
+    location: remote
+  - title: designer
+    location: remote
+  - title: sales
+    location: united states
