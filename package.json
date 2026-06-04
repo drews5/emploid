@@ -10,6 +10,7 @@
     "seed": "npx tsx scripts/seed.ts",
     "scrape": "python scripts/run_scrapes.py",
     "harvest": "python -m scripts.harvester.main",
+    "worker:harvest": "python -m scripts.harvester.worker",
     "db:types": "npx supabase gen types typescript --local > lib/database.types.ts"
   },
   "dependencies": {

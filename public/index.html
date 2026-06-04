@@ -771,22 +771,45 @@
 
           <!-- Quick Filters Chips (No "Try" label) -->
           <div class="dirA-chips">
-            <button type="button" class="dirA-chip" data-filter="high-trust" id="qf-high-trust">
-              <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
-              High Trust Score
-            </button>
-            <button type="button" class="dirA-chip" data-filter="remote" id="qf-remote">
-              <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
-              Remote-only
-            </button>
-            <button type="button" class="dirA-chip" data-filter="salary-50k" id="qf-salary-50k">
-              <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
-              $50k+
-            </button>
-            <button type="button" class="dirA-chip" data-filter="hybrid" id="qf-hybrid">
-              <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
-              Hybrid
-            </button>
+            <div class="dirA-chip-control" data-variable-filter="trust">
+              <button type="button" class="dirA-chip dirA-chip-variable" data-filter="high-trust" id="qf-high-trust" aria-haspopup="true" aria-expanded="false" aria-controls="qf-trust-menu">
+                <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
+                <span>Trust Score</span>
+                <strong class="dirA-chip-value" id="qf-trust-value">80+</strong>
+              </button>
+              <div class="quick-filter-popover quick-filter-popover-narrow" id="qf-trust-menu" role="menu" aria-label="Trust score minimum">
+                <div class="quick-filter-wheel" data-wheel="trust"></div>
+              </div>
+            </div>
+            <div class="dirA-chip-control" data-variable-filter="pay">
+              <button type="button" class="dirA-chip dirA-chip-variable" data-filter="salary-50k" id="qf-salary-50k" aria-haspopup="true" aria-expanded="false" aria-controls="qf-pay-menu">
+                <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
+                <span>Pay</span>
+                <strong class="dirA-chip-value" id="qf-pay-value">$50k / $24hr</strong>
+              </button>
+              <div class="quick-filter-popover quick-filter-popover-pay" id="qf-pay-menu" role="menu" aria-label="Pay minimum">
+                <div class="quick-filter-wheel-group">
+                  <div>
+                    <span class="quick-filter-wheel-label">Salary</span>
+                    <div class="quick-filter-wheel" data-wheel="salary"></div>
+                  </div>
+                  <div>
+                    <span class="quick-filter-wheel-label">Hourly</span>
+                    <div class="quick-filter-wheel" data-wheel="hourly"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="dirA-chip-control" data-variable-filter="distance">
+              <button type="button" class="dirA-chip dirA-chip-variable" data-filter="distance" id="qf-distance" aria-haspopup="true" aria-expanded="false" aria-controls="qf-distance-menu">
+                <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
+                <span>Distance</span>
+                <strong class="dirA-chip-value" id="qf-distance-value">30 mi</strong>
+              </button>
+              <div class="quick-filter-popover quick-filter-popover-narrow" id="qf-distance-menu" role="menu" aria-label="Distance radius">
+                <div class="quick-filter-wheel" data-wheel="distance"></div>
+              </div>
+            </div>
             <button type="button" class="dirA-chip" data-filter="direct-apply" id="qf-direct-apply">
               <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
               Direct Apply
@@ -1007,30 +1030,6 @@
                 <div class="team-major">Lead Engineer</div>
                 <div class="team-social">
                   <a class="team-link" href="https://linkedin.com/in/" target="_blank" rel="noopener noreferrer" aria-label="Open Gabe's LinkedIn profile">
-                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.94 8.5H3.56V20h3.38V8.5Zm.22-3.56A1.97 1.97 0 0 0 5.25 3a1.99 1.99 0 1 0 0 3.94c1.1 0 1.91-.75 1.91-2ZM20.44 13.05c0-3.23-1.72-4.73-4.02-4.73-1.85 0-2.68 1.02-3.14 1.74V8.5H9.91c.04 1.03 0 11.5 0 11.5h3.37v-6.42c0-.34.03-.68.13-.92.27-.68.88-1.38 1.9-1.38 1.34 0 1.87 1.02 1.87 2.5V20h3.37v-6.95Z"></path></svg>
-                  </a>
-                </div>
-              </div>
-            </article>
-            <article class="team-card">
-              <div class="team-photo team-initial">A</div>
-              <div class="team-info">
-                <div class="team-name">Aubrey</div>
-                <div class="team-major">Design Lead</div>
-                <div class="team-social">
-                  <a class="team-link" href="https://linkedin.com/in/" target="_blank" rel="noopener noreferrer" aria-label="Open Aubrey's LinkedIn profile">
-                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.94 8.5H3.56V20h3.38V8.5Zm.22-3.56A1.97 1.97 0 0 0 5.25 3a1.99 1.99 0 1 0 0 3.94c1.1 0 1.91-.75 1.91-2ZM20.44 13.05c0-3.23-1.72-4.73-4.02-4.73-1.85 0-2.68 1.02-3.14 1.74V8.5H9.91c.04 1.03 0 11.5 0 11.5h3.37v-6.42c0-.34.03-.68.13-.92.27-.68.88-1.38 1.9-1.38 1.34 0 1.87 1.02 1.87 2.5V20h3.37v-6.95Z"></path></svg>
-                  </a>
-                </div>
-              </div>
-            </article>
-            <article class="team-card">
-              <div class="team-photo team-initial">Y</div>
-              <div class="team-info">
-                <div class="team-name">Yumo</div>
-                <div class="team-major">Data Lead</div>
-                <div class="team-social">
-                  <a class="team-link" href="https://linkedin.com/in/" target="_blank" rel="noopener noreferrer" aria-label="Open Yumo's LinkedIn profile">
                     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.94 8.5H3.56V20h3.38V8.5Zm.22-3.56A1.97 1.97 0 0 0 5.25 3a1.99 1.99 0 1 0 0 3.94c1.1 0 1.91-.75 1.91-2ZM20.44 13.05c0-3.23-1.72-4.73-4.02-4.73-1.85 0-2.68 1.02-3.14 1.74V8.5H9.91c.04 1.03 0 11.5 0 11.5h3.37v-6.42c0-.34.03-.68.13-.92.27-.68.88-1.38 1.9-1.38 1.34 0 1.87 1.02 1.87 2.5V20h3.37v-6.95Z"></path></svg>
                   </a>
                 </div>
