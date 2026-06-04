@@ -551,9 +551,9 @@
 }
 
 .dirA-chip-variable {
-  padding-right: 12px;
+  padding: 9px 14px 10px;
   overflow: hidden;
-  min-height: 38px;
+  min-height: 42px;
 }
 
 #qf-direct-apply {
@@ -590,30 +590,30 @@
   display: none;
   align-items: center;
   justify-content: center;
-  min-width: 30px;
-  padding: 2px 7px;
+  min-width: 34px;
+  padding: 3px 9px;
   border-radius: 999px;
   background: rgba(8, 17, 31, 0.06);
   color: var(--text-primary);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 850;
   line-height: 1.1;
   white-space: nowrap;
 }
 .dirA-chip.is-active .chip-current-value {
   display: inline-flex;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.22);
   color: #fff;
 }
 
 .chip-scroll-window {
   display: inline-flex;
   position: absolute;
-  left: 34px;
-  right: 28px;
-  bottom: 0;
+  left: 58px;
+  right: 36px;
+  bottom: 7px;
   width: auto;
-  height: 16px;
+  height: 8px;
   align-items: center;
   gap: 0;
   overflow-x: auto;
@@ -623,14 +623,14 @@
   padding: 0 calc(50% - 16px);
   border-radius: 999px;
   background:
-    linear-gradient(180deg, transparent 0 5px, rgba(255, 255, 255, 0.76) 5px 9px, transparent 9px 100%);
+    linear-gradient(180deg, transparent 0 3px, rgba(255, 255, 255, 0.48) 3px 5px, transparent 5px 100%);
   box-shadow: none;
   scrollbar-width: none;
   overscroll-behavior-inline: contain;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateY(4px) scaleX(0.86);
+  transform: translateY(3px) scaleX(0.92);
   transform-origin: center;
   transition: opacity 160ms ease, transform 180ms cubic-bezier(0.16, 1, 0.3, 1), visibility 160ms ease;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
@@ -639,8 +639,7 @@
 .chip-scroll-window::-webkit-scrollbar {
   display: none;
 }
-.dirA-chip.is-active:hover .chip-scroll-window,
-.dirA-chip.is-active:focus-within .chip-scroll-window {
+.dirA-chip.is-active:hover .chip-scroll-window {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
@@ -648,7 +647,7 @@
 }
 .chip-scroll-option {
   flex: 0 0 32px;
-  height: 16px;
+  height: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -662,34 +661,39 @@
 }
 .chip-scroll-option::before {
   content: "";
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
   border-radius: 999px;
-  background: currentColor;
-  opacity: 0.55;
+  background: rgba(255, 255, 255, 0.62);
+  opacity: 1;
 }
 .chip-scroll-window[data-chip-scroll="salary"] .chip-scroll-option {
-  color: #b8f2c8;
+  color: inherit;
 }
 .chip-scroll-option.is-selected {
-  transform: scale(1.45);
+  transform: scale(1.35);
   opacity: 1;
 }
 .chip-scroll-option[data-trust-tone="excellent"] {
-  color: #58d68d;
+  color: inherit;
 }
 .chip-scroll-option[data-trust-tone="high"] {
-  color: #8fdc7b;
+  color: inherit;
 }
 .chip-scroll-option[data-trust-tone="mid"] {
-  color: #ffd166;
+  color: inherit;
 }
 .chip-scroll-option[data-trust-tone="low"] {
-  color: #ff8b78;
+  color: inherit;
 }
 .chip-scroll-option[data-trust-tone].is-selected {
-  color: currentColor;
-  filter: saturate(1.2) brightness(1.08);
+  color: inherit;
+  filter: none;
+}
+.chip-scroll-option.is-selected::before {
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.96);
 }
 
 .dirA-chip-clear {
