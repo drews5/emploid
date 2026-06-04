@@ -546,14 +546,21 @@
   display: inline-flex;
   overflow: visible;
 }
+.dirA-chip-control[hidden] {
+  display: none !important;
+}
 
 .dirA-chip-variable {
-  padding-right: 10px;
-  overflow: visible;
+  padding-right: 12px;
+  overflow: hidden;
+  min-height: 38px;
 }
 
 #qf-direct-apply {
   overflow: visible;
+}
+#qf-distance {
+  display: none !important;
 }
 
 .dirA-chip-value {
@@ -579,48 +586,93 @@
   color: #fff;
 }
 
-.chip-scroll-window {
+.chip-current-value {
   display: none;
-  width: clamp(48px, 12vw, 74px);
-  height: 26px;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(8, 17, 31, 0.06);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.dirA-chip.is-active .chip-current-value {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.chip-scroll-window {
+  display: inline-flex;
+  position: absolute;
+  left: 34px;
+  right: 28px;
+  bottom: 0;
+  width: auto;
+  height: 16px;
   align-items: center;
   gap: 0;
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
   scroll-padding-inline: calc(50% - 16px);
-  padding-inline: calc(50% - 16px);
+  padding: 0 calc(50% - 16px);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.2);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  background:
+    linear-gradient(180deg, transparent 0 5px, rgba(255, 255, 255, 0.76) 5px 9px, transparent 9px 100%);
+  box-shadow: none;
   scrollbar-width: none;
   overscroll-behavior-inline: contain;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(4px) scaleX(0.86);
+  transform-origin: center;
+  transition: opacity 160ms ease, transform 180ms cubic-bezier(0.16, 1, 0.3, 1), visibility 160ms ease;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
 }
 .chip-scroll-window::-webkit-scrollbar {
   display: none;
 }
-.dirA-chip.is-active .chip-scroll-window {
-  display: inline-flex;
+.dirA-chip.is-active:hover .chip-scroll-window,
+.dirA-chip.is-active:focus-within .chip-scroll-window {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0) scaleX(1);
 }
 .chip-scroll-option {
   flex: 0 0 32px;
-  height: 24px;
+  height: 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   scroll-snap-align: center;
-  color: rgba(255, 255, 255, 0.58);
-  font-size: 12px;
+  color: transparent;
+  font-size: 0;
   font-weight: 850;
   line-height: 1;
   transition: color 160ms ease, transform 160ms ease, opacity 160ms ease;
   user-select: none;
 }
+.chip-scroll-option::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.55;
+}
+.chip-scroll-window[data-chip-scroll="salary"] .chip-scroll-option {
+  color: #b8f2c8;
+}
 .chip-scroll-option.is-selected {
-  color: #fff;
-  transform: scale(1.12);
+  transform: scale(1.45);
   opacity: 1;
 }
 .chip-scroll-option[data-trust-tone="excellent"] {

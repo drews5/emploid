@@ -4171,6 +4171,11 @@ function initVariableQuickFilters() {
 }
 
 function updateQuickFilterLabels() {
+  const trustCurrent = document.getElementById('qf-trust-current');
+  const payCurrent = document.getElementById('qf-pay-current');
+  if (trustCurrent) trustCurrent.textContent = String(quickFilterValues.trust);
+  if (payCurrent) payCurrent.textContent = formatSalaryShort(quickFilterValues.salary).replace('$', '');
+
   document.querySelectorAll('[data-chip-scroll]').forEach((scroll) => {
     const type = scroll.dataset.chipScroll;
     scroll.setAttribute('aria-valuenow', String(quickFilterValues[type] || ''));
@@ -4322,7 +4327,7 @@ function initVariableQuickFilters() {
       if (event.target.closest('.chip-scroll-window')) return;
 
       if (activeChipFilters.has(button.dataset.filter)) {
-        deactivateVariableFilter(button.dataset.filter);
+        window.setTimeout(() => scrollSelectedChipOption(control.dataset.variableFilter === 'pay' ? 'salary' : 'trust'), 0);
         return;
       }
 
