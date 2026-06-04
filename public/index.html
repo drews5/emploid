@@ -775,7 +775,8 @@
               <button type="button" class="dirA-chip dirA-chip-variable" data-filter="high-trust" id="qf-high-trust" aria-haspopup="true" aria-expanded="false" aria-controls="qf-trust-menu">
                 <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
                 <span>Trust Score</span>
-                <strong class="dirA-chip-value" id="qf-trust-value">80+</strong>
+                <strong class="dirA-chip-value" id="qf-trust-value">70+</strong>
+                <span class="dirA-chip-clear" aria-hidden="true">×</span>
               </button>
               <div class="quick-filter-popover quick-filter-popover-narrow" id="qf-trust-menu" role="menu" aria-label="Trust score minimum">
                 <div class="quick-filter-wheel" data-wheel="trust"></div>
@@ -785,10 +786,21 @@
               <button type="button" class="dirA-chip dirA-chip-variable" data-filter="salary-50k" id="qf-salary-50k" aria-haspopup="true" aria-expanded="false" aria-controls="qf-pay-menu">
                 <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
                 <span>Pay</span>
-                <strong class="dirA-chip-value" id="qf-pay-value">$50k / $24hr</strong>
+                <strong class="dirA-chip-value" id="qf-pay-value"></strong>
+                <span class="dirA-chip-clear" aria-hidden="true">×</span>
               </button>
               <div class="quick-filter-popover quick-filter-popover-pay" id="qf-pay-menu" role="menu" aria-label="Pay minimum">
-                <div class="quick-filter-wheel-group">
+                <div class="quick-filter-choice-group" id="qf-pay-choices">
+                  <label class="quick-filter-check">
+                    <input type="checkbox" data-pay-kind="salary" />
+                    <span>Salary</span>
+                  </label>
+                  <label class="quick-filter-check">
+                    <input type="checkbox" data-pay-kind="hourly" />
+                    <span>Hourly</span>
+                  </label>
+                </div>
+                <div class="quick-filter-wheel-group" id="qf-pay-wheels" hidden>
                   <div>
                     <span class="quick-filter-wheel-label">Salary</span>
                     <div class="quick-filter-wheel" data-wheel="salary"></div>
@@ -804,7 +816,8 @@
               <button type="button" class="dirA-chip dirA-chip-variable" data-filter="distance" id="qf-distance" aria-haspopup="true" aria-expanded="false" aria-controls="qf-distance-menu">
                 <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
                 <span>Distance</span>
-                <strong class="dirA-chip-value" id="qf-distance-value">30 mi</strong>
+                <strong class="dirA-chip-value" id="qf-distance-value"></strong>
+                <span class="dirA-chip-clear" aria-hidden="true">×</span>
               </button>
               <div class="quick-filter-popover quick-filter-popover-narrow" id="qf-distance-menu" role="menu" aria-label="Distance radius">
                 <div class="quick-filter-wheel" data-wheel="distance"></div>
@@ -813,6 +826,7 @@
             <button type="button" class="dirA-chip" data-filter="direct-apply" id="qf-direct-apply">
               <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
               Direct Apply
+              <span class="dirA-chip-clear" aria-hidden="true">×</span>
             </button>
           </div>
 
