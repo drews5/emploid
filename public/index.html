@@ -730,7 +730,6 @@
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7.5"></circle><line x1="20.5" y1="20.5" x2="17" y2="17"></line></svg>
               </span>
               <input id="jobs-search-query" type="text" placeholder="Role, company, skill…" autocomplete="off" />
-              <span class="search-kbd-hint" title="Press / to focus search">/</span>
               <span class="dirA-search-divider"></span>
               <span class="dirA-search-loc" id="jobs-location-picker">
                 <input type="hidden" id="jobs-search-location" value="remote" />
@@ -740,6 +739,7 @@
                     <span class="location-trigger-label" id="jobs-location-label">Remote</span>
                     <span class="location-trigger-hint" id="jobs-location-hint">Work from home</span>
                   </span>
+                  <span class="location-distance-pill" id="jobs-distance-value">30 mi</span>
                   <svg class="location-trigger-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </button>
                 <div class="location-menu" id="jobs-location-menu" role="listbox" aria-label="Location filter" hidden>
@@ -757,6 +757,13 @@
                     <span>Specific location</span>
                     <input id="jobs-location-custom" type="text" placeholder="City, state, or ZIP" autocomplete="off" />
                   </label>
+                  <div class="location-distance-control">
+                    <div class="location-distance-head">
+                      <span>Distance</span>
+                      <strong id="jobs-distance-label">30 mi</strong>
+                    </div>
+                    <input id="jobs-distance-slider" type="range" min="5" max="100" step="5" value="30" aria-label="Search distance in miles" />
+                  </div>
                 </div>
               </span>
               <button class="dirA-search-btn" type="submit">
@@ -772,47 +779,22 @@
           <!-- Quick Filters Chips (No "Try" label) -->
           <div class="dirA-chips">
             <div class="dirA-chip-control" data-variable-filter="trust">
-              <button type="button" class="dirA-chip dirA-chip-variable" data-filter="high-trust" id="qf-high-trust" aria-haspopup="true" aria-expanded="false" aria-controls="qf-trust-menu">
+              <button type="button" class="dirA-chip dirA-chip-variable" data-filter="high-trust" id="qf-high-trust">
                 <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
                 <span>Trust Score</span>
-                <strong class="dirA-chip-value" id="qf-trust-value">70+</strong>
+                <span class="chip-scroll-window" data-chip-scroll="trust" id="qf-trust-scroll" aria-label="Trust score minimum"></span>
                 <span class="dirA-chip-clear" aria-hidden="true">×</span>
               </button>
-              <div class="quick-filter-popover quick-filter-popover-narrow" id="qf-trust-menu" role="menu" aria-label="Trust score minimum">
-                <div class="quick-filter-wheel" data-wheel="trust"></div>
-              </div>
             </div>
             <div class="dirA-chip-control" data-variable-filter="pay">
-              <button type="button" class="dirA-chip dirA-chip-variable" data-filter="salary-50k" id="qf-salary-50k" aria-haspopup="true" aria-expanded="false" aria-controls="qf-pay-menu">
+              <button type="button" class="dirA-chip dirA-chip-variable" data-filter="salary-50k" id="qf-salary-50k">
                 <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
                 <span>Pay</span>
-                <strong class="dirA-chip-value" id="qf-pay-value"></strong>
+                <span class="chip-scroll-window" data-chip-scroll="salary" id="qf-pay-scroll" aria-label="Pay minimum"></span>
                 <span class="dirA-chip-clear" aria-hidden="true">×</span>
               </button>
-              <div class="quick-filter-popover quick-filter-popover-pay" id="qf-pay-menu" role="menu" aria-label="Pay minimum">
-                <div class="quick-filter-choice-group" id="qf-pay-choices">
-                  <label class="quick-filter-check">
-                    <input type="checkbox" data-pay-kind="salary" />
-                    <span>Salary</span>
-                  </label>
-                  <label class="quick-filter-check">
-                    <input type="checkbox" data-pay-kind="hourly" />
-                    <span>Hourly</span>
-                  </label>
-                </div>
-                <div class="quick-filter-wheel-group" id="qf-pay-wheels" hidden>
-                  <div>
-                    <span class="quick-filter-wheel-label">Salary</span>
-                    <div class="quick-filter-wheel" data-wheel="salary"></div>
-                  </div>
-                  <div>
-                    <span class="quick-filter-wheel-label">Hourly</span>
-                    <div class="quick-filter-wheel" data-wheel="hourly"></div>
-                  </div>
-                </div>
-              </div>
             </div>
-            <div class="dirA-chip-control" data-variable-filter="distance">
+            <div class="dirA-chip-control" data-variable-filter="distance" hidden>
               <button type="button" class="dirA-chip dirA-chip-variable" data-filter="distance" id="qf-distance" aria-haspopup="true" aria-expanded="false" aria-controls="qf-distance-menu">
                 <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
                 <span>Distance</span>

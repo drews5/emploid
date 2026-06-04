@@ -1082,6 +1082,9 @@ const jobsLocationLabel = document.getElementById('jobs-location-label');
 const jobsLocationHint = document.getElementById('jobs-location-hint');
 const jobsIpLocationLabel = document.getElementById('jobs-ip-location-label');
 const jobsLocationCustom = document.getElementById('jobs-location-custom');
+const jobsDistanceSlider = document.getElementById('jobs-distance-slider');
+const jobsDistanceLabel = document.getElementById('jobs-distance-label');
+const jobsDistanceValue = document.getElementById('jobs-distance-value');
 const jobsLiveSearchBtn = document.getElementById('jobs-live-search-btn');
 const trustFilter = document.getElementById('trust-score-filter');
 const trustFilterValue = document.getElementById('trust-score-val');
@@ -2574,6 +2577,16 @@ function selectLocation(value, label, hint, source = 'custom') {
   }
 }
 
+function updateDistanceLabels() {
+  const miles = Number(quickFilterValues.distance || 30);
+  const label = `${miles} mi`;
+  if (jobsDistanceLabel) jobsDistanceLabel.textContent = label;
+  if (jobsDistanceValue) jobsDistanceValue.textContent = label;
+  if (jobsDistanceSlider && Number(jobsDistanceSlider.value) !== miles) {
+    jobsDistanceSlider.value = String(miles);
+  }
+}
+
 async function fetchIpLocationSuggestion() {
   const option = jobsLocationMenu && jobsLocationMenu.querySelector('[data-location-option="ip"]');
   if (!option || !jobsIpLocationLabel) return;
@@ -2650,6 +2663,7 @@ function initLocationPicker() {
   if (!jobsLocationPicker || !jobsLocationInput || !jobsLocationTrigger || !jobsLocationMenu) return;
 
   selectLocation(jobsLocationInput.value || 'remote');
+  updateDistanceLabels();
   fetchIpLocationSuggestion();
 
   jobsLocationTrigger.addEventListener('click', () => {
@@ -2794,8 +2808,7 @@ function applyFilters() {
   const chipDirect = activeChipFilters.has('direct-apply');
   const effectiveMinTrustScore = chipHighTrust ? Math.max(minTrustScore, quickFilterValues.trust) : minTrustScore;
   const payMinimums = [];
-  if (chipSalary50k && activePayKinds.has('salary')) payMinimums.push(quickFilterValues.salary);
-  if (chipSalary50k && activePayKinds.has('hourly')) payMinimums.push(hourlyToSalary(quickFilterValues.hourly));
+  if (chipSalary50k) payMinimums.push(quickFilterValues.salary);
   const effectiveMinSalary = payMinimums.length ? Math.max(minSalary, ...payMinimums) : minSalary;
   const effectiveDirectOnly = directOnly || chipDirect;
   const effectiveModes = selectedModes;
@@ -3580,20 +3593,16 @@ const quickFilterValues = {
   distance: 30,
 };
 
-const activePayKinds = new Set();
 const quickFilterScrollTimers = {};
 
 const QUICK_FILTER_WHEELS = {
-  trust: [100, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50],
-  salary: [200000, 175000, 150000, 125000, 100000, 90000, 80000, 70000, 60000, 50000, 40000, 30000],
-  hourly: [96, 84, 72, 60, 48, 43, 38, 34, 29, 24, 19, 14],
-  distance: [100, 75, 60, 45, 30, 25, 20, 15, 10, 5],
+  trust: [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100],
+  salary: [30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 125000, 150000, 175000, 200000],
 };
 
 const QUICK_FILTERS_CONFIG = {
   'high-trust': { label: 'Trust Score' },
   'salary-50k': { label: 'Pay' },
-  'distance': { label: 'Distance' },
   'direct-apply': { label: 'Direct Apply' },
 };
 
@@ -3808,7 +3817,6 @@ function renderAutocompletePanel() {
             <div class="autocomplete-row-title">${escapeHtml(item.title)}</div>
             <div class="autocomplete-row-meta">${escapeHtml(item.meta)}</div>
           </div>
-          ${isSelected ? '<span class="autocomplete-row-enter"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 10 4 15 9 20"></polyline><path d="M20 4v7a4 4 0 0 1-4 4H4"></path></svg></span>' : ''}
         </button>
       `;
       selectableIndex++;
@@ -4145,11 +4153,190 @@ function initVariableQuickFilters() {
     });
   });
 
+  if (jobsDistanceSlider) {
+    jobsDistanceSlider.addEventListener('input', () => {
+      const miles = Number(jobsDistanceSlider.value || 30);
+      if (Number.isFinite(miles)) {
+        quickFilterValues.distance = miles;
+        updateDistanceLabels();
+      }
+    });
+  }
+
   document.addEventListener('click', (event) => {
     if (!event.target.closest('.dirA-chip-control')) {
       closeQuickFilterPopovers();
     }
   });
+}
+
+function updateQuickFilterLabels() {
+  document.querySelectorAll('[data-chip-scroll]').forEach((scroll) => {
+    const type = scroll.dataset.chipScroll;
+    scroll.setAttribute('aria-valuenow', String(quickFilterValues[type] || ''));
+  });
+}
+
+function wheelOptionLabel(type, value) {
+  if (type === 'trust') return String(value);
+  if (type === 'salary') return formatSalaryShort(value).replace('$', '');
+  return String(value);
+}
+
+function trustTone(value) {
+  if (value >= 85) return 'excellent';
+  if (value >= 75) return 'high';
+  if (value >= 65) return 'mid';
+  return 'low';
+}
+
+function syncChipScrollSelection(type) {
+  document.querySelectorAll(`[data-chip-scroll="${type}"] .chip-scroll-option`).forEach((option) => {
+    option.classList.toggle('is-selected', Number(option.dataset.value) === Number(quickFilterValues[type]));
+  });
+}
+
+function scrollSelectedChipOption(type) {
+  const selected = document.querySelector(`[data-chip-scroll="${type}"] .chip-scroll-option.is-selected`);
+  if (selected) selected.scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+
+function centeredChipOption(type) {
+  const scroll = document.querySelector(`[data-chip-scroll="${type}"]`);
+  if (!scroll) return null;
+  const scrollRect = scroll.getBoundingClientRect();
+  const scrollCenter = scrollRect.left + (scrollRect.width / 2);
+  let closest = null;
+  let closestDistance = Infinity;
+
+  scroll.querySelectorAll('.chip-scroll-option').forEach((option) => {
+    const rect = option.getBoundingClientRect();
+    const optionCenter = rect.left + (rect.width / 2);
+    const distance = Math.abs(optionCenter - scrollCenter);
+    if (distance < closestDistance) {
+      closest = option;
+      closestDistance = distance;
+    }
+  });
+
+  return closest;
+}
+
+function scheduleCenteredChipApply(type) {
+  window.clearTimeout(quickFilterScrollTimers[type]);
+  quickFilterScrollTimers[type] = window.setTimeout(() => {
+    const centered = centeredChipOption(type);
+    if (centered) applyVariableQuickFilter(type, centered.dataset.value);
+  }, 180);
+}
+
+function applyVariableQuickFilter(type, value) {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return;
+
+  if (type === 'trust') {
+    quickFilterValues.trust = numericValue;
+    activeChipFilters.add('high-trust');
+    applyQuickFilterToControls('high-trust', true);
+  } else if (type === 'salary') {
+    quickFilterValues.salary = numericValue;
+    quickFilterValues.hourly = salaryToHourly(numericValue);
+    activeChipFilters.add('salary-50k');
+    applyQuickFilterToControls('salary-50k', true);
+  }
+
+  updateQuickFilterLabels();
+  syncQuickFiltersUI();
+  ['trust', 'salary'].forEach(syncChipScrollSelection);
+
+  if (liveJobSearchState && liveJobSearchState.hasSearched) {
+    applyFilters();
+  }
+}
+
+function renderQuickFilterWheel(type) {
+  const wheel = document.querySelector(`[data-chip-scroll="${type}"]`);
+  const values = QUICK_FILTER_WHEELS[type];
+  if (!wheel || !values) return;
+
+  wheel.innerHTML = values.map((value) => `
+    <span class="chip-scroll-option" role="option" data-value="${value}" ${type === 'trust' ? `data-trust-tone="${trustTone(value)}"` : ''}>
+      ${wheelOptionLabel(type, value)}
+    </span>
+  `).join('');
+
+  wheel.querySelectorAll('.chip-scroll-option').forEach((option) => {
+    option.addEventListener('click', (event) => {
+      event.stopPropagation();
+      applyVariableQuickFilter(type, option.dataset.value);
+      scrollSelectedChipOption(type);
+    });
+  });
+
+  wheel.addEventListener('scroll', () => scheduleCenteredChipApply(type), { passive: true });
+  wheel.addEventListener('wheel', (event) => {
+    if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+      event.preventDefault();
+      wheel.scrollLeft += event.deltaY;
+      scheduleCenteredChipApply(type);
+    }
+  }, { passive: false });
+  wheel.addEventListener('pointerdown', (event) => event.stopPropagation());
+
+  syncChipScrollSelection(type);
+}
+
+function deactivateVariableFilter(filterId) {
+  activeChipFilters.delete(filterId);
+  applyQuickFilterToControls(filterId, false);
+  syncQuickFiltersUI();
+  if (liveJobSearchState && liveJobSearchState.hasSearched) applyFilters();
+}
+
+function initVariableQuickFilters() {
+  ['trust', 'salary'].forEach(renderQuickFilterWheel);
+  applyQuickFilterToControls('high-trust', true);
+  updateQuickFilterLabels();
+  updateDistanceLabels();
+
+  if (jobsDistanceSlider) {
+    jobsDistanceSlider.addEventListener('input', () => {
+      const miles = Number(jobsDistanceSlider.value || 30);
+      if (Number.isFinite(miles)) {
+        quickFilterValues.distance = miles;
+        updateDistanceLabels();
+      }
+    });
+  }
+
+  document.querySelectorAll('.dirA-chip-control').forEach((control) => {
+    const button = control.querySelector('.dirA-chip');
+    if (!button || control.hidden) return;
+
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      if (event.target.closest('.dirA-chip-clear')) {
+        deactivateVariableFilter(button.dataset.filter);
+        return;
+      }
+      if (event.target.closest('.chip-scroll-window')) return;
+
+      if (activeChipFilters.has(button.dataset.filter)) {
+        deactivateVariableFilter(button.dataset.filter);
+        return;
+      }
+
+      activeChipFilters.add(button.dataset.filter);
+      applyQuickFilterToControls(button.dataset.filter, true);
+      syncQuickFiltersUI();
+      window.setTimeout(() => scrollSelectedChipOption(control.dataset.variableFilter === 'pay' ? 'salary' : 'trust'), 0);
+      if (liveJobSearchState && liveJobSearchState.hasSearched) applyFilters();
+    });
+  });
+
+  window.setTimeout(() => {
+    ['trust', 'salary'].forEach(scrollSelectedChipOption);
+  }, 0);
 }
 
 function syncQuickFiltersUI() {
@@ -4325,19 +4512,6 @@ function initSearchRedesign() {
     });
   });
   
-  // 4. Global Keyboard Shortcut '/' to focus search
-  window.addEventListener('keydown', (e) => {
-    if (e.key === '/' && !['input', 'textarea'].includes(document.activeElement.tagName.toLowerCase()) && !document.activeElement.isContentEditable) {
-      if (jobsSearchQuery) {
-        e.preventDefault();
-        jobsSearchQuery.focus();
-        jobsSearchQuery.select();
-        // Trigger suggestions dropdown on focus
-        updateFilteredSuggestions(jobsSearchQuery.value);
-        showAutocompletePanel();
-      }
-    }
-  });
 }
 
 // Page initialization
