@@ -3965,6 +3965,10 @@ html.filson-pro-loaded .hero h1 {
     bottom: 16px;
     font-size: 10px;
   }
+
+  footer .footer-inner {
+    padding-top: 48px;
+  }
 }
 
 /* ---- Stats Band (Repositioned) ---- */
