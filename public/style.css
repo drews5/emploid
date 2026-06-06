@@ -3944,6 +3944,28 @@ html.filson-pro-loaded .hero h1 {
   color: rgba(255, 255, 255, 0.66) !important;
 }
 
+.scanner-layer-detailed .trust-score-indicator {
+  width: 40px;
+  height: 40px;
+}
+
+.scanner-layer-detailed .trust-ring-svg {
+  display: block;
+  width: 40px;
+  height: 40px;
+}
+
+.scanner-layer-detailed .trust-ring-svg circle:first-child {
+  stroke: rgba(255, 255, 255, 0.2);
+}
+
+.scanner-layer-detailed .trust-ring-value {
+  color: #ffffff !important;
+  font-size: 13px;
+  font-weight: 850;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.36);
+}
+
 @media (max-width: 640px) {
   .hero-scanner-widget.full-length {
     height: 230px;
