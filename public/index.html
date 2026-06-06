@@ -729,15 +729,15 @@
               <span class="dirA-search-icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7.5"></circle><line x1="20.5" y1="20.5" x2="17" y2="17"></line></svg>
               </span>
-              <input id="jobs-search-query" type="text" placeholder="Role, company, skill…" autocomplete="off" />
+              <input id="jobs-search-query" type="text" placeholder="Role, company, skill..." autocomplete="off" />
               <span class="dirA-search-divider"></span>
               <span class="dirA-search-loc" id="jobs-location-picker">
-                <input type="hidden" id="jobs-search-location" value="remote" />
+                <input type="hidden" id="jobs-search-location" value="Minneapolis, MN" />
                 <button class="location-trigger" id="jobs-location-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
                   <svg class="location-trigger-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                   <span class="location-trigger-copy">
-                    <span class="location-trigger-label" id="jobs-location-label">Remote</span>
-                    <span class="location-trigger-hint" id="jobs-location-hint">Work from home</span>
+                    <span class="location-trigger-label" id="jobs-location-label">Minneapolis, ...</span>
+                    <span class="location-trigger-hint" id="jobs-location-hint">Precise location</span>
                   </span>
                   <span class="location-distance-pill" id="jobs-distance-value">30 mi</span>
                   <svg class="location-trigger-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -787,6 +787,16 @@
                 <span class="dirA-chip-clear" aria-hidden="true">×</span>
               </div>
             </div>
+            <button type="button" class="dirA-chip" data-filter="remote" id="qf-remote">
+              <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
+              Remote
+              <span class="dirA-chip-clear" aria-hidden="true">x</span>
+            </button>
+            <button type="button" class="dirA-chip" data-filter="job-type" id="qf-job-type">
+              <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
+              Job Type
+              <span class="dirA-chip-clear" aria-hidden="true">x</span>
+            </button>
             <div class="dirA-chip-control" data-variable-filter="pay">
               <div class="dirA-chip dirA-chip-variable" data-filter="salary-50k" id="qf-salary-50k" role="button" tabindex="0">
                 <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>

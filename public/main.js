@@ -3584,7 +3584,7 @@ var selectedSuggestionIndex = -1;
 var currentFilteredSuggestions = [];
 
 // Active chip filters — independent state so they work even before jobs-shell is visible
-const activeChipFilters = new Set(['high-trust']);
+const activeChipFilters = new Set(['direct-apply']);
 
 const quickFilterValues = {
   trust: 70,
@@ -3595,6 +3595,8 @@ const quickFilterValues = {
 
 const QUICK_FILTERS_CONFIG = {
   'high-trust': { label: 'Trust Score' },
+  'remote': { label: 'Remote' },
+  'job-type': { label: 'Job Type' },
   'salary-50k': { label: 'Pay' },
   'direct-apply': { label: 'Direct Apply' },
 };
@@ -3950,7 +3952,7 @@ function deactivateVariableFilter(filterId) {
 }
 
 function initVariableQuickFilters() {
-  applyQuickFilterToControls('high-trust', true);
+  applyQuickFilterToControls('direct-apply', true);
   updateQuickFilterLabels();
 
   document.querySelectorAll('.dirA-chip-control').forEach((control) => {
@@ -4094,6 +4096,15 @@ function applyQuickFilterToControls(filterId, isActive) {
     } else if (directToggle.dataset.quickFilter === filterId) {
       directToggle.checked = false;
       delete directToggle.dataset.quickFilter;
+    }
+  }
+
+  if (filterId === 'remote') {
+    const remoteCheckbox = getWorkModeCheckbox('Remote');
+    if (remoteCheckbox) {
+      remoteCheckbox.checked = Boolean(isActive);
+      if (isActive) remoteCheckbox.dataset.quickFilter = filterId;
+      else delete remoteCheckbox.dataset.quickFilter;
     }
   }
 }
