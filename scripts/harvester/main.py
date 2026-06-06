@@ -74,7 +74,8 @@ def crawl_ats(companies: dict, only_provider: str | None = None) -> tuple[list[d
 
 def run(include_jsearch: bool = False, only_provider: str | None = None) -> dict:
     stats = {"seen": 0, "new": 0, "updated": 0, "deactivated": 0, "errors": 0, "notes": ""}
-    run_id = db.create_crawl_run("all")
+    run_source = only_provider or ("all+jsearch" if include_jsearch else "all")
+    run_id = db.create_crawl_run(run_source)
 
     companies = load_yaml("companies.yaml")
     query_config = load_yaml("queries.yaml")
