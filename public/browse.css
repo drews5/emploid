@@ -462,6 +462,16 @@
 .dirA-chip-variable > span:not(.dirA-chip-clear):not(.chip-value-combo),
 .dirA-chip-variable > .chip-value-input,
 .dirA-chip-variable > .chip-value-combo {
+  transition: transform 160ms ease;
+}
+.dirA-chip-variable.is-active:hover > .plus,
+.dirA-chip-variable.is-active:hover > span:not(.dirA-chip-clear):not(.chip-value-combo),
+.dirA-chip-variable.is-active:hover > .chip-value-input,
+.dirA-chip-variable.is-active:hover > .chip-value-combo,
+.dirA-chip-variable.is-active:focus-within > .plus,
+.dirA-chip-variable.is-active:focus-within > span:not(.dirA-chip-clear):not(.chip-value-combo),
+.dirA-chip-variable.is-active:focus-within > .chip-value-input,
+.dirA-chip-variable.is-active:focus-within > .chip-value-combo {
   transform: translateY(-4px);
 }
 .dirA-chip:hover {
@@ -557,9 +567,9 @@
 }
 
 .dirA-chip-variable {
-  padding: 9px 18px 14px;
+  padding: 9px 14px 10px;
   overflow: visible;
-  min-height: 46px;
+  min-height: 42px;
 }
 
 #qf-direct-apply {
