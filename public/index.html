@@ -782,8 +782,8 @@
               <div class="dirA-chip dirA-chip-variable" data-filter="high-trust" id="qf-high-trust" role="button" tabindex="0">
                 <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
                 <span>Trust Score</span>
-                <strong class="chip-current-value" id="qf-trust-current">70</strong>
-                <input class="chip-range" id="qf-trust-range" type="range" min="50" max="100" step="5" value="70" aria-label="Trust score minimum" />
+                <input class="chip-value-input" id="qf-trust-current" type="number" min="0" max="100" step="1" value="70" aria-label="Trust score minimum value" />
+                <input class="chip-range" id="qf-trust-range" type="range" min="0" max="100" step="1" value="70" aria-label="Trust score minimum" />
                 <span class="dirA-chip-clear" aria-hidden="true">×</span>
               </div>
             </div>
@@ -791,8 +791,8 @@
               <div class="dirA-chip dirA-chip-variable" data-filter="salary-50k" id="qf-salary-50k" role="button" tabindex="0">
                 <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
                 <span>Pay</span>
-                <strong class="chip-current-value" id="qf-pay-current">50k</strong>
-                <input class="chip-range" id="qf-pay-range" type="range" min="30000" max="200000" step="5000" value="50000" aria-label="Pay minimum" />
+                <span class="chip-value-combo"><input class="chip-value-input" id="qf-pay-current" type="number" min="0" max="300" step="1" value="50" aria-label="Pay minimum value in thousands" /><span class="chip-value-unit">k</span></span>
+                <input class="chip-range" id="qf-pay-range" type="range" min="0" max="300000" step="1000" value="50000" aria-label="Pay minimum" />
                 <span class="dirA-chip-clear" aria-hidden="true">×</span>
               </div>
             </div>

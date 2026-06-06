@@ -3910,23 +3910,26 @@ function updateQuickFilterLabels() {
   const trustRange = document.getElementById('qf-trust-range');
   const payRange = document.getElementById('qf-pay-range');
 
-  if (trustCurrent) trustCurrent.textContent = String(quickFilterValues.trust);
-  if (payCurrent) payCurrent.textContent = formatSalaryShort(quickFilterValues.salary).replace('$', '');
+  if (trustCurrent && Number(trustCurrent.value) !== quickFilterValues.trust) trustCurrent.value = String(quickFilterValues.trust);
+  if (payCurrent && Number(payCurrent.value) !== Math.round(quickFilterValues.salary / 1000)) payCurrent.value = String(Math.round(quickFilterValues.salary / 1000));
   if (trustRange && Number(trustRange.value) !== quickFilterValues.trust) trustRange.value = String(quickFilterValues.trust);
   if (payRange && Number(payRange.value) !== quickFilterValues.salary) payRange.value = String(quickFilterValues.salary);
 }
 
-function applyVariableQuickFilter(type, value) {
+function clampQuickFilterValue(value, min, max) {
   const numericValue = Number(value);
-  if (!Number.isFinite(numericValue)) return;
+  if (!Number.isFinite(numericValue)) return min;
+  return Math.max(min, Math.min(max, Math.round(numericValue)));
+}
 
+function applyVariableQuickFilter(type, value) {
   if (type === 'trust') {
-    quickFilterValues.trust = numericValue;
+    quickFilterValues.trust = clampQuickFilterValue(value, 0, 100);
     activeChipFilters.add('high-trust');
     applyQuickFilterToControls('high-trust', true);
   } else if (type === 'salary') {
-    quickFilterValues.salary = numericValue;
-    quickFilterValues.hourly = salaryToHourly(numericValue);
+    quickFilterValues.salary = clampQuickFilterValue(value, 0, 300000);
+    quickFilterValues.hourly = salaryToHourly(quickFilterValues.salary);
     activeChipFilters.add('salary-50k');
     applyQuickFilterToControls('salary-50k', true);
   }
@@ -3961,7 +3964,11 @@ function initVariableQuickFilters() {
         return;
       }
       if (event.target.closest('.chip-range')) return;
-      if (activeChipFilters.has(chip.dataset.filter)) return;
+      if (event.target.closest('.chip-value-input')) return;
+      if (activeChipFilters.has(chip.dataset.filter)) {
+        deactivateVariableFilter(chip.dataset.filter);
+        return;
+      }
       activeChipFilters.add(chip.dataset.filter);
       applyQuickFilterToControls(chip.dataset.filter, true);
       syncQuickFiltersUI();
@@ -3971,8 +3978,11 @@ function initVariableQuickFilters() {
     chip.addEventListener('keydown', (event) => {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       if (event.target.closest('.chip-range')) return;
+      if (event.target.closest('.chip-value-input')) return;
       event.preventDefault();
-      if (!activeChipFilters.has(chip.dataset.filter)) {
+      if (activeChipFilters.has(chip.dataset.filter)) {
+        deactivateVariableFilter(chip.dataset.filter);
+      } else {
         activeChipFilters.add(chip.dataset.filter);
         applyQuickFilterToControls(chip.dataset.filter, true);
         syncQuickFiltersUI();
@@ -3983,6 +3993,8 @@ function initVariableQuickFilters() {
 
   const trustRange = document.getElementById('qf-trust-range');
   const payRange = document.getElementById('qf-pay-range');
+  const trustValueInput = document.getElementById('qf-trust-current');
+  const payValueInput = document.getElementById('qf-pay-current');
 
   if (trustRange) {
     trustRange.addEventListener('input', (event) => {
@@ -3992,12 +4004,38 @@ function initVariableQuickFilters() {
     trustRange.addEventListener('click', (event) => event.stopPropagation());
   }
 
+  if (trustValueInput) {
+    trustValueInput.addEventListener('input', (event) => {
+      event.stopPropagation();
+      if (trustValueInput.value === '') return;
+      applyVariableQuickFilter('trust', trustValueInput.value);
+    });
+    trustValueInput.addEventListener('change', (event) => {
+      event.stopPropagation();
+      applyVariableQuickFilter('trust', trustValueInput.value);
+    });
+    trustValueInput.addEventListener('click', (event) => event.stopPropagation());
+  }
+
   if (payRange) {
     payRange.addEventListener('input', (event) => {
       event.stopPropagation();
       applyVariableQuickFilter('salary', payRange.value);
     });
     payRange.addEventListener('click', (event) => event.stopPropagation());
+  }
+
+  if (payValueInput) {
+    payValueInput.addEventListener('input', (event) => {
+      event.stopPropagation();
+      if (payValueInput.value === '') return;
+      applyVariableQuickFilter('salary', Number(payValueInput.value) * 1000);
+    });
+    payValueInput.addEventListener('change', (event) => {
+      event.stopPropagation();
+      applyVariableQuickFilter('salary', Number(payValueInput.value) * 1000);
+    });
+    payValueInput.addEventListener('click', (event) => event.stopPropagation());
   }
 
   if (jobsDistanceSlider) {
@@ -4028,7 +4066,7 @@ function getWorkModeCheckbox(mode) {
 
 function applyQuickFilterToControls(filterId, isActive) {
   if (filterId === 'high-trust' && trustFilter) {
-    if (isActive && Number(trustFilter.value) < quickFilterValues.trust) {
+    if (isActive) {
       trustFilter.value = String(quickFilterValues.trust);
       trustFilter.dataset.quickFilter = filterId;
     } else if (!isActive && trustFilter.dataset.quickFilter === filterId) {
@@ -4041,7 +4079,7 @@ function applyQuickFilterToControls(filterId, isActive) {
   if (filterId === 'salary-50k' && salaryFilter) {
     if (isActive) {
       const hasOption = Array.from(salaryFilter.options || []).some((option) => Number(option.value) === Number(quickFilterValues.salary));
-      if (hasOption) salaryFilter.value = String(quickFilterValues.salary);
+      salaryFilter.value = hasOption ? String(quickFilterValues.salary) : '0';
       salaryFilter.dataset.quickFilter = filterId;
     } else if (!isActive && salaryFilter.dataset.quickFilter === filterId) {
       salaryFilter.value = '0';

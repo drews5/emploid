@@ -441,7 +441,7 @@
 .dirA-chip {
   display: inline-flex; align-items: center; gap: 6px;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   background: var(--bg-white);
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -457,6 +457,12 @@
 .dirA-chip > * {
   position: relative;
   z-index: 1;
+}
+.dirA-chip-variable > .plus,
+.dirA-chip-variable > span:not(.dirA-chip-clear):not(.chip-value-combo),
+.dirA-chip-variable > .chip-value-input,
+.dirA-chip-variable > .chip-value-combo {
+  transform: translateY(-4px);
 }
 .dirA-chip:hover {
   border-color: var(--orange-500);
@@ -551,9 +557,9 @@
 }
 
 .dirA-chip-variable {
-  padding: 9px 14px 10px;
-  overflow: hidden;
-  min-height: 42px;
+  padding: 9px 18px 14px;
+  overflow: visible;
+  min-height: 46px;
 }
 
 #qf-direct-apply {
@@ -582,31 +588,66 @@
   color: #fff;
 }
 
-.chip-current-value {
+.chip-value-input,
+.chip-value-combo {
   display: none;
   align-items: center;
   justify-content: center;
+}
+.chip-value-input {
   min-width: 34px;
+  width: 44px;
   padding: 3px 9px;
+  border: 0;
   border-radius: 999px;
   background: rgba(8, 17, 31, 0.06);
   color: var(--text-primary);
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 850;
   line-height: 1.1;
+  text-align: center;
   white-space: nowrap;
+  outline: none;
+  -moz-appearance: textfield;
 }
-.dirA-chip.is-active .chip-current-value {
+.chip-value-input::-webkit-outer-spin-button,
+.chip-value-input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+.chip-value-combo {
+  position: relative;
+}
+.chip-value-combo .chip-value-input {
   display: inline-flex;
+  width: 52px;
+  padding-right: 18px;
+}
+.chip-value-unit {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  color: currentColor;
+  font-size: 12px;
+  font-weight: 850;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+.dirA-chip.is-active .chip-value-input,
+.dirA-chip.is-active .chip-value-combo {
+  display: inline-flex;
+}
+.dirA-chip.is-active .chip-value-input {
   background: rgba(255, 255, 255, 0.22);
   color: #fff;
 }
 
 .chip-range {
   position: absolute;
-  left: 44px;
-  right: 42px;
-  bottom: 6px;
+  left: 18px;
+  right: 18px;
+  bottom: 8px;
   width: auto;
   height: 14px;
   margin: 0;
@@ -661,8 +702,8 @@
 
 .dirA-chip-clear {
   position: absolute;
-  top: -7px;
-  right: -7px;
+  top: -9px;
+  right: -9px;
   width: 18px;
   height: 18px;
   display: none;
@@ -676,6 +717,7 @@
   font-weight: 900;
   line-height: 1;
   box-shadow: 0 3px 10px rgba(8, 17, 31, 0.11);
+  z-index: 8;
 }
 
 .dirA-chip.is-active .dirA-chip-clear {
