@@ -19,9 +19,12 @@ jobs:
       matrix:
         provider: [greenhouse, lever, ashby, smartrecruiters]
     env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
       PYTHONUNBUFFERED: "1"
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL || secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      SUPABASE_URL_SECRET: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_URL_SECRET: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -35,14 +38,31 @@ jobs:
         run: python -m pip install --upgrade pip && python -m pip install -r scripts/requirements.txt
 
       - name: Validate required secrets
+        shell: bash
         run: |
-          python - <<'PY'
-          import os
-          missing = [name for name in ("SUPABASE_URL", "SUPABASE_SERVICE_KEY") if not os.getenv(name)]
-          if missing:
-              raise SystemExit(f"Missing required GitHub secrets: {', '.join(missing)}")
-          print("Supabase secrets are present.")
-          PY
+          set -euo pipefail
+
+          if [[ -n "${SUPABASE_URL_SECRET}" ]]; then
+            echo "SUPABASE_URL=${SUPABASE_URL_SECRET}" >> "$GITHUB_ENV"
+            echo "SUPABASE_URL configured: yes"
+          elif [[ -n "${NEXT_PUBLIC_SUPABASE_URL_SECRET}" ]]; then
+            echo "SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL_SECRET}" >> "$GITHUB_ENV"
+            echo "NEXT_PUBLIC_SUPABASE_URL configured: yes"
+          else
+            echo "::error::Missing Supabase URL secret. Add SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL in repository Actions secrets."
+            exit 1
+          fi
+
+          if [[ -n "${SUPABASE_SERVICE_KEY_SECRET}" ]]; then
+            echo "SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY_SECRET}" >> "$GITHUB_ENV"
+            echo "SUPABASE_SERVICE_KEY configured: yes"
+          elif [[ -n "${SUPABASE_SERVICE_ROLE_KEY_SECRET}" ]]; then
+            echo "SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_ROLE_KEY_SECRET}" >> "$GITHUB_ENV"
+            echo "SUPABASE_SERVICE_ROLE_KEY configured: yes"
+          else
+            echo "::error::Missing Supabase service key secret. Add SUPABASE_SERVICE_KEY or SUPABASE_SERVICE_ROLE_KEY in repository Actions secrets."
+            exit 1
+          fi
 
       - name: Crawl ATS listings into Supabase
         run: python -u -m scripts.harvester.main --provider "${{ matrix.provider }}"
