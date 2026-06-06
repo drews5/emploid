@@ -3593,13 +3593,6 @@ const quickFilterValues = {
   distance: 30,
 };
 
-const quickFilterScrollTimers = {};
-
-const QUICK_FILTER_WHEELS = {
-  trust: [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100],
-  salary: [30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 125000, 150000, 175000, 200000],
-};
-
 const QUICK_FILTERS_CONFIG = {
   'high-trust': { label: 'Trust Score' },
   'salary-50k': { label: 'Pay' },
@@ -3912,327 +3905,15 @@ function hourlyToSalary(hourly) {
 }
 
 function updateQuickFilterLabels() {
-  const trustValue = document.getElementById('qf-trust-value');
-  const payValue = document.getElementById('qf-pay-value');
-  const distanceValue = document.getElementById('qf-distance-value');
-
-  if (trustValue) trustValue.textContent = activeChipFilters.has('high-trust') ? `${quickFilterValues.trust}+` : '';
-  if (payValue) {
-    const labels = [];
-    if (activeChipFilters.has('salary-50k') && activePayKinds.has('salary')) labels.push(formatSalaryShort(quickFilterValues.salary));
-    if (activeChipFilters.has('salary-50k') && activePayKinds.has('hourly')) labels.push(formatHourly(quickFilterValues.hourly));
-    payValue.textContent = labels.join(' / ');
-  }
-  if (distanceValue) distanceValue.textContent = activeChipFilters.has('distance') ? `${quickFilterValues.distance} mi` : '';
-}
-
-function wheelOptionLabel(type, value) {
-  if (type === 'trust') return `${value}+`;
-  if (type === 'salary') return formatSalaryShort(value);
-  if (type === 'hourly') return formatHourly(value);
-  if (type === 'distance') return `${value} mi`;
-  return String(value);
-}
-
-function trustTone(value) {
-  if (value >= 75) return 'high';
-  if (value >= 70) return 'mid';
-  return 'low';
-}
-
-function syncWheelSelection(type) {
-  document.querySelectorAll(`[data-wheel="${type}"] .quick-filter-option`).forEach((option) => {
-    option.classList.toggle('is-selected', Number(option.dataset.value) === Number(quickFilterValues[type]));
-  });
-}
-
-function scrollSelectedWheelOption(type) {
-  const selected = document.querySelector(`[data-wheel="${type}"] .quick-filter-option.is-selected`);
-  if (selected) selected.scrollIntoView({ block: 'center', inline: 'nearest' });
-}
-
-function centeredWheelOption(type) {
-  const wheel = document.querySelector(`[data-wheel="${type}"]`);
-  if (!wheel) return null;
-  const wheelRect = wheel.getBoundingClientRect();
-  const wheelCenter = wheelRect.top + (wheelRect.height / 2);
-  let closest = null;
-  let closestDistance = Infinity;
-
-  wheel.querySelectorAll('.quick-filter-option').forEach((option) => {
-    const rect = option.getBoundingClientRect();
-    const optionCenter = rect.top + (rect.height / 2);
-    const distance = Math.abs(optionCenter - wheelCenter);
-    if (distance < closestDistance) {
-      closest = option;
-      closestDistance = distance;
-    }
-  });
-
-  return closest;
-}
-
-function scheduleCenteredWheelApply(type) {
-  window.clearTimeout(quickFilterScrollTimers[type]);
-  quickFilterScrollTimers[type] = window.setTimeout(() => {
-    const centered = centeredWheelOption(type);
-    if (centered) applyVariableQuickFilter(type, centered.dataset.value);
-  }, 2000);
-}
-
-function syncPayPopoverMode() {
-  const choices = document.getElementById('qf-pay-choices');
-  const wheels = document.getElementById('qf-pay-wheels');
-  if (!choices || !wheels) return;
-
-  const hasKind = activePayKinds.size > 0;
-  choices.hidden = false;
-  wheels.hidden = !hasKind;
-  const salaryCol = wheels.querySelector('[data-wheel="salary"]')?.parentElement;
-  const hourlyCol = wheels.querySelector('[data-wheel="hourly"]')?.parentElement;
-  if (salaryCol) salaryCol.hidden = !activePayKinds.has('salary');
-  if (hourlyCol) hourlyCol.hidden = !activePayKinds.has('hourly');
-  wheels.style.gridTemplateColumns = activePayKinds.size === 1 ? '1fr' : '1fr 1fr';
-}
-
-function applyVariableQuickFilter(type, value) {
-  const numericValue = Number(value);
-  if (!Number.isFinite(numericValue)) return;
-
-  if (type === 'trust') {
-    quickFilterValues.trust = numericValue;
-    activeChipFilters.add('high-trust');
-    applyQuickFilterToControls('high-trust', true);
-  } else if (type === 'salary') {
-    quickFilterValues.salary = numericValue;
-    quickFilterValues.hourly = salaryToHourly(numericValue);
-    activeChipFilters.add('salary-50k');
-    applyQuickFilterToControls('salary-50k', true);
-  } else if (type === 'hourly') {
-    quickFilterValues.hourly = numericValue;
-    activeChipFilters.add('salary-50k');
-    applyQuickFilterToControls('salary-50k', true);
-  } else if (type === 'distance') {
-    quickFilterValues.distance = numericValue;
-    activeChipFilters.add('distance');
-  }
-
-  updateQuickFilterLabels();
-  syncQuickFiltersUI();
-  syncPayPopoverMode();
-  ['trust', 'salary', 'hourly', 'distance'].forEach(syncWheelSelection);
-
-  if (liveJobSearchState && liveJobSearchState.hasSearched) {
-    applyFilters();
-  }
-}
-
-function renderQuickFilterWheel(type) {
-  const wheel = document.querySelector(`[data-wheel="${type}"]`);
-  const values = QUICK_FILTER_WHEELS[type];
-  if (!wheel || !values) return;
-
-  wheel.innerHTML = values.map((value) => `
-    <button class="quick-filter-option" type="button" data-wheel-option="${type}" data-value="${value}" ${type === 'trust' ? `data-trust-tone="${trustTone(value)}"` : ''}>
-      ${wheelOptionLabel(type, value)}
-    </button>
-  `).join('');
-
-  wheel.querySelectorAll('.quick-filter-option').forEach((option) => {
-    option.addEventListener('click', (event) => {
-      event.stopPropagation();
-      applyVariableQuickFilter(type, option.dataset.value);
-      scrollSelectedWheelOption(type);
-    });
-  });
-
-  wheel.addEventListener('scroll', () => scheduleCenteredWheelApply(type), { passive: true });
-  wheel.addEventListener('pointermove', (event) => {
-    if (event.pointerType === 'touch') return;
-    const rect = wheel.getBoundingClientRect();
-    const topZone = rect.top + rect.height * 0.32;
-    const bottomZone = rect.top + rect.height * 0.68;
-    if (event.clientY < topZone) wheel.scrollBy({ top: -8, behavior: 'smooth' });
-    if (event.clientY > bottomZone) wheel.scrollBy({ top: 8, behavior: 'smooth' });
-  });
-
-  syncWheelSelection(type);
-}
-
-function closeQuickFilterPopovers(exceptControl = null) {
-  document.querySelectorAll('.dirA-chip-control.is-open').forEach((control) => {
-    if (control !== exceptControl) {
-      control.classList.remove('is-open');
-      const button = control.querySelector('.dirA-chip');
-      if (button) button.setAttribute('aria-expanded', 'false');
-    }
-  });
-}
-
-function deactivateVariableFilter(filterId) {
-  activeChipFilters.delete(filterId);
-  if (filterId === 'salary-50k') {
-    activePayKinds.clear();
-    document.querySelectorAll('[data-pay-kind]').forEach((input) => { input.checked = false; });
-    syncPayPopoverMode();
-  }
-  applyQuickFilterToControls(filterId, false);
-  syncQuickFiltersUI();
-  if (liveJobSearchState && liveJobSearchState.hasSearched) applyFilters();
-}
-
-function initVariableQuickFilters() {
-  ['trust', 'salary', 'hourly', 'distance'].forEach(renderQuickFilterWheel);
-  applyQuickFilterToControls('high-trust', true);
-  syncPayPopoverMode();
-  updateQuickFilterLabels();
-
-  document.querySelectorAll('[data-pay-kind]').forEach((input) => {
-    input.addEventListener('change', () => {
-      if (input.checked) activePayKinds.add(input.dataset.payKind);
-      else activePayKinds.delete(input.dataset.payKind);
-
-      if (activePayKinds.size) {
-        activeChipFilters.add('salary-50k');
-        applyQuickFilterToControls('salary-50k', true);
-        window.setTimeout(() => {
-          syncPayPopoverMode();
-          ['salary', 'hourly'].forEach(scrollSelectedWheelOption);
-        }, 1000);
-      } else {
-        activeChipFilters.delete('salary-50k');
-        applyQuickFilterToControls('salary-50k', false);
-        syncPayPopoverMode();
-      }
-
-      syncQuickFiltersUI();
-      if (liveJobSearchState && liveJobSearchState.hasSearched) applyFilters();
-    });
-  });
-
-  document.querySelectorAll('.dirA-chip-control').forEach((control) => {
-    const button = control.querySelector('.dirA-chip');
-    if (!button) return;
-
-    button.addEventListener('click', (event) => {
-      event.stopPropagation();
-      if (event.target.closest('.dirA-chip-clear')) {
-        deactivateVariableFilter(button.dataset.filter);
-        closeQuickFilterPopovers();
-        return;
-      }
-
-      if (activeChipFilters.has(button.dataset.filter) && control.classList.contains('is-open')) {
-        deactivateVariableFilter(button.dataset.filter);
-        closeQuickFilterPopovers();
-        return;
-      }
-
-      if (button.dataset.filter === 'distance' && !activeChipFilters.has('distance')) {
-        activeChipFilters.add('distance');
-        syncQuickFiltersUI();
-        if (liveJobSearchState && liveJobSearchState.hasSearched) applyFilters();
-      }
-
-      if (button.dataset.filter === 'high-trust' && !activeChipFilters.has('high-trust')) {
-        activeChipFilters.add('high-trust');
-        applyQuickFilterToControls('high-trust', true);
-        syncQuickFiltersUI();
-        if (liveJobSearchState && liveJobSearchState.hasSearched) applyFilters();
-      }
-
-      const open = !control.classList.contains('is-open');
-      closeQuickFilterPopovers(control);
-      control.classList.toggle('is-open', open);
-      button.setAttribute('aria-expanded', String(open));
-      if (open) {
-        const type = control.dataset.variableFilter === 'pay' ? 'salary' : control.dataset.variableFilter;
-        syncPayPopoverMode();
-        window.setTimeout(() => scrollSelectedWheelOption(type), 0);
-      }
-    });
-  });
-
-  if (jobsDistanceSlider) {
-    jobsDistanceSlider.addEventListener('input', () => {
-      const miles = Number(jobsDistanceSlider.value || 30);
-      if (Number.isFinite(miles)) {
-        quickFilterValues.distance = miles;
-        updateDistanceLabels();
-      }
-    });
-  }
-
-  document.addEventListener('click', (event) => {
-    if (!event.target.closest('.dirA-chip-control')) {
-      closeQuickFilterPopovers();
-    }
-  });
-}
-
-function updateQuickFilterLabels() {
   const trustCurrent = document.getElementById('qf-trust-current');
   const payCurrent = document.getElementById('qf-pay-current');
+  const trustRange = document.getElementById('qf-trust-range');
+  const payRange = document.getElementById('qf-pay-range');
+
   if (trustCurrent) trustCurrent.textContent = String(quickFilterValues.trust);
   if (payCurrent) payCurrent.textContent = formatSalaryShort(quickFilterValues.salary).replace('$', '');
-
-  document.querySelectorAll('[data-chip-scroll]').forEach((scroll) => {
-    const type = scroll.dataset.chipScroll;
-    scroll.setAttribute('aria-valuenow', String(quickFilterValues[type] || ''));
-  });
-}
-
-function wheelOptionLabel(type, value) {
-  if (type === 'trust') return String(value);
-  if (type === 'salary') return formatSalaryShort(value).replace('$', '');
-  return String(value);
-}
-
-function trustTone(value) {
-  if (value >= 85) return 'excellent';
-  if (value >= 75) return 'high';
-  if (value >= 65) return 'mid';
-  return 'low';
-}
-
-function syncChipScrollSelection(type) {
-  document.querySelectorAll(`[data-chip-scroll="${type}"] .chip-scroll-option`).forEach((option) => {
-    option.classList.toggle('is-selected', Number(option.dataset.value) === Number(quickFilterValues[type]));
-  });
-}
-
-function scrollSelectedChipOption(type) {
-  const selected = document.querySelector(`[data-chip-scroll="${type}"] .chip-scroll-option.is-selected`);
-  if (selected) selected.scrollIntoView({ block: 'nearest', inline: 'center' });
-}
-
-function centeredChipOption(type) {
-  const scroll = document.querySelector(`[data-chip-scroll="${type}"]`);
-  if (!scroll) return null;
-  const scrollRect = scroll.getBoundingClientRect();
-  const scrollCenter = scrollRect.left + (scrollRect.width / 2);
-  let closest = null;
-  let closestDistance = Infinity;
-
-  scroll.querySelectorAll('.chip-scroll-option').forEach((option) => {
-    const rect = option.getBoundingClientRect();
-    const optionCenter = rect.left + (rect.width / 2);
-    const distance = Math.abs(optionCenter - scrollCenter);
-    if (distance < closestDistance) {
-      closest = option;
-      closestDistance = distance;
-    }
-  });
-
-  return closest;
-}
-
-function scheduleCenteredChipApply(type) {
-  window.clearTimeout(quickFilterScrollTimers[type]);
-  quickFilterScrollTimers[type] = window.setTimeout(() => {
-    const centered = centeredChipOption(type);
-    if (centered) applyVariableQuickFilter(type, centered.dataset.value);
-  }, 180);
+  if (trustRange && Number(trustRange.value) !== quickFilterValues.trust) trustRange.value = String(quickFilterValues.trust);
+  if (payRange && Number(payRange.value) !== quickFilterValues.salary) payRange.value = String(quickFilterValues.salary);
 }
 
 function applyVariableQuickFilter(type, value) {
@@ -4252,43 +3933,10 @@ function applyVariableQuickFilter(type, value) {
 
   updateQuickFilterLabels();
   syncQuickFiltersUI();
-  ['trust', 'salary'].forEach(syncChipScrollSelection);
 
   if (liveJobSearchState && liveJobSearchState.hasSearched) {
     applyFilters();
   }
-}
-
-function renderQuickFilterWheel(type) {
-  const wheel = document.querySelector(`[data-chip-scroll="${type}"]`);
-  const values = QUICK_FILTER_WHEELS[type];
-  if (!wheel || !values) return;
-
-  wheel.innerHTML = values.map((value) => `
-    <span class="chip-scroll-option" role="option" data-value="${value}" ${type === 'trust' ? `data-trust-tone="${trustTone(value)}"` : ''}>
-      ${wheelOptionLabel(type, value)}
-    </span>
-  `).join('');
-
-  wheel.querySelectorAll('.chip-scroll-option').forEach((option) => {
-    option.addEventListener('click', (event) => {
-      event.stopPropagation();
-      applyVariableQuickFilter(type, option.dataset.value);
-      scrollSelectedChipOption(type);
-    });
-  });
-
-  wheel.addEventListener('scroll', () => scheduleCenteredChipApply(type), { passive: true });
-  wheel.addEventListener('wheel', (event) => {
-    if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
-      event.preventDefault();
-      wheel.scrollLeft += event.deltaY;
-      scheduleCenteredChipApply(type);
-    }
-  }, { passive: false });
-  wheel.addEventListener('pointerdown', (event) => event.stopPropagation());
-
-  syncChipScrollSelection(type);
 }
 
 function deactivateVariableFilter(filterId) {
@@ -4299,10 +3947,58 @@ function deactivateVariableFilter(filterId) {
 }
 
 function initVariableQuickFilters() {
-  ['trust', 'salary'].forEach(renderQuickFilterWheel);
   applyQuickFilterToControls('high-trust', true);
   updateQuickFilterLabels();
-  updateDistanceLabels();
+
+  document.querySelectorAll('.dirA-chip-control').forEach((control) => {
+    const chip = control.querySelector('.dirA-chip');
+    if (!chip) return;
+
+    chip.addEventListener('click', (event) => {
+      event.stopPropagation();
+      if (event.target.closest('.dirA-chip-clear')) {
+        deactivateVariableFilter(chip.dataset.filter);
+        return;
+      }
+      if (event.target.closest('.chip-range')) return;
+      if (activeChipFilters.has(chip.dataset.filter)) return;
+      activeChipFilters.add(chip.dataset.filter);
+      applyQuickFilterToControls(chip.dataset.filter, true);
+      syncQuickFiltersUI();
+      if (liveJobSearchState && liveJobSearchState.hasSearched) applyFilters();
+    });
+
+    chip.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      if (event.target.closest('.chip-range')) return;
+      event.preventDefault();
+      if (!activeChipFilters.has(chip.dataset.filter)) {
+        activeChipFilters.add(chip.dataset.filter);
+        applyQuickFilterToControls(chip.dataset.filter, true);
+        syncQuickFiltersUI();
+        if (liveJobSearchState && liveJobSearchState.hasSearched) applyFilters();
+      }
+    });
+  });
+
+  const trustRange = document.getElementById('qf-trust-range');
+  const payRange = document.getElementById('qf-pay-range');
+
+  if (trustRange) {
+    trustRange.addEventListener('input', (event) => {
+      event.stopPropagation();
+      applyVariableQuickFilter('trust', trustRange.value);
+    });
+    trustRange.addEventListener('click', (event) => event.stopPropagation());
+  }
+
+  if (payRange) {
+    payRange.addEventListener('input', (event) => {
+      event.stopPropagation();
+      applyVariableQuickFilter('salary', payRange.value);
+    });
+    payRange.addEventListener('click', (event) => event.stopPropagation());
+  }
 
   if (jobsDistanceSlider) {
     jobsDistanceSlider.addEventListener('input', () => {
@@ -4313,35 +4009,6 @@ function initVariableQuickFilters() {
       }
     });
   }
-
-  document.querySelectorAll('.dirA-chip-control').forEach((control) => {
-    const button = control.querySelector('.dirA-chip');
-    if (!button || control.hidden) return;
-
-    button.addEventListener('click', (event) => {
-      event.stopPropagation();
-      if (event.target.closest('.dirA-chip-clear')) {
-        deactivateVariableFilter(button.dataset.filter);
-        return;
-      }
-      if (event.target.closest('.chip-scroll-window')) return;
-
-      if (activeChipFilters.has(button.dataset.filter)) {
-        window.setTimeout(() => scrollSelectedChipOption(control.dataset.variableFilter === 'pay' ? 'salary' : 'trust'), 0);
-        return;
-      }
-
-      activeChipFilters.add(button.dataset.filter);
-      applyQuickFilterToControls(button.dataset.filter, true);
-      syncQuickFiltersUI();
-      window.setTimeout(() => scrollSelectedChipOption(control.dataset.variableFilter === 'pay' ? 'salary' : 'trust'), 0);
-      if (liveJobSearchState && liveJobSearchState.hasSearched) applyFilters();
-    });
-  });
-
-  window.setTimeout(() => {
-    ['trust', 'salary'].forEach(scrollSelectedChipOption);
-  }, 0);
 }
 
 function syncQuickFiltersUI() {
