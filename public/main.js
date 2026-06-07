@@ -288,7 +288,7 @@ function buildTrustRing(score, size = 'small') {
 }
 
 function buildSourceMarkup(source) {
-  return `<span class="source-inline source-${sourceClass(source)}">via ${escapeHtml(source)}</span>`;
+  return `<span class="source-inline source-${sourceClass(source)}">${escapeHtml(source)}</span>`;
 }
 
 function buildSignalTag(type, label) {
@@ -1316,7 +1316,7 @@ function getTrackerTertiaryAction(application) {
 
 function buildTrackerTimeline(application) {
   return [
-    { time: 'Applied', copy: `Submitted to ${application.company} via ${application.source} ${application.appliedDaysAgo} days ago.` },
+    { time: 'Applied', copy: `Submitted to ${application.company} ${application.appliedDaysAgo} days ago.` },
     { time: 'Signal', copy: `${application.trustScore} trust score and ${application.lastActivity.toLowerCase()}.` },
     { time: 'Next', copy: application.nextAction }
   ];
