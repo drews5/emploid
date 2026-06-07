@@ -6,6 +6,52 @@ export const dynamic = 'force-dynamic';
 
 const JSEARCH_HOST = 'jsearch.p.rapidapi.com';
 const JSEARCH_LOW_RESULT_THRESHOLD = 12;
+const JOB_LIST_SELECT = [
+  'id',
+  'title',
+  'company_id',
+  'location',
+  'remote_type',
+  'salary_min',
+  'salary_max',
+  'source',
+  'source_provider',
+  'external_source',
+  'source_url',
+  'apply_url',
+  'job_type',
+  'posted_at',
+  'first_seen_at',
+  'trust_flags',
+  'ghost_score',
+  'company_trust_score',
+  'canonical_company_key',
+  'companies(name, logo_url, slug, total_active_listings, avg_ghost_score)',
+].join(',');
+
+function sanitizeSearchInput(value: string | null) {
+  return String(value || '')
+    .replace(/[^a-zA-Z0-9\s@.+#/-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 120);
+}
+
+function escapeIlike(value: string) {
+  return value.replace(/[%_]/g, (match) => `\\${match}`);
+}
+
+function splitSearchTerms(value: string) {
+  return sanitizeSearchInput(value)
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((term) => term.length >= 2)
+    .slice(0, 8);
+}
+
+function ilikePattern(value: string) {
+  return `%${escapeIlike(value)}%`;
+}
 
 function slugify(value: string) {
   return String(value || '')
@@ -84,29 +130,17 @@ function simpleTrustScore(job: any) {
   return Math.max(25, Math.min(95, score));
 }
 
-function buildJobsQuery(supabase: any, searchParams: URLSearchParams) {
-  const q = searchParams.get('q');
+function applyJobFilters(query: any, searchParams: URLSearchParams) {
+  const q = sanitizeSearchInput(searchParams.get('q'));
   const source = searchParams.get('source');
   const ghost_score_min = searchParams.get('ghost_score_min');
   const salary_min = searchParams.get('salary_min');
   const remote_type = searchParams.get('remote_type');
   const job_type = searchParams.get('job_type');
   const experience_level = searchParams.get('experience_level');
-  const sort = searchParams.get('sort') || 'relevance';
-  const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
-  const per_page = Math.min(Math.max(1, parseInt(searchParams.get('per_page') || '20')), 50);
 
-  let query = supabase
-    .from('jobs')
-    .select(
-      '*, companies(name, logo_url, slug, total_active_listings, avg_ghost_score)',
-      { count: 'exact' }
-    );
-
-  // Base filter: only active jobs
   query = query.eq('is_active', true);
 
-  // Optional filters
   if (ghost_score_min) {
     const min = parseInt(ghost_score_min);
     if (!isNaN(min)) query = query.gte('ghost_score', min);
@@ -122,9 +156,81 @@ function buildJobsQuery(supabase: any, searchParams: URLSearchParams) {
   if (job_type) query = query.in('job_type', job_type.split(',').filter(Boolean));
   if (experience_level) query = query.in('experience_level', experience_level.split(',').filter(Boolean));
 
-  // Full-text search using the generated search_vector column
-  if (q && q.trim() !== '') {
-    query = query.textSearch('search_vector', q.trim(), { config: 'english', type: 'plain' });
+  return { query, q };
+}
+
+function buildTextSearchFilter(q: string) {
+  const terms = splitSearchTerms(q);
+  const slugValues = [slugify(q), ...terms.map(slugify)].filter((value) => value && value !== 'unknown');
+  const values = [q, ...terms].filter(Boolean);
+  const clauses = new Set<string>();
+
+  for (const value of values) {
+    const pattern = ilikePattern(value);
+    clauses.add(`title.ilike.${pattern}`);
+    clauses.add(`location.ilike.${pattern}`);
+  }
+
+  for (const value of slugValues) {
+    clauses.add(`canonical_company_key.ilike.${ilikePattern(value)}`);
+  }
+
+  return Array.from(clauses).join(',');
+}
+
+function scoreJobSearchMatch(job: any, q: string) {
+  const normalizedQuery = q.toLowerCase();
+  const terms = splitSearchTerms(q);
+  const company = String(job.companies?.name || job.company_name || '').toLowerCase();
+  const title = String(job.title || '').toLowerCase();
+  const location = String(job.location || '').toLowerCase();
+  const description = stripHtml(job.description || '').toLowerCase();
+  let score = 0;
+
+  if (title === normalizedQuery) score += 120;
+  if (title.startsWith(normalizedQuery)) score += 80;
+  if (title.includes(normalizedQuery)) score += 60;
+  if (company === normalizedQuery) score += 95;
+  if (company.includes(normalizedQuery)) score += 65;
+  if (location.includes(normalizedQuery)) score += 25;
+
+  for (const term of terms) {
+    if (title.includes(term)) score += 18;
+    if (company.includes(term)) score += 14;
+    if (location.includes(term)) score += 7;
+    if (description.includes(term)) score += 3;
+  }
+
+  score += Math.min(25, Math.max(0, Number(job.ghost_score || 0)) / 4);
+  const postedAt = job.posted_at ? new Date(job.posted_at) : null;
+  if (postedAt && !Number.isNaN(postedAt.getTime())) {
+    const daysOld = Math.max(0, Math.round((Date.now() - postedAt.getTime()) / 86400000));
+    score += Math.max(0, 14 - Math.min(14, daysOld / 3));
+  }
+
+  return score;
+}
+
+function buildJobsQuery(supabase: any, searchParams: URLSearchParams, options: { textSearch?: boolean } = {}) {
+  const sort = searchParams.get('sort') || 'relevance';
+  const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+  const per_page = Math.min(Math.max(1, parseInt(searchParams.get('per_page') || '20')), 50);
+
+  let query = supabase
+    .from('jobs')
+    .select(JOB_LIST_SELECT, { count: 'planned' });
+
+  const filtered = applyJobFilters(query, searchParams);
+  query = filtered.query;
+  const q = filtered.q;
+
+  if (q) {
+    const broadFilter = buildTextSearchFilter(q);
+    if (options.textSearch === false || !broadFilter) {
+      if (broadFilter) query = query.or(broadFilter);
+    } else {
+      query = query.textSearch('search_vector', q, { config: 'english', type: 'plain' });
+    }
   }
 
   // Sorting
@@ -153,11 +259,58 @@ function buildJobsQuery(supabase: any, searchParams: URLSearchParams) {
   return { query, page, per_page };
 }
 
-async function runJobsQuery(supabase: any, searchParams: URLSearchParams) {
-  const { query, page, per_page } = buildJobsQuery(supabase, searchParams);
+async function runJobsQuery(supabase: any, searchParams: URLSearchParams, options: { textSearch?: boolean } = {}) {
+  const { query, page, per_page } = buildJobsQuery(supabase, searchParams, options);
   const { data, error, count } = await query;
   if (error) throw error;
-  return { data: data || [], count: count ?? 0, page, per_page };
+  const q = sanitizeSearchInput(searchParams.get('q'));
+  let rows = data || [];
+
+  if (q && searchParams.get('sort') !== 'salary' && searchParams.get('sort') !== 'date_posted') {
+    rows = rows
+      .map((job: any) => ({ ...job, _search_rank: scoreJobSearchMatch(job, q) }))
+      .sort((a: any, b: any) => b._search_rank - a._search_rank);
+    rows = rows.slice(0, per_page);
+    rows = rows.map(({ _search_rank, ...job }: any) => job);
+  }
+  return { data: rows, count: count ?? 0, page, per_page };
+}
+
+async function runSuggestionQuery(supabase: any, searchParams: URLSearchParams) {
+  const q = sanitizeSearchInput(searchParams.get('q'));
+  if (q.length < 2) return [];
+
+  const limit = Math.min(Math.max(1, parseInt(searchParams.get('limit') || '8')), 12);
+  const suggestionQuery = await supabase
+    .from('jobs')
+    .select('id,title,location,ghost_score,posted_at,companies(name, logo_url, slug)')
+    .eq('is_active', true)
+    .or(buildTextSearchFilter(q))
+    .order('ghost_score', { ascending: false, nullsFirst: false })
+    .limit(Math.max(limit, 12));
+
+  if (suggestionQuery.error) throw suggestionQuery.error;
+  const rows = suggestionQuery.data || [];
+
+  const seen = new Set<string>();
+  return rows
+    .map((job: any) => ({ ...job, _search_rank: scoreJobSearchMatch(job, q) }))
+    .sort((a: any, b: any) => b._search_rank - a._search_rank)
+    .filter((job: any) => {
+      const key = `${String(job.title || '').toLowerCase()}|${String(job.companies?.name || '').toLowerCase()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, limit)
+    .map((job: any) => ({
+      type: 'job',
+      title: job.title,
+      company: job.companies?.name || 'Company',
+      location: job.location || 'Location not listed',
+      trustScore: Math.round(Number(job.ghost_score || 0)),
+      value: [job.title, job.companies?.name].filter(Boolean).join(' '),
+    }));
 }
 
 async function canUseJSearch(service: any) {
@@ -206,6 +359,10 @@ async function fetchJSearch(query: string) {
 }
 
 async function upsertJSearchJobs(query: string) {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_SERVICE_KEY) {
+    return { attempted: false, inserted: 0 };
+  }
+
   const service = createServiceClient();
   const allowed = await canUseJSearch(service);
   if (!allowed) return { attempted: false, inserted: 0 };
@@ -291,24 +448,40 @@ async function upsertJSearchJobs(query: string) {
 
 export const GET = withPublic(async (req, { supabase }) => {
   const searchParams = req.nextUrl.searchParams;
-  const q = searchParams.get('q');
+  const q = sanitizeSearchInput(searchParams.get('q'));
+
+  if (searchParams.get('suggest') === '1') {
+    try {
+      const suggestions = await runSuggestionQuery(supabase, searchParams);
+      return NextResponse.json({ data: suggestions });
+    } catch (error: any) {
+      console.error('[JOBS_SUGGEST]', error);
+      return NextResponse.json({ error: error.message || 'Job suggestions failed' }, { status: 500 });
+    }
+  }
 
   let result;
   try {
     result = await runJobsQuery(supabase, searchParams);
   } catch (error: any) {
-    console.error('[JOBS_LIST]', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.warn('[JOBS_LIST_TEXT_SEARCH_FALLBACK]', error);
+    try {
+      result = await runJobsQuery(supabase, searchParams, { textSearch: false });
+    } catch (fallbackError: any) {
+      console.error('[JOBS_LIST]', fallbackError);
+      return NextResponse.json({ error: fallbackError.message || 'Job search failed' }, { status: 500 });
+    }
   }
 
   let jsearchMeta = { attempted: false, inserted: 0 };
   if (
-    q?.trim() &&
+    searchParams.get('live_jsearch') === '1' &&
+    q &&
     result.page === 1 &&
     result.data.length < Math.min(result.per_page, JSEARCH_LOW_RESULT_THRESHOLD)
   ) {
     try {
-      jsearchMeta = await upsertJSearchJobs(q.trim());
+      jsearchMeta = await upsertJSearchJobs(q);
       if (jsearchMeta.attempted && jsearchMeta.inserted > 0) {
         result = await runJobsQuery(supabase, searchParams);
       }

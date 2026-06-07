@@ -2761,7 +2761,7 @@ async function runLiveJobSearch(rawQuery) {
   setLiveSearchLoading(true, query);
 
   try {
-    const response = await fetch(`/api/jobs?q=${encodeURIComponent(apiQuery)}&per_page=50&sort=trust`, { cache: 'no-store' });
+    const response = await fetch(`/api/jobs?q=${encodeURIComponent(apiQuery)}&per_page=30&sort=trust`, { cache: 'no-store' });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(payload.error || 'Live job search failed.');
 
