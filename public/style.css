@@ -4174,6 +4174,69 @@ html.filson-pro-loaded .hero h1 {
   }
 }
 
+/* Stable single-bar hero scanner */
+.scanner-center-overlay,
+.scanner-line,
+.scanner-flare,
+.scanner-logo-badge {
+  display: none !important;
+}
+
+.scanner-glow-background {
+  background: radial-gradient(circle at 50% 18%, rgba(200, 91, 36, 0.12), transparent 42%) !important;
+}
+
+.scanner-viewport::before {
+  display: none !important;
+}
+
+.scanner-viewport::after {
+  content: "" !important;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.92) 14%, #ffffff 50%, rgba(255, 255, 255, 0.92) 86%, transparent);
+  box-shadow:
+    0 0 14px rgba(255, 255, 255, 0.48),
+    0 0 32px rgba(200, 91, 36, 0.38);
+  pointer-events: none;
+  z-index: 9;
+}
+
+.scanner-layer .row-1 .scanner-track {
+  animation: scanner-stream-left 14s linear infinite !important;
+}
+
+.scanner-layer .row-2 .scanner-track {
+  animation: scanner-stream-right 14s linear infinite !important;
+}
+
+.scanner-layer-detailed .trust-ring-value,
+.scanner-layer-detailed .trust-label {
+  animation: none !important;
+  opacity: 1;
+  transform: none;
+}
+
+.scanner-layer-detailed .job-card-detailed:not(.is-scanned) .trust-label {
+  opacity: 0;
+}
+
+.scanner-layer-detailed .trust-ring-svg,
+.scanner-layer-detailed .job-card-detailed.is-scanned .trust-ring-svg,
+.scanner-layer-detailed .job-card-detailed.is-score-applying .trust-ring-svg {
+  transform: none !important;
+  animation: none !important;
+}
+
+.scanner-layer-detailed .trust-ring-svg circle:last-child {
+  transition: stroke-dashoffset 360ms ease;
+}
+
 /* ---- Stats Band (Repositioned) ---- */
 .stats-band {
   padding: 80px 0; 

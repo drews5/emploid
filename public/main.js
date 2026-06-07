@@ -803,7 +803,7 @@ function normalizeHeroScannerCards() {
   cards.forEach((card) => {
     const info = card.querySelector('.card-info');
     if (info) {
-      const company = info.textContent.split('•')[0].trim();
+      const company = info.textContent.split(/\u2022/)[0].trim();
       info.textContent = company || 'Hiring company';
     }
 
@@ -814,43 +814,129 @@ function normalizeHeroScannerCards() {
     const targetScore = Number.parseInt(scoreValue && scoreValue.textContent ? scoreValue.textContent : '0', 10);
     if (scoreValue && Number.isFinite(targetScore)) {
       scoreValue.dataset.score = String(targetScore);
-      scoreValue.textContent = '0';
+      scoreValue.dataset.revealed = 'false';
+      scoreValue.dataset.previousDistance = '';
+      scoreValue.textContent = '?';
+    }
+
+    const scoreArc = card.querySelector('.trust-ring-svg circle:last-child');
+    if (scoreArc && Number.isFinite(targetScore)) {
+      const circumference = Number.parseFloat(scoreArc.getAttribute('stroke-dasharray')) || 100.5;
+      scoreArc.dataset.circumference = String(circumference);
+      scoreArc.dataset.targetOffset = String(circumference - ((targetScore / 100) * circumference));
+      scoreArc.setAttribute('stroke-dashoffset', String(circumference));
     }
   });
 }
 
 function animateHeroTrustScores() {
-  const scoreEls = Array.from(document.querySelectorAll('.scanner-layer-detailed .trust-ring-value'));
-  if (!scoreEls.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    scoreEls.forEach((scoreEl) => {
-      if (scoreEl.dataset.score) scoreEl.textContent = scoreEl.dataset.score;
+  const cards = Array.from(document.querySelectorAll('.scanner-layer-detailed .job-card-detailed'));
+  if (!cards.length) return;
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    cards.forEach((card) => {
+      const scoreEl = card.querySelector('.trust-ring-value');
+      const arc = card.querySelector('.trust-ring-svg circle:last-child');
+      if (scoreEl && scoreEl.dataset.score) scoreEl.textContent = scoreEl.dataset.score;
+      if (arc && arc.dataset.targetOffset) arc.setAttribute('stroke-dashoffset', arc.dataset.targetOffset);
+      card.classList.add('is-scanned');
     });
     return;
   }
 
-  const cycleMs = 5800;
-  const rampStartMs = 1450;
-  const rampMs = 900;
+  const scannerViewport = document.querySelector('.scanner-viewport');
+  const defaultCircumference = 100.5;
+  const revealDuration = 560;
+  const revealDistance = 8;
+
+  function resetCard(card, scoreEl, arc, distanceFromScan) {
+    card.classList.remove('is-scanning', 'is-scanned', 'is-score-applying');
+    if (scoreEl) {
+      scoreEl.textContent = '?';
+      scoreEl.dataset.revealed = 'false';
+      scoreEl.dataset.previousDistance = String(distanceFromScan);
+      delete scoreEl.dataset.revealStart;
+    }
+    if (arc) {
+      const circumference = Number.parseFloat(arc.dataset.circumference || '') || defaultCircumference;
+      arc.setAttribute('stroke-dashoffset', String(circumference));
+    }
+  }
 
   function updateScores(now) {
-    scoreEls.forEach((scoreEl, index) => {
-      const targetScore = Number.parseInt(scoreEl.dataset.score || scoreEl.textContent || '0', 10);
-      const delay = (index % 3) * 350;
-      const elapsed = (now - delay) % cycleMs;
+    const viewportRect = scannerViewport ? scannerViewport.getBoundingClientRect() : null;
+    const scannerMidpoint = viewportRect
+      ? viewportRect.left + (viewportRect.width / 2)
+      : window.innerWidth / 2;
 
-      if (elapsed < rampStartMs) {
-        scoreEl.textContent = '0';
+    cards.forEach((card) => {
+      const scoreEl = card.querySelector('.trust-ring-value');
+      const arc = card.querySelector('.trust-ring-svg circle:last-child');
+      const targetScore = Number.parseInt(scoreEl && scoreEl.dataset.score ? scoreEl.dataset.score : '0', 10);
+      const rect = card.getBoundingClientRect();
+      const cardCenter = rect.left + (rect.width / 2);
+      const distanceFromScan = cardCenter - scannerMidpoint;
+      const isOffscreen = viewportRect
+        ? rect.right < viewportRect.left - 32 || rect.left > viewportRect.right + 32
+        : rect.right < -32 || rect.left > window.innerWidth + 32;
+
+      if (!scoreEl || !Number.isFinite(targetScore)) return;
+
+      if (isOffscreen) {
+        resetCard(card, scoreEl, arc, distanceFromScan);
         return;
       }
 
-      if (elapsed > rampStartMs + rampMs) {
-        scoreEl.textContent = String(targetScore);
+      const row = card.closest('.scanner-row');
+      const movesRight = Boolean(row && row.classList.contains('row-2'));
+      const previousDistance = Number.parseFloat(scoreEl.dataset.previousDistance || '');
+      const crossedMiddle = Number.isFinite(previousDistance)
+        ? (movesRight ? previousDistance < 0 && distanceFromScan >= 0 : previousDistance > 0 && distanceFromScan <= 0)
+        : false;
+      const alreadyPastScan = !Number.isFinite(previousDistance) && (
+        movesRight ? distanceFromScan > revealDistance : distanceFromScan < -revealDistance
+      );
+      const isNearScanner = Math.abs(distanceFromScan) <= 44;
+
+      card.classList.toggle('is-scanning', isNearScanner);
+
+      if (scoreEl.dataset.revealed !== 'true' && !crossedMiddle && !alreadyPastScan) {
+        scoreEl.textContent = '?';
+        if (arc) {
+          const circumference = Number.parseFloat(arc.dataset.circumference || '') || defaultCircumference;
+          arc.setAttribute('stroke-dashoffset', String(circumference));
+        }
+        scoreEl.dataset.previousDistance = String(distanceFromScan);
         return;
       }
 
-      const progress = Math.min(1, Math.max(0, (elapsed - rampStartMs) / rampMs));
+      if (scoreEl.dataset.revealed !== 'true') {
+        scoreEl.dataset.revealed = 'true';
+        scoreEl.dataset.revealStart = String(now);
+      }
+
+      card.classList.add('is-scanned');
+      const revealStart = Number(scoreEl.dataset.revealStart || now);
+      const progress = Math.min(1, Math.max(0, (now - revealStart) / revealDuration));
       const eased = 1 - Math.pow(1 - progress, 3);
-      scoreEl.textContent = String(Math.round(targetScore * eased));
+      const currentScore = Math.max(0, Math.round(targetScore * eased));
+
+      if (progress < 1) card.classList.add('is-score-applying');
+      else card.classList.remove('is-score-applying');
+
+      scoreEl.textContent = progress >= 1 ? String(targetScore) : String(currentScore);
+
+      if (arc) {
+        if (progress >= 1 && arc.dataset.targetOffset) {
+          arc.setAttribute('stroke-dashoffset', arc.dataset.targetOffset);
+        } else {
+          const circumference = Number.parseFloat(arc.dataset.circumference || '') || defaultCircumference;
+          const offset = circumference - ((currentScore / 100) * circumference);
+          arc.setAttribute('stroke-dashoffset', String(offset));
+        }
+      }
+
+      scoreEl.dataset.previousDistance = String(distanceFromScan);
     });
 
     window.requestAnimationFrame(updateScores);
