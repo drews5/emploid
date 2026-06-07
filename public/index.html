@@ -23,12 +23,27 @@
           <span class="nav-logo-word">emploid</span>
         </a>
 
-        <div class="nav-links">
-          <a href="/" class="nav-link active" data-page="home" id="nav-home">Home</a>
-          <a href="/browse" class="nav-link" data-page="jobs" id="nav-jobs">Find Job</a>
-          <a href="/tracker" class="nav-link" data-page="tracker" id="nav-tracker">Tracker</a>
-          <a href="/about" class="nav-link" data-page="about" id="nav-about">About</a>
-        </div>
+        <form class="nav-search" id="nav-search-form" role="search">
+          <span class="nav-search-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7.5"></circle><line x1="20.5" y1="20.5" x2="17" y2="17"></line></svg>
+          </span>
+          <input id="nav-search-query" type="text" placeholder="Role, company, skill..." autocomplete="off" aria-label="Search jobs" />
+          <button class="nav-filter-trigger" id="nav-filter-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="nav-filter-menu">
+            Filters
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <button class="nav-search-submit" type="submit" aria-label="Search jobs">
+            Search
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="13 6 19 12 13 18"></polyline></svg>
+          </button>
+          <div class="nav-filter-menu" id="nav-filter-menu" hidden>
+            <button type="button" data-nav-filter="high-trust"><span>Trust Score</span><strong id="nav-filter-trust-value">70</strong></button>
+            <button type="button" data-nav-filter="salary-50k"><span>Pay</span><strong id="nav-filter-pay-value">50k</strong></button>
+            <button type="button" data-nav-filter="remote"><span>Remote</span></button>
+            <button type="button" data-nav-filter="job-type"><span>Job Type</span></button>
+            <button type="button" data-nav-filter="direct-apply"><span>Direct Apply</span></button>
+          </div>
+        </form>
 
         <div class="nav-auth">
           <div class="nav-auth-guest" id="nav-auth-guest">
@@ -47,10 +62,6 @@
       </div>
 
       <div class="nav-mobile-menu" id="nav-mobile-menu">
-        <a href="/" class="nav-mobile-link active" data-page="home">Home</a>
-        <a href="/browse" class="nav-mobile-link" data-page="jobs">Find Job</a>
-        <a href="/tracker" class="nav-mobile-link" data-page="tracker">Tracker</a>
-        <a href="/about" class="nav-mobile-link" data-page="about">About</a>
         <div class="nav-mobile-auth">
           <div class="nav-mobile-auth-guest" id="nav-mobile-auth-guest">
             <button class="nav-mobile-link" type="button" id="nav-mobile-login-trigger">Sign in</button>
@@ -776,8 +787,13 @@
             <div class="search-autocomplete-panel" id="search-autocomplete-panel" hidden></div>
           </div>
 
+          <div class="dirA-filter-menu-wrap">
+            <button class="dirA-filter-menu-trigger" id="dirA-filter-menu-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="dirA-filter-menu">
+              <span>Filters</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
           <!-- Quick Filters Chips (No "Try" label) -->
-          <div class="dirA-chips">
+          <div class="dirA-chips" id="dirA-filter-menu" hidden>
             <div class="dirA-chip-control" data-variable-filter="trust">
               <div class="dirA-chip dirA-chip-variable" data-filter="high-trust" id="qf-high-trust" role="button" tabindex="0">
                 <span class="plus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span>
@@ -811,6 +827,7 @@
               Direct Apply
               <span class="dirA-chip-clear" aria-hidden="true">×</span>
             </button>
+          </div>
           </div>
 
           <!-- Redesigned Previous Searches (styled like the activity rail) -->
