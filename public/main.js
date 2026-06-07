@@ -6,11 +6,13 @@ const BRAND_COPY = {
     name: 'Emploid',
     lower: 'emploid',
     domain: 'emploid.com',
+    logo: '/images/logoicon.svg',
   },
   jobspector: {
     name: 'Jobspector',
     lower: 'jobspector',
     domain: 'jobspector.com',
+    logo: '/images/jobspector-logoicon.svg',
   },
 };
 
@@ -34,6 +36,10 @@ function setStoredBrandChoice(brand) {
   }
 }
 
+function activeBrandCopy() {
+  return BRAND_COPY[normalizeBrandChoice(document.documentElement.dataset.brand)] || BRAND_COPY.emploid;
+}
+
 function replaceBrandText(value, brand) {
   if (!value) return value;
   const next = BRAND_COPY[brand];
@@ -52,7 +58,15 @@ function applyBrandChoice(brand) {
   if (!root) return;
 
   document.documentElement.dataset.brand = normalized;
+  document.documentElement.style.setProperty('--brand-logo-url', `url("${BRAND_COPY[normalized].logo}")`);
   document.title = BRAND_COPY[normalized].lower;
+  document.querySelectorAll('link[rel~="icon"]').forEach((icon) => {
+    icon.setAttribute('href', BRAND_COPY[normalized].logo);
+  });
+  document.querySelectorAll('[data-brand-logo]').forEach((image) => {
+    image.setAttribute('src', BRAND_COPY[normalized].logo);
+    image.setAttribute('alt', `${BRAND_COPY[normalized].name} logo mark`);
+  });
 
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
@@ -521,6 +535,7 @@ function buildInternalListingUrl(job) {
 
 function buildReactTrackerRecord(job, stage = 'applied') {
   const isApplied = stage !== 'saved';
+  const brand = activeBrandCopy();
   return {
     id: `tracked-${job.id}`,
     role: job.title,
@@ -534,9 +549,9 @@ function buildReactTrackerRecord(job, stage = 'applied') {
     updatedAt: todayIso(),
     notes: isApplied
       ? (job.hiringContact
-          ? 'Opened apply link from Jobspector. Hiring contact spotted; follow up quickly while this listing is still warm.'
-          : 'Opened apply link from Jobspector. Revisit within 5 business days if the listing still looks active.')
-      : 'Saved from Jobspector. Verify the source and apply when this role deserves time.',
+          ? `Opened apply link from ${brand.name}. Hiring contact spotted; follow up quickly while this listing is still warm.`
+          : `Opened apply link from ${brand.name}. Revisit within 5 business days if the listing still looks active.`)
+      : `Saved from ${brand.name}. Verify the source and apply when this role deserves time.`,
     hot: false,
     stall: false,
     listingUrl: buildInternalListingUrl(job),
@@ -672,18 +687,19 @@ function renderAuthState() {
 }
 
 function setAuthMode(mode = 'signup') {
+  const brand = activeBrandCopy();
   currentAuthMode = 'google';
   if (authKicker) authKicker.textContent = 'Google sign in';
   if (authTitle) authTitle.textContent = mode === 'tracker'
     ? 'Sign in to sync your tracker'
-    : 'Continue to Jobspector';
+    : `Continue to ${brand.name}`;
   if (authSubtitle) authSubtitle.textContent = mode === 'tracker'
-    ? 'Use Google to keep saved and applied jobs tied to your account. Gmail progress monitoring requires a separate inbox permission before Jobspector can read status emails.'
+    ? `Use Google to keep saved and applied jobs tied to your account. Gmail progress monitoring requires a separate inbox permission before ${brand.name} can read status emails.`
     : 'Use your Google account to save searches, tracker activity, and account details in Supabase.';
   if (authSubmit) authSubmit.querySelector('span:last-child').textContent = 'Continue with Google';
   if (authNote) authNote.textContent = mode === 'tracker'
     ? 'We only sync your Google profile with this sign-in. Inbox monitoring will ask for explicit Gmail access when that integration is enabled.'
-    : 'Your Google name, email, and profile image are synced to your Jobspector profile.';
+    : `Your Google name, email, and profile image are synced to your ${brand.name} profile.`;
 }
 
 function openAuthModal(mode = 'signup') {

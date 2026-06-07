@@ -5,7 +5,7 @@ export default function NotFound() {
         <div style={styles.kicker}>404</div>
         <h1 style={styles.title}>This page doesn&apos;t exist - unlike our job listings.</h1>
         <p style={styles.body}>
-          Head back to Jobspector and we&apos;ll get you to the roles that are actually hiring.
+          Head back to Emploid and we&apos;ll get you to the roles that are actually hiring.
         </p>
         <a href="/" style={styles.link}>
           Back to search

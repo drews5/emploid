@@ -1,4 +1,5 @@
 :root {
+  --brand-logo-url: url("/images/logoicon.svg");
   --navy-950: #08111f;
   --navy-900: #0c1728;
   --navy-800: #122035;
@@ -3764,7 +3765,7 @@ html.filson-pro-loaded .hero h1 {
   border-radius: 50%;
   background:
     rgba(255, 255, 255, 0.96)
-    url("/images/logoicon.svg")
+    var(--brand-logo-url)
     center / 24px 24px
     no-repeat;
   border: 2px solid rgba(255, 255, 255, 0.9);
