@@ -3035,13 +3035,17 @@ function renderJobs() {
           <div class="job-card-title-row">
             <h3 class="job-title">${escapeHtml(job.title)}</h3>
           </div>
-          <p class="job-company-line">${job.company} · ${job.location} · ${buildSourceMarkup(job.source)}</p>
+          <div class="job-company-line">
+            <span>${escapeHtml(job.company)}</span>
+            <span>${escapeHtml(job.location)}</span>
+            ${buildSourceMarkup(job.source)}
+          </div>
           <div class="job-meta-line">
             ${resumeChip}
             <span class="meta-pill">${escapeHtml(salaryLabel)}</span>
             <span class="meta-pill">${escapeHtml(job.workMode)}</span>
             <span class="meta-pill">${escapeHtml(job.jobType)}</span>
-            <span class="job-posted-age">${formatPostedAge(job.daysPosted)}</span>
+            <span class="meta-pill meta-pill-muted">${formatPostedAge(job.daysPosted)}</span>
           </div>
           <div class="job-smart-tags">${buildSmartTags(job)}</div>
         </div>
