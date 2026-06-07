@@ -1,11 +1,12 @@
 import argparse
+import os
 import sys
 import time
 from pathlib import Path
 
 import yaml
 
-from . import ats, db, jsearch, trust
+from . import ats, ats_discovery, db, jsearch, trust
 from .utils import (
     canonical_company_key,
     description_hash,
@@ -72,12 +73,41 @@ def crawl_ats(companies: dict, only_provider: str | None = None) -> tuple[list[d
     return rows, seen_by_company
 
 
+def expand_ats_boards(companies: dict, only_provider: str | None = None) -> dict:
+    providers = [
+        provider
+        for provider in companies
+        if not only_provider or provider == only_provider
+    ]
+    if not providers:
+        return companies
+
+    try:
+        db_sources = db.fetch_discovery_sources()
+        page_limit = int(os.getenv("ATS_DISCOVERY_PAGE_LIMIT", "120"))
+        discovery_sources = ats_discovery.fetch_discovery_sources(db_sources, page_limit)
+        expanded = ats_discovery.discover_board_slugs(
+            providers=providers,
+            seed_boards=companies,
+            discovery_sources=discovery_sources,
+        )
+        for provider in providers:
+            before = len(companies.get(provider, []) or [])
+            after = len(expanded.get(provider, []) or [])
+            if after > before:
+                print(f"[DISCOVERY] {provider}: {before} seeded boards, {after} discovered boards")
+        return {**companies, **expanded}
+    except Exception as exc:
+        print(f"[DISCOVERY] failed, using configured boards only: {exc}", file=sys.stderr)
+        return companies
+
+
 def run(include_jsearch: bool = False, only_provider: str | None = None) -> dict:
     stats = {"seen": 0, "new": 0, "updated": 0, "deactivated": 0, "errors": 0, "notes": ""}
     run_source = only_provider or ("all+jsearch" if include_jsearch else "all")
     run_id = db.create_crawl_run(run_source)
 
-    companies = load_yaml("companies.yaml")
+    companies = expand_ats_boards(load_yaml("companies.yaml"), only_provider)
     query_config = load_yaml("queries.yaml")
     raw_jobs, seen_by_company = crawl_ats(companies, only_provider)
 

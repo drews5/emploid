@@ -66,6 +66,36 @@ def fetch_existing_jobs(limit: int = 12000) -> list[dict[str, Any]]:
     return rows
 
 
+def fetch_discovery_sources(limit: int = 1500) -> list[dict[str, Any]]:
+    sources: list[dict[str, Any]] = []
+    try:
+        companies = (
+            client()
+            .table("companies")
+            .select("name,slug,website,careers_page_url")
+            .limit(limit)
+            .execute()
+        )
+        sources.extend(companies.data or [])
+    except Exception as exc:
+        print(f"[DISCOVERY] could not read companies: {exc}")
+
+    try:
+        jobs = (
+            client()
+            .table("jobs")
+            .select("source_url,apply_url,source_provider")
+            .eq("is_active", True)
+            .limit(limit)
+            .execute()
+        )
+        sources.extend(jobs.data or [])
+    except Exception as exc:
+        print(f"[DISCOVERY] could not read jobs: {exc}")
+
+    return sources
+
+
 def resolve_company(job: dict[str, Any], company_scores: dict[str, dict] | None = None) -> dict[str, Any]:
     name = (job.get("company_name") or job.get("company_slug") or "Unknown Company").strip()
     slug = slugify(job.get("company_slug") or name)
