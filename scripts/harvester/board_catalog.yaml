@@ -1,0 +1,67 @@
+# Public ATS board tokens used to broaden scheduled crawls beyond the small
+# product seed list. These are direct employer job boards, not third-party
+# scraped job pages. Invalid or retired boards are skipped by the crawler.
+greenhouse:
+  - affirm
+  - airbnb
+  - alltrails
+  - anthropic
+  - asana
+  - calendly
+  - chime
+  - coinbase
+  - datadog
+  - discord
+  - doordash
+  - dropbox
+  - figma
+  - flexport
+  - gusto
+  - instacart
+  - lyft
+  - opendoor
+  - plaid
+  - reddit
+  - robinhood
+  - segment
+  - stripe
+  - toast
+  - twilio
+  - uber
+  - vercel
+  - zapier
+lever:
+  - anduril
+  - benchling
+  - brex
+  - canva
+  - cloudflare
+  - coursera
+  - duolingo
+  - flexport
+  - gitlab
+  - headspace
+  - scaleai
+  - shopify
+  - spotify
+  - twitch
+ashby:
+  - airtable
+  - cursor
+  - elevenlabs
+  - linear
+  - mercury
+  - notion
+  - openai
+  - ramp
+  - rippling
+  - runways
+  - scale
+smartrecruiters:
+  - Adobe
+  - Atlassian
+  - LinkedIn
+  - McDonalds
+  - PayPal
+  - Square
+  - Visa

@@ -74,6 +74,9 @@ def crawl_ats(companies: dict, only_provider: str | None = None) -> tuple[list[d
 
 
 def expand_ats_boards(companies: dict, only_provider: str | None = None) -> dict:
+    if _env_bool("ATS_DISCOVERY_USE_LOCAL_CATALOG", True):
+        companies = merge_board_maps(companies, load_yaml("board_catalog.yaml"))
+
     providers = [
         provider
         for provider in companies
@@ -100,6 +103,29 @@ def expand_ats_boards(companies: dict, only_provider: str | None = None) -> dict
     except Exception as exc:
         print(f"[DISCOVERY] failed, using configured boards only: {exc}", file=sys.stderr)
         return companies
+
+
+def merge_board_maps(*maps: dict) -> dict:
+    merged: dict[str, list[str]] = {}
+    seen: dict[str, set[str]] = {}
+    for item in maps:
+        for provider, slugs in (item or {}).items():
+            merged.setdefault(provider, [])
+            seen.setdefault(provider, {value.lower() for value in merged[provider]})
+            for slug in slugs or []:
+                text = str(slug).strip()
+                key = text.lower()
+                if text and key not in seen[provider]:
+                    merged[provider].append(text)
+                    seen[provider].add(key)
+    return merged
+
+
+def _env_bool(name: str, default: bool) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
 def run(include_jsearch: bool = False, only_provider: str | None = None) -> dict:

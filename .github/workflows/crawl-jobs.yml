@@ -25,6 +25,7 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL_SECRET: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       SUPABASE_SERVICE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_KEY }}
       SUPABASE_SERVICE_ROLE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -66,3 +67,57 @@ jobs:
 
       - name: Crawl ATS listings into Supabase
         run: python -u -m scripts.harvester.main --provider "${{ matrix.provider }}"
+
+  aggregate:
+    name: Crawl aggregator searches
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+      PYTHONUNBUFFERED: "1"
+      SUPABASE_URL_SECRET: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_URL_SECRET: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: scripts/requirements.txt
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r scripts/requirements.txt
+
+      - name: Validate required secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -n "${SUPABASE_URL_SECRET}" ]]; then
+            echo "SUPABASE_URL=${SUPABASE_URL_SECRET}" >> "$GITHUB_ENV"
+            echo "SUPABASE_URL configured: yes"
+          elif [[ -n "${NEXT_PUBLIC_SUPABASE_URL_SECRET}" ]]; then
+            echo "SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL_SECRET}" >> "$GITHUB_ENV"
+            echo "NEXT_PUBLIC_SUPABASE_URL configured: yes"
+          else
+            echo "::error::Missing Supabase URL secret. Add SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL in repository Actions secrets."
+            exit 1
+          fi
+
+          if [[ -n "${SUPABASE_SERVICE_KEY_SECRET}" ]]; then
+            echo "SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY_SECRET}" >> "$GITHUB_ENV"
+            echo "SUPABASE_SERVICE_KEY configured: yes"
+          elif [[ -n "${SUPABASE_SERVICE_ROLE_KEY_SECRET}" ]]; then
+            echo "SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_ROLE_KEY_SECRET}" >> "$GITHUB_ENV"
+            echo "SUPABASE_SERVICE_ROLE_KEY configured: yes"
+          else
+            echo "::error::Missing Supabase service key secret. Add SUPABASE_SERVICE_KEY or SUPABASE_SERVICE_ROLE_KEY in repository Actions secrets."
+            exit 1
+          fi
+
+      - name: Crawl JSearch into Supabase
+        run: python -u -m scripts.harvester.main --include-jsearch --provider jsearch
