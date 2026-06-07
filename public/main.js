@@ -1225,7 +1225,6 @@ const navSearchForm = document.getElementById('nav-search-form');
 const navSearchQuery = document.getElementById('nav-search-query');
 const navFilterTrigger = document.getElementById('nav-filter-trigger');
 const navFilterMenu = document.getElementById('nav-filter-menu');
-const dirAFilterMenuTrigger = document.getElementById('dirA-filter-menu-trigger');
 const dirAFilterMenu = document.getElementById('dirA-filter-menu');
 const heroSearch = document.getElementById('hero-search');
 const heroSearchButton = document.getElementById('hero-search-btn');
@@ -2537,7 +2536,6 @@ if (navFilterTrigger) {
     event.stopPropagation();
     const isOpen = navFilterTrigger.getAttribute('aria-expanded') === 'true';
     setDisclosureMenu(navFilterTrigger, navFilterMenu, !isOpen);
-    setDisclosureMenu(dirAFilterMenuTrigger, dirAFilterMenu, false);
     syncNavFilterMenuState();
   });
 }
@@ -2558,14 +2556,6 @@ if (navFilterMenu) {
     syncNavFilterMenuState();
     if (document.body.dataset.page !== 'jobs') navigateTo('jobs');
     if (liveJobSearchState.hasSearched) applyFilters();
-  });
-}
-if (dirAFilterMenuTrigger) {
-  dirAFilterMenuTrigger.addEventListener('click', (event) => {
-    event.stopPropagation();
-    const isOpen = dirAFilterMenuTrigger.getAttribute('aria-expanded') === 'true';
-    setDisclosureMenu(dirAFilterMenuTrigger, dirAFilterMenu, !isOpen);
-    setDisclosureMenu(navFilterTrigger, navFilterMenu, false);
   });
 }
 if (jobsSearchForm) {
