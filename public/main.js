@@ -51,118 +51,32 @@ const LOCATIONS = ['Minneapolis, MN', 'Chicago, IL', 'Remote', 'Austin, TX', 'Ne
 const WORK_MODES = ['Remote', 'Hybrid', 'On-site'];
 const PREVIEW_LISTINGS = [];
 
-const TRACKER_STAGES = ['Applied', 'Reviewing', 'Interview', 'Offer'];
+const TRACKER_STAGES = ['Saved', 'Applied', 'Reviewing', 'Interview', 'Offer'];
 
-const DEFAULT_TRACKER_APPLICATIONS = [
-  {
-    id: 'adobe-product',
-    role: 'Associate Product Designer',
-    company: 'Adobe',
-    source: 'Company Direct',
-    appliedDaysAgo: 3,
-    stage: 'Interview',
-    status: 'needs-action',
-    trustScore: 96,
-    location: 'Remote',
-    salary: '$98k-$122k',
-    lastActivity: 'Recruiter replied 6h ago',
-    nextAction: 'Send panel availability and 2 portfolio samples before tonight.',
-    actionLabel: 'Reply today',
-    secondaryAction: 'Prep brief',
-    tags: ['Direct company link', 'Hiring contact replied', 'Portfolio requested'],
-    interviewsThisWeek: true
-  },
-  {
-    id: 'spotify-growth',
-    role: 'Growth Marketing Analyst',
-    company: 'Spotify',
-    source: 'LinkedIn',
-    appliedDaysAgo: 12,
-    stage: 'Reviewing',
-    status: 'active',
-    trustScore: 91,
-    location: 'Hybrid',
-    salary: '$88k-$110k',
-    lastActivity: 'Application viewed yesterday',
-    nextAction: 'Hold until Friday, then send one short follow-up if there is still no response.',
-    actionLabel: 'Set follow-up',
-    secondaryAction: 'Open listing',
-    tags: ['High trust listing', 'Direct employer page found', 'No recruiter yet'],
-    interviewsThisWeek: false
-  },
-  {
-    id: 'airbnb-research',
-    role: 'UX Research Intern',
-    company: 'Airbnb',
-    source: 'Company Direct',
-    appliedDaysAgo: 5,
-    stage: 'Reviewing',
-    status: 'interview',
-    trustScore: 89,
-    location: 'Remote',
-    salary: '$42/hr',
-    lastActivity: 'Recruiter screen booked for Thursday',
-    nextAction: 'Review case-study stories and prep three questions about scope.',
-    actionLabel: 'Prep interview',
-    secondaryAction: 'View timeline',
-    tags: ['Interview scheduled', 'Hiring team active', 'High-trust role'],
-    interviewsThisWeek: true
-  },
-  {
-    id: 'target-finance',
-    role: 'Corporate Finance Intern',
-    company: 'Target',
-    source: 'Handshake',
-    appliedDaysAgo: 9,
-    stage: 'Applied',
-    status: 'needs-action',
-    trustScore: 73,
-    location: 'Minneapolis, MN',
-    salary: '$29/hr',
-    lastActivity: 'No reply yet',
-    nextAction: 'Follow up with the campus recruiter tomorrow morning while the role is still fresh.',
-    actionLabel: 'Follow up',
-    secondaryAction: 'Find contact',
-    tags: ['Campus pipeline', 'Direct recruiter listed', 'Fresh posting'],
-    interviewsThisWeek: false
-  },
-  {
-    id: 'bestbuy-ops',
-    role: 'Business Operations Analyst',
-    company: 'Best Buy',
-    source: 'Company Direct',
-    appliedDaysAgo: 18,
-    stage: 'Offer',
-    status: 'offer',
-    trustScore: 84,
-    location: 'Hybrid',
-    salary: '$82k-$96k',
-    lastActivity: 'Offer came in this morning',
-    nextAction: 'Compare compensation, ask about team structure, and request the deadline in writing.',
-    actionLabel: 'Review offer',
-    secondaryAction: 'Compare comp',
-    tags: ['Offer stage', 'Direct company link', 'Real team opening'],
-    interviewsThisWeek: false
-  },
-  {
-    id: 'lyft-community',
-    role: 'Community Partnerships Coordinator',
-    company: 'Lyft',
-    source: 'Indeed',
-    appliedDaysAgo: 29,
-    stage: 'Applied',
-    status: 'archived',
-    trustScore: 37,
-    location: 'Chicago, IL',
-    salary: '$58k-$68k',
-    lastActivity: 'No activity for 29 days',
-    nextAction: 'Archive this one and stop spending follow-up energy on a low-signal listing.',
-    actionLabel: 'Archive',
-    secondaryAction: 'View notes',
-    tags: ['Low trust listing', 'Long silence', 'Likely stale'],
-    interviewsThisWeek: false
-  }
-];
+const DEFAULT_TRACKER_APPLICATIONS = [];
+const DEMO_TRACKER_IDS = new Set([
+  'a1',
+  'a2',
+  'a3',
+  'a4',
+  'a5',
+  'a6',
+  'a7',
+  'a8',
+  'a9',
+  'a10',
+  'a11',
+  'a12',
+  'a13',
+  'a14',
+  'a15',
+  'adobe-product',
+  'spotify-growth',
+  'airbnb-research',
+  'target-finance',
+  'bestbuy-ops',
+  'lyft-community'
+]);
 
 const TRACKER_REPLY_MOMENTUM = [
   { label: 'Mon', value: 1 },
@@ -505,21 +419,24 @@ function buildInternalListingUrl(job) {
   return `/browse?job=${encodeURIComponent(String(job.id))}&q=${query}`;
 }
 
-function buildReactTrackerRecord(job) {
+function buildReactTrackerRecord(job, stage = 'applied') {
+  const isApplied = stage !== 'saved';
   return {
     id: `tracked-${job.id}`,
     role: job.title,
     company: job.company,
     source: job.source,
-    stage: 'applied',
+    stage: isApplied ? 'applied' : 'saved',
     trust: job.trustScore,
     salary: formatJobSalaryLabel(job),
     location: job.location,
-    applied: todayIso(),
+    applied: isApplied ? todayIso() : null,
     updatedAt: todayIso(),
-    notes: job.hiringContact
-      ? 'Hiring contact spotted. Follow up quickly while this listing is still warm.'
-      : 'Added from search. Revisit within 5 business days if the listing still looks active.',
+    notes: isApplied
+      ? (job.hiringContact
+          ? 'Opened apply link from Jobspector. Hiring contact spotted; follow up quickly while this listing is still warm.'
+          : 'Opened apply link from Jobspector. Revisit within 5 business days if the listing still looks active.')
+      : 'Saved from Jobspector. Verify the source and apply when this role deserves time.',
     hot: false,
     stall: false,
     listingUrl: buildInternalListingUrl(job),
@@ -531,19 +448,22 @@ function buildReactTrackerRecord(job) {
   };
 }
 
-function syncReactTrackerStorage(job) {
+function syncReactTrackerStorage(job, stage = 'applied') {
   const current = safeParseJSON(window.localStorage.getItem(scopedStorageKey(REACT_TRACKER_STORAGE_KEY)), []);
-  const tracker = Array.isArray(current) ? current : [];
+  const tracker = Array.isArray(current) ? current.filter((application) => !DEMO_TRACKER_IDS.has(application && application.id)) : [];
   const existingIndex = tracker.findIndex((application) => application.company === job.company && application.role === job.title);
-  const nextRecord = buildReactTrackerRecord(job);
+  const nextRecord = buildReactTrackerRecord(job, stage);
 
   if (existingIndex >= 0) {
+    const existing = tracker[existingIndex];
+    const shouldPromoteToApplied = nextRecord.stage !== 'saved' && existing.stage === 'saved';
     tracker[existingIndex] = {
-      ...tracker[existingIndex],
-      listingUrl: tracker[existingIndex].listingUrl || nextRecord.listingUrl,
+      ...existing,
+      stage: shouldPromoteToApplied ? nextRecord.stage : existing.stage,
+      listingUrl: existing.listingUrl || nextRecord.listingUrl,
       updatedAt: nextRecord.updatedAt,
-      applied: tracker[existingIndex].applied || nextRecord.applied,
-      notes: tracker[existingIndex].notes || nextRecord.notes,
+      applied: existing.applied || nextRecord.applied,
+      notes: existing.notes || nextRecord.notes,
     };
   } else {
     tracker.unshift(nextRecord);
@@ -553,12 +473,37 @@ function syncReactTrackerStorage(job) {
   window.dispatchEvent(new CustomEvent('emploid:tracker-updated'));
 }
 
+function syncRemoteTrackerRecord(job, stage = 'applied') {
+  if (!authSession) return;
+  const record = buildReactTrackerRecord(job, stage);
+  fetch('/api/tracker', {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      external_job_id: String(job.id),
+      role: record.role,
+      company: record.company,
+      source: record.source,
+      stage: record.stage,
+      trust_score: record.trust,
+      salary: record.salary,
+      location: record.location,
+      listing_url: job.url || record.listingUrl,
+      notes: record.notes,
+    }),
+  }).catch((error) => {
+    console.warn('[TRACKER_SYNC]', error);
+  });
+}
+
 function loadTrackerApplications() {
   const saved = safeParseJSON(window.localStorage.getItem(scopedStorageKey(TRACKER_STORAGE_KEY)), []);
-  if (!Array.isArray(saved) || !saved.length) return DEFAULT_TRACKER_APPLICATIONS.map((application) => ({ ...application }));
+  const realSaved = Array.isArray(saved) ? saved.filter((application) => !DEMO_TRACKER_IDS.has(application && application.id)) : [];
+  if (!realSaved.length) return DEFAULT_TRACKER_APPLICATIONS.map((application) => ({ ...application }));
 
   const defaultMap = new Map(DEFAULT_TRACKER_APPLICATIONS.map((application) => [application.id, application]));
-  const merged = saved.map((application) => {
+  const merged = realSaved.map((application) => {
     const seeded = defaultMap.get(application.id);
     return seeded ? { ...seeded, ...application } : application;
   });
@@ -623,9 +568,10 @@ function renderAuthState() {
   if (navMobileAuthGuest) navMobileAuthGuest.hidden = signedIn;
   if (navMobileAuthUser) navMobileAuthUser.hidden = !signedIn;
   if (navMobileUserEmail) navMobileUserEmail.textContent = email;
+  window.dispatchEvent(new CustomEvent('emploid:auth-updated', { detail: { signedIn, email } }));
 }
 
-function setAuthMode() {
+function setAuthMode(mode = 'signup') {
   currentAuthMode = 'google';
   if (authKicker) authKicker.textContent = 'Google sign in';
   if (authTitle) authTitle.textContent = 'Continue to Emploid';
@@ -1213,6 +1159,7 @@ function companyMark(company) {
 }
 
 function trackerStatusLabel(status) {
+  if (status === 'saved') return 'Saved';
   if (status === 'needs-action') return 'Follow-up due';
   if (status === 'interview') return 'Interviewing';
   if (status === 'offer') return 'Offer in hand';
@@ -1227,11 +1174,12 @@ function trackerMatchesFilter(application) {
 }
 
 function trackerProgressPercent(stageIndex) {
-  return (stageIndex / (TRACKER_STAGES.length - 1)) * 100;
+  const safeIndex = Math.max(0, stageIndex);
+  return (safeIndex / (TRACKER_STAGES.length - 1)) * 100;
 }
 
 function trackerStageMarkup(stage, applicationId, label, isAnimating = false) {
-  const stageIndex = TRACKER_STAGES.indexOf(stage);
+  const stageIndex = Math.max(0, TRACKER_STAGES.indexOf(stage));
   const progress = trackerProgressPercent(stageIndex);
   return `
     <div class="tracker-progress">
@@ -1295,6 +1243,7 @@ function nextTrackerStage(stage) {
 
 function syncTrackerStatus(application) {
   if (application.status === 'archived') return application;
+  if (application.stage === 'Saved') return { ...application, status: 'saved' };
   if (application.stage === 'Offer') return { ...application, status: 'offer' };
   if (application.stage === 'Interview') return { ...application, status: 'interview' };
   return application;
@@ -1321,11 +1270,20 @@ function getTrackerTertiaryAction(application) {
 }
 
 function buildTrackerTimeline(application) {
+  const firstEvent = application.stage === 'Saved'
+    ? { time: 'Saved', copy: `Saved ${application.company} for later.` }
+    : { time: 'Applied', copy: `Submitted to ${application.company} ${application.appliedDaysAgo || 0} days ago.` };
+
   return [
-    { time: 'Applied', copy: `Submitted to ${application.company} ${application.appliedDaysAgo} days ago.` },
+    firstEvent,
     { time: 'Signal', copy: `${application.trustScore} trust score and ${application.lastActivity.toLowerCase()}.` },
     { time: 'Next', copy: application.nextAction }
   ];
+}
+
+function trackerActivityLabel(application) {
+  if (application.stage === 'Saved' || application.status === 'saved') return 'Saved for later';
+  return `Applied ${application.appliedDaysAgo || 0} days ago`;
 }
 
 function updateTrackerApplication(applicationId, updater) {
@@ -1438,33 +1396,41 @@ function handleTrackerAction(applicationId, action) {
   }
 }
 
-function trackJobApplication(job) {
+function trackJobApplication(job, stage = 'applied') {
+  const isApplied = stage !== 'saved';
   const existing = trackerApplications.find((application) => application.company === job.company && application.role === job.title);
   if (existing) {
+    const remoteStage = isApplied || existing.stage === 'Saved' ? stage : 'applied';
     updateTrackerApplication(existing.id, (entry) => ({
       ...entry,
-      lastActivity: 'Opened from search just now'
+      stage: isApplied && entry.stage === 'Saved' ? 'Applied' : entry.stage,
+      status: isApplied && entry.status === 'saved' ? 'active' : entry.status,
+      appliedDaysAgo: isApplied ? 0 : entry.appliedDaysAgo,
+      lastActivity: isApplied ? 'Opened apply link just now' : 'Saved from search just now'
     }));
-    syncReactTrackerStorage(job);
+    syncReactTrackerStorage(job, stage);
+    syncRemoteTrackerRecord(job, remoteStage);
     return;
   }
 
-  const status = job.hiringContact ? 'needs-action' : 'active';
+  const status = isApplied ? (job.hiringContact ? 'needs-action' : 'active') : 'saved';
   const application = {
     id: `tracked-${job.id}`,
     role: job.title,
     company: job.company,
     source: job.source,
-    appliedDaysAgo: 0,
-    stage: 'Applied',
+    appliedDaysAgo: isApplied ? 0 : null,
+    stage: isApplied ? 'Applied' : 'Saved',
     status,
     trustScore: job.trustScore,
     location: job.location,
     salary: formatJobSalaryLabel(job),
-    lastActivity: 'Added from search just now',
-    nextAction: job.hiringContact
+    lastActivity: isApplied ? 'Opened apply link just now' : 'Saved from search just now',
+    nextAction: isApplied && job.hiringContact
       ? 'A recruiter signal was found here. Follow up within 48 hours while the role is still warm.'
-      : 'Give this role 5 business days, then send one concise follow-up if it still looks active.',
+      : isApplied
+        ? 'Give this role 5 business days, then send one concise follow-up if it still looks active.'
+        : 'Verify the source and apply when this role deserves time.',
     tags: [
       job.directCompanyLink ? 'Live source link' : 'No source link',
       job.hiringContact ? 'Hiring contact spotted' : 'No recruiter listed',
@@ -1476,7 +1442,8 @@ function trackJobApplication(job) {
 
   trackerApplications = [application, ...trackerApplications];
   saveTrackerApplications();
-  syncReactTrackerStorage(job);
+  syncReactTrackerStorage(job, stage);
+  syncRemoteTrackerRecord(job, stage);
   renderTracker();
   triggerTrackerWave(application.id);
 }
@@ -1576,7 +1543,7 @@ function renderTrackerList() {
       const rightPriority = priorityOrder[right.status] ?? 99;
       if (leftPriority !== rightPriority) return leftPriority - rightPriority;
       if (right.trustScore !== left.trustScore) return right.trustScore - left.trustScore;
-      return left.appliedDaysAgo - right.appliedDaysAgo;
+      return (left.appliedDaysAgo ?? 999) - (right.appliedDaysAgo ?? 999);
     });
 
   if (trackerToolbarNote) {
@@ -1618,7 +1585,7 @@ function renderTrackerList() {
               <span class="tracker-chip ${trustClass}">${application.trustScore} Trust Score</span>
             </div>
             <h3 class="tracker-card-title">${application.role}</h3>
-            <p class="tracker-card-subline">${application.company} · ${buildSourceMarkup(application.source)} · Applied ${application.appliedDaysAgo} days ago</p>
+            <p class="tracker-card-subline">${application.company} ? ${buildSourceMarkup(application.source)} ? ${trackerActivityLabel(application)}</p>
             ${trackerStageMarkup(application.stage, application.id, `${application.role} at ${application.company}`, waveTrackerId === application.id)}
             <div class="tracker-meta-row">
               ${metaPills.map((item) => `<span class="tracker-meta-pill">${item}</span>`).join('')}
@@ -2413,6 +2380,9 @@ if (trackerListEl) {
     setTrackerStage(target.dataset.trackerId, Number(target.value));
   });
 }
+window.addEventListener('emploid:open-auth', (event) => {
+  openAuthModal(event.detail && event.detail.mode ? event.detail.mode : 'signup');
+});
 window.addEventListener('resize', () => {
   if (window.innerWidth > 760) {
     if (jobsFilters) jobsFilters.classList.remove('mobile-open');
@@ -3124,7 +3094,12 @@ function toggleSave(id) {
   const job = allJobs.find((entry) => entry.id === id);
   if (!job) return;
   job.saved = !job.saved;
-  showToast(job.saved ? 'Saved. We\'ll keep an eye on this one.' : 'Removed from saved jobs.');
+  if (job.saved) {
+    trackJobApplication(job, 'saved');
+    showToast('Saved to your tracker.');
+  } else {
+    showToast('Removed from saved jobs.');
+  }
   if (activeModalJobId === id) syncModalBookmark(job);
 }
 

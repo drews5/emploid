@@ -10,6 +10,30 @@ const TR_COMPANY_TINTS = window.TRACKER.COMPANY_TINTS;
 
 const TRACKER_BOARD_STORAGE_KEY = 'emploid-tracker-board-v2';
 const TRACKER_LEGACY_STORAGE_KEY = 'emploid-tracker-applications-v1';
+const AUTH_SESSION_STORAGE_KEY = 'emploid-auth-session-v1';
+const DEMO_TRACKER_IDS = new Set([
+  'a1',
+  'a2',
+  'a3',
+  'a4',
+  'a5',
+  'a6',
+  'a7',
+  'a8',
+  'a9',
+  'a10',
+  'a11',
+  'a12',
+  'a13',
+  'a14',
+  'a15',
+  'adobe-product',
+  'spotify-growth',
+  'airbnb-research',
+  'target-finance',
+  'bestbuy-ops',
+  'lyft-community',
+]);
 const PERIOD_OPTIONS = [
   { id: '7', label: '7d', days: 7 },
   { id: '30', label: '30d', days: 30 },
@@ -45,6 +69,27 @@ function trackerStorageKey(baseKey) {
   return typeof window.emploidScopedStorageKey === 'function'
     ? window.emploidScopedStorageKey(baseKey)
     : baseKey;
+}
+
+function loadTrackerAuthSession() {
+  return trackerSafeParseJSON(window.localStorage.getItem(AUTH_SESSION_STORAGE_KEY), null);
+}
+
+function fromRemoteTrackerEntry(entry) {
+  return normalizeApp({
+    id: entry.external_job_id ? `tracked-${entry.external_job_id}` : entry.id,
+    role: entry.role,
+    company: entry.company,
+    source: entry.source,
+    stage: entry.stage,
+    trust: entry.trust_score,
+    salary: entry.salary,
+    location: entry.location,
+    applied: entry.applied_at ? String(entry.applied_at).slice(0, 10) : null,
+    updatedAt: entry.updated_at ? String(entry.updated_at).slice(0, 10) : todayStr,
+    notes: entry.notes,
+    listingUrl: entry.listing_url,
+  });
 }
 
 function slugify(value) {
@@ -163,8 +208,9 @@ function loadTrackerBoard(initialApps) {
   const findDefaultMatch = (app) => defaults.find((defaultApp) => defaultApp.id === app.id || (defaultApp.company === app.company && defaultApp.role === app.role));
 
   const saved = trackerSafeParseJSON(window.localStorage.getItem(trackerStorageKey(TRACKER_BOARD_STORAGE_KEY)), null);
-  if (Array.isArray(saved) && saved.length) {
-    const merged = saved.map((savedApp) => {
+  const savedRealApps = Array.isArray(saved) ? saved.filter((app) => !DEMO_TRACKER_IDS.has(app && app.id)) : [];
+  if (savedRealApps.length) {
+    const merged = savedRealApps.map((savedApp) => {
       const matchedDefault = findDefaultMatch(savedApp);
       return normalizeApp(matchedDefault ? { ...matchedDefault, ...savedApp, listingUrl: savedApp.listingUrl || matchedDefault.listingUrl } : savedApp);
     });
@@ -176,8 +222,9 @@ function loadTrackerBoard(initialApps) {
   }
 
   const legacy = trackerSafeParseJSON(window.localStorage.getItem(trackerStorageKey(TRACKER_LEGACY_STORAGE_KEY)), null);
-  if (Array.isArray(legacy) && legacy.length) {
-    const merged = legacy.map((legacyApp) => {
+  const legacyRealApps = Array.isArray(legacy) ? legacy.filter((app) => !DEMO_TRACKER_IDS.has(app && app.id)) : [];
+  if (legacyRealApps.length) {
+    const merged = legacyRealApps.map((legacyApp) => {
       const converted = fromLegacyApplication(legacyApp);
       const matchedDefault = findDefaultMatch(converted);
       return normalizeApp(matchedDefault ? { ...matchedDefault, ...converted, listingUrl: converted.listingUrl || matchedDefault.listingUrl } : converted);
@@ -908,8 +955,29 @@ function emptyDraft(stageId) {
   };
 }
 
+function TrackerProductionNotice({ signedIn, onSignIn }) {
+  return (
+    <div className="tracker-production-notice">
+      <div>
+        <span className="notice-kicker">Production tracker</span>
+        <h2>{signedIn ? 'Your board starts with real activity.' : 'Sign in before your tracker gets busy.'}</h2>
+        <p>
+          Saved jobs and apply-link clicks are added automatically from Find Job. Google sign-in ties that activity
+          to your account; inbox monitoring will require explicit Gmail permission before Jobspector can scan status emails.
+        </p>
+      </div>
+      {!signedIn && (
+        <button className="btn btn-primary" onClick={onSignIn}>
+          <Icon d={I.arrow} />Continue with Google
+        </button>
+      )}
+    </div>
+  );
+}
+
 function App() {
   const [apps, setApps] = useState(() => loadTrackerBoard(window.TRACKER.initial));
+  const [authSession, setAuthSession] = useState(() => loadTrackerAuthSession());
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [groupBy, setGroupBy] = useState('none');
@@ -934,6 +1002,39 @@ function App() {
     window.addEventListener('emploid:tracker-updated', handleSync);
     return () => window.removeEventListener('emploid:tracker-updated', handleSync);
   }, []);
+
+  useEffect(() => {
+    function handleAuthSync() {
+      setAuthSession(loadTrackerAuthSession());
+    }
+    window.addEventListener('emploid:auth-updated', handleAuthSync);
+    window.addEventListener('storage', handleAuthSync);
+    return () => {
+      window.removeEventListener('emploid:auth-updated', handleAuthSync);
+      window.removeEventListener('storage', handleAuthSync);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!authSession) return undefined;
+    let cancelled = false;
+
+    fetch('/api/tracker', { credentials: 'same-origin' })
+      .then((response) => response.ok ? response.json() : null)
+      .then((payload) => {
+        if (cancelled || !payload || !Array.isArray(payload.data)) return;
+        const remoteApps = payload.data.map(fromRemoteTrackerEntry);
+        if (remoteApps.length) {
+          setApps(enforceExclusiveFlags(remoteApps));
+          saveTrackerBoard(remoteApps);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authSession]);
 
   useEffect(() => {
     if (!toast) return undefined;
@@ -987,6 +1088,10 @@ function App() {
     setDraft(emptyDraft(stageId || 'saved'));
     setComposerOpen(true);
     setMenuStageId(null);
+  };
+
+  const openTrackerAuth = () => {
+    window.dispatchEvent(new CustomEvent('emploid:open-auth', { detail: { mode: 'tracker' } }));
   };
 
   const clearFilters = () => {
@@ -1129,6 +1234,8 @@ function App() {
       </div>
 
       <Funnel data={apps} period={period} setPeriod={setPeriod} />
+
+      <TrackerProductionNotice signedIn={Boolean(authSession)} onSignIn={openTrackerAuth} />
 
       <Toolbar
         filter={filter}
