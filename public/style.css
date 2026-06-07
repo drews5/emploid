@@ -1,51 +1,3 @@
-@font-face {
-  font-family: 'Filson Pro';
-  src: url('/fonts/filson/FilsonProHeavy.woff') format('woff');
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Filson Pro';
-  src: url('/fonts/filson/FilsonProBold.woff') format('woff');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Filson Pro';
-  src: url('/fonts/filson/FilsonProMedium.woff') format('woff');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Satoshi';
-  src: url('/fonts/satoshi/Satoshi-Regular.woff') format('woff');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Satoshi';
-  src: url('/fonts/satoshi/Satoshi-Medium.woff') format('woff');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Satoshi';
-  src: url('/fonts/satoshi/Satoshi-Bold.woff') format('woff');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 :root {
   --navy-950: #08111f;
   --navy-900: #0c1728;
@@ -301,8 +253,9 @@ p {
 }
 
 .nav-logo img {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 31px;
+  object-fit: contain;
 }
 
 .nav-logo-word {
@@ -334,7 +287,7 @@ p {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 10px 30px rgba(8, 17, 31, 0.08);
-  transition: border-color 180ms ease, box-shadow 180ms ease;
+  transition: opacity 180ms ease, transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
 .nav-search:focus-within {
@@ -1561,10 +1514,10 @@ p {
   position: sticky;
   top: calc(var(--nav-height) + 16px);
   max-width: 250px;
-  border-radius: 18px;
+  border-radius: 16px;
   background: var(--bg-white);
   border: 1px solid rgba(188, 201, 216, 0.75);
-  box-shadow: 0 16px 36px rgba(8, 17, 31, 0.08);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
 
@@ -2092,6 +2045,90 @@ p {
   height: 16px;
 }
 
+.legal-page {
+  background: var(--bg);
+  padding: 72px 0 96px;
+}
+
+.legal-container {
+  max-width: 920px;
+}
+
+.legal-hero {
+  margin-bottom: 28px;
+}
+
+.legal-hero h1 {
+  margin: 10px 0 10px;
+  font-family: var(--font-heading);
+  font-size: clamp(2.25rem, 6vw, 4.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+}
+
+.legal-hero p:not(.section-kicker) {
+  max-width: 680px;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.legal-card {
+  padding: 40px;
+  border: 1px solid rgba(188, 201, 216, 0.78);
+  border-radius: 18px;
+  background: var(--bg-white);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.72;
+}
+
+.legal-card > *:first-child {
+  margin-top: 0;
+}
+
+.legal-card > *:last-child {
+  margin-bottom: 0;
+}
+
+.legal-card h2 {
+  margin: 34px 0 10px;
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  line-height: 1.2;
+  color: var(--text-primary);
+  letter-spacing: -0.015em;
+}
+
+.legal-card p {
+  margin: 12px 0;
+}
+
+.legal-card ul {
+  margin: 12px 0 0;
+  padding-left: 20px;
+}
+
+.legal-card li + li {
+  margin-top: 8px;
+}
+
+.legal-card strong {
+  color: var(--text-primary);
+  font-weight: 800;
+}
+
+.legal-card a {
+  color: var(--orange-600);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.legal-card a:hover {
+  text-decoration: underline;
+}
+
 footer {
   background: var(--navy-900);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -2116,7 +2153,9 @@ footer {
 }
 
 .footer-brand-logo img {
-  width: 22px;
+  width: 24px;
+  height: 31px;
+  object-fit: contain;
   filter: brightness(0) invert(1);
 }
 
@@ -2302,7 +2341,7 @@ footer {
   margin-top: 22px;
   padding: 14px;
   border: 1px solid rgba(188, 201, 216, 0.72);
-  border-radius: 16px;
+  border-radius: 18px;
   background: rgba(255, 255, 255, 0.72);
 }
 
@@ -3432,7 +3471,7 @@ html.filson-pro-loaded .hero h1 {
   position: absolute;
   left: -2px;
   right: -2px;
-  bottom: 0.04em;
+  bottom: calc(0.04em - 7px);
   height: 0.12em;
   border-radius: 4px;
   background: linear-gradient(90deg, #c85b24, #e07035);
@@ -3498,7 +3537,7 @@ html.filson-pro-loaded .hero h1 {
   border: 1px solid #ffffff;
   background: #ffffff;
   color: var(--navy-950);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 16px 36px rgba(8, 17, 31, 0.08);
   cursor: pointer;
   transition: all var(--transition);
 }
@@ -3920,53 +3959,16 @@ html.filson-pro-loaded .hero h1 {
 
 /* Center Overlay: Scanner Line & Central Badge */
 .scanner-center-overlay {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  pointer-events: none;
-  z-index: 10;
+  display: none;
 }
 .scanner-line {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -1.5px;
-  width: 3px;
-  background: var(--orange-500);
-  box-shadow: 
-    0 0 10px var(--orange-500),
-    0 0 20px var(--orange-500);
-  z-index: 10;
+  display: none;
 }
 .scanner-flare {
-  position: absolute;
-  bottom: 0;
-  left: -100px;
-  width: 200px;
-  height: 40px;
-  pointer-events: none;
-  z-index: 11;
+  display: none;
 }
 .scanner-logo-badge {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 64px;
-  height: 64px;
-  background: var(--orange-500);
-  border: 3px solid #020617;
-  border-radius: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 
-    0 0 16px rgba(200, 91, 36, 0.4),
-    0 8px 24px rgba(0, 0, 0, 0.4);
-  z-index: 12;
-  animation: badge-glow-pulse 2s infinite ease-in-out;
+  display: none;
 }
 .scanner-logo-badge img {
   width: 32px;
@@ -3998,46 +4000,28 @@ html.filson-pro-loaded .hero h1 {
 
 .scanner-glow-background {
   background:
-    radial-gradient(circle at 50% 18%, rgba(200, 91, 36, 0.12), transparent 42%),
-    linear-gradient(90deg, rgba(5, 11, 22, 0.98), rgba(5, 11, 22, 0) 18%, rgba(5, 11, 22, 0) 82%, rgba(5, 11, 22, 0.98));
+    radial-gradient(circle at 50% 18%, rgba(200, 91, 36, 0.12), transparent 42%);
 }
 
 .scanner-viewport::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 50%;
-  width: 120px;
-  transform: translateX(-50%);
-  background:
-    linear-gradient(90deg, transparent, rgba(200, 91, 36, 0.18), rgba(255, 255, 255, 0.08), rgba(200, 91, 36, 0.18), transparent);
-  border-left: 1px solid rgba(255, 190, 127, 0.34);
-  border-right: 1px solid rgba(255, 190, 127, 0.18);
-  filter: blur(0.2px);
-  opacity: 0.9;
-  pointer-events: none;
-  z-index: 7;
+  display: none;
 }
 
 .scanner-viewport::after {
-  content: "Verifying active listings";
+  content: "";
   position: absolute;
   left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  padding: 8px 12px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  transform: translateX(-50%);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.28);
-  color: #08111f;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  line-height: 1;
-  text-transform: uppercase;
-  white-space: nowrap;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.92) 14%, #ffffff 50%, rgba(255, 255, 255, 0.92) 86%, transparent);
+  box-shadow:
+    0 0 14px rgba(255, 255, 255, 0.48),
+    0 0 32px rgba(200, 91, 36, 0.38);
   pointer-events: none;
-  z-index: 8;
+  z-index: 9;
 }
 
 .scanner-layer {
@@ -4064,11 +4048,11 @@ html.filson-pro-loaded .hero h1 {
 }
 
 .scanner-layer .row-1 .scanner-track {
-  animation: scanner-stream-left 30s linear infinite;
+  animation: scanner-stream-left 14s linear infinite;
 }
 
 .scanner-layer .row-2 .scanner-track {
-  animation: scanner-stream-right 34s linear infinite;
+  animation: scanner-stream-right 14s linear infinite;
 }
 
 @keyframes scanner-stream-left {
@@ -4134,10 +4118,16 @@ html.filson-pro-loaded .hero h1 {
   display: block;
   width: 40px;
   height: 40px;
+  transform: none;
+  transition: none;
 }
 
 .scanner-layer-detailed .trust-ring-svg circle:first-child {
   stroke: rgba(255, 255, 255, 0.2);
+}
+
+.scanner-layer-detailed .trust-ring-svg circle:last-child {
+  transition: stroke-dashoffset 420ms ease, stroke 240ms ease;
 }
 
 .scanner-layer-detailed .trust-ring-value {
@@ -4145,6 +4135,43 @@ html.filson-pro-loaded .hero h1 {
   font-size: 13px;
   font-weight: 850;
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.36);
+}
+
+.scanner-layer-detailed .job-card-detailed:not(.is-scanned) .trust-label {
+  opacity: 0;
+}
+
+.scanner-layer-detailed .job-card-detailed.is-scanned .trust-label {
+  opacity: 1;
+}
+
+.scanner-layer-detailed .job-card-detailed.is-scanning {
+  border-color: rgba(255, 255, 255, 0.34);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 0 34px rgba(255, 255, 255, 0.16),
+    0 0 54px rgba(200, 91, 36, 0.24),
+    0 14px 34px rgba(0, 0, 0, 0.2);
+}
+
+.scanner-layer-detailed .job-card-detailed.is-scanned .trust-ring-svg {
+  transform: none;
+}
+
+.scanner-layer-detailed .job-card-detailed.is-score-applying .trust-ring-svg {
+  animation: none;
+}
+
+@keyframes scanner-score-wheel {
+  0% {
+    transform: rotate(-90deg) scale(0.94);
+  }
+  55% {
+    transform: rotate(180deg) scale(1.04);
+  }
+  100% {
+    transform: rotate(270deg) scale(1);
+  }
 }
 
 @media (max-width: 640px) {
@@ -4163,78 +4190,9 @@ html.filson-pro-loaded .hero h1 {
     padding: 10px 12px;
   }
 
-  .scanner-viewport::after {
-    top: auto;
-    bottom: 16px;
-    font-size: 10px;
-  }
-
   footer .footer-inner {
     padding-top: 48px;
   }
-}
-
-/* Stable single-bar hero scanner */
-.scanner-center-overlay,
-.scanner-line,
-.scanner-flare,
-.scanner-logo-badge {
-  display: none !important;
-}
-
-.scanner-glow-background {
-  background: radial-gradient(circle at 50% 18%, rgba(200, 91, 36, 0.12), transparent 42%) !important;
-}
-
-.scanner-viewport::before {
-  display: none !important;
-}
-
-.scanner-viewport::after {
-  content: "" !important;
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  transform: translateX(-50%);
-  border-radius: 999px;
-  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.92) 14%, #ffffff 50%, rgba(255, 255, 255, 0.92) 86%, transparent);
-  box-shadow:
-    0 0 14px rgba(255, 255, 255, 0.48),
-    0 0 32px rgba(200, 91, 36, 0.38);
-  pointer-events: none;
-  z-index: 9;
-}
-
-.scanner-layer .row-1 .scanner-track {
-  animation: scanner-stream-left 14s linear infinite !important;
-}
-
-.scanner-layer .row-2 .scanner-track {
-  animation: scanner-stream-right 14s linear infinite !important;
-}
-
-.scanner-layer-detailed .trust-ring-value,
-.scanner-layer-detailed .trust-label {
-  animation: none !important;
-  opacity: 1;
-  transform: none;
-}
-
-.scanner-layer-detailed .job-card-detailed:not(.is-scanned) .trust-label {
-  opacity: 0;
-}
-
-.scanner-layer-detailed .trust-ring-svg,
-.scanner-layer-detailed .job-card-detailed.is-scanned .trust-ring-svg,
-.scanner-layer-detailed .job-card-detailed.is-score-applying .trust-ring-svg {
-  transform: none !important;
-  animation: none !important;
-}
-
-.scanner-layer-detailed .trust-ring-svg circle:last-child {
-  transition: stroke-dashoffset 360ms ease;
 }
 
 /* ---- Stats Band (Repositioned) ---- */
@@ -5040,6 +4998,7 @@ html.filson-pro-loaded .hero h1 {
   color: #f8fafc;
 }
 .tool-form input,
+.tool-form select,
 .tool-form textarea {
   width: 100%;
   border: 1px solid rgba(237, 177, 143, 0.42);
@@ -5060,6 +5019,7 @@ html.filson-pro-loaded .hero h1 {
   color: rgba(248, 250, 252, 0.48);
 }
 .tool-form input:focus,
+.tool-form select:focus,
 .tool-form textarea:focus {
   border-color: var(--orange-500);
   background: rgba(8, 17, 31, 0.96);
@@ -5305,10 +5265,12 @@ html.filson-pro-loaded .hero h1 {
     width: 100%;
   }
   .hero-upload-wrap {
-    width: 100%;
+    width: auto;
+    align-self: center;
   }
   .hero-upload-btn {
-    width: 100%;
+    width: auto;
+    min-width: 0;
     justify-content: center;
   }
   .hero-copy-centered h1 {
@@ -5467,7 +5429,6 @@ html.filson-pro-loaded .hero h1 {
   .nav-auth {
     display: none;
   }
-
 
   .nav-search {
     max-width: none;
@@ -5927,6 +5888,23 @@ html.filson-pro-loaded .hero h1 {
   }
 }
 
+@media (max-width: 640px) {
+  .legal-page {
+    padding: 48px 0 72px;
+  }
+
+  .legal-card {
+    padding: 26px 20px;
+    border-radius: 14px;
+    font-size: 0.96rem;
+  }
+
+  .legal-card h2 {
+    margin-top: 28px;
+    font-size: 1.18rem;
+  }
+}
+
 @media (max-width: 1024px) {
   .hero-scanner-widget.full-length {
     width: 100vw;
@@ -5982,6 +5960,22 @@ html.filson-pro-loaded .hero h1 {
     width: 100%;
   }
 
+  .hero-browse-btn {
+    min-height: 56px;
+  }
+
+  .hero-upload-wrap {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hero-upload-btn {
+    width: min(100%, 210px);
+    min-height: 46px;
+    padding: 0 20px;
+    font-size: 14px;
+  }
+
   .hero-scanner-widget.full-length {
     height: 306px;
   }
@@ -6034,13 +6028,14 @@ html.filson-pro-loaded .hero h1 {
   }
 
   .scanner-layer-skeleton {
-    clip-path: polygon(0 0, 46% 0, 46% 100%, 0 100%);
-    -webkit-clip-path: polygon(0 0, 46% 0, 46% 100%, 0 100%);
+    display: none;
+    clip-path: none;
+    -webkit-clip-path: none;
   }
 
   .scanner-layer-detailed {
-    clip-path: polygon(46% 0, 100% 0, 100% 100%, 46% 100%);
-    -webkit-clip-path: polygon(46% 0, 100% 0, 100% 100%, 46% 100%);
+    clip-path: none;
+    -webkit-clip-path: none;
   }
 }
 
@@ -6497,6 +6492,48 @@ html.filson-pro-loaded .hero h1 {
   background: rgba(235, 177, 182, 0.15);
 }
 
+.brand-toggle {
+  position: fixed;
+  left: 14px;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 120;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid rgba(188, 201, 216, 0.72);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 14px 34px rgba(8, 17, 31, 0.14);
+  backdrop-filter: blur(10px);
+}
+
+.brand-toggle-option {
+  min-height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.brand-toggle-option[aria-pressed='true'] {
+  background: var(--text-primary);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(8, 17, 31, 0.18);
+}
+
+.brand-toggle-option:focus-visible {
+  outline: 2px solid var(--orange-500);
+  outline-offset: 2px;
+}
+
 @media (max-width: 768px) {
   .jobs-search-panel-redesign {
     padding: 24px;
@@ -6508,49 +6545,5 @@ html.filson-pro-loaded .hero h1 {
   }
   .clear-history-btn {
     align-self: flex-end;
-  }
-}
-
-
-/* Keep hero primary action dominant on tablets and phones */
-@media (max-width: 980px) {
-  .hero-actions {
-    align-items: center;
-  }
-
-  .hero-browse-btn {
-    width: min(100%, 360px);
-    min-height: 56px;
-  }
-
-  .hero-upload-wrap {
-    width: auto;
-    align-self: center;
-    justify-content: center;
-  }
-
-  .hero-upload-btn {
-    width: auto;
-    min-width: 0;
-    min-height: 46px;
-    padding: 0 20px;
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 640px) {
-  .hero-browse-btn {
-    width: 100%;
-    max-width: 360px;
-  }
-
-  .hero-upload-wrap {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .hero-upload-btn {
-    width: min(100%, 210px) !important;
-    min-height: 46px;
   }
 }

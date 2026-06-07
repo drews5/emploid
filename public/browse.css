@@ -80,6 +80,12 @@
   background: var(--bg);
 }
 
+.dirA-search-workspace {
+  min-height: calc(100svh - var(--nav-height) + 280px);
+  box-sizing: border-box;
+  padding-bottom: 220px;
+}
+
 /* Thin utility header — sits below nav, acts like a workspace breadcrumb */
 .dirA-utility {
   display: flex; align-items: center; justify-content: space-between;
@@ -132,25 +138,31 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  padding: 6px 24px 54px;
-  gap: 32px;
+  justify-content: center;
+  padding: 52px 40px 54px;
+  gap: 24px;
 }
 .dirA-prompt {
-  display: none;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 28px;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  margin: 0;
+  text-align: center;
 }
 .dirA-prompt .muted { color: var(--text-muted); font-weight: 500; }
 
 .dirA-search {
   width: 100%;
-  max-width: 1612px;
+  max-width: 920px;
   display: flex; align-items: center;
   background: var(--bg-white);
-  border: 1px solid rgba(188, 201, 216, 0.82);
+  border: 1.5px solid var(--border);
   border-radius: 999px;
-  padding: 14px 16px 14px 38px;
-  box-shadow: 0 22px 46px rgba(8, 17, 31, 0.12);
-  gap: 18px;
+  padding: 6px 6px 6px 24px;
+  box-shadow: 0 18px 44px rgba(8, 17, 31, 0.09);
+  gap: 10px;
   transition: all var(--transition);
 }
 .dirA-search:focus-within {
@@ -158,28 +170,23 @@
   box-shadow: 0 0 0 5px rgba(200,91,36,0.14), var(--shadow-md);
 }
 .dirA-search-icon { color: var(--text-muted); flex: none; display: flex; }
-.dirA-search-icon svg {
-  width: 30px;
-  height: 30px;
-  stroke-width: 2;
-}
 .dirA-search input {
   flex: 1; border: 0; outline: 0;
   font-family: var(--font-body);
-  font-size: 28px;
+  font-size: 18px;
   color: var(--text-primary);
   background: transparent;
-  padding: 20px 4px;
+  padding: 16px 4px;
   min-width: 0;
   font-weight: 500;
 }
 .dirA-search input::placeholder { color: var(--text-muted); font-weight: 400; }
 .search-input-wrapper {
   width: 100%;
-  max-width: 1612px;
+  max-width: 920px;
   position: relative;
 }
-.dirA-search-divider { display: none; }
+.dirA-search-divider { width: 1px; height: 30px; background: var(--border); }
 .dirA-search-loc {
   display: flex;
   align-items: center;
@@ -188,8 +195,8 @@
   z-index: 40;
 }
 .location-trigger {
-  min-width: 406px;
-  max-width: 406px;
+  min-width: 172px;
+  max-width: 224px;
   border: 1px solid rgba(188, 201, 216, 0.8);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.92);
@@ -197,8 +204,8 @@
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 14px;
-  padding: 16px 20px;
+  gap: 8px;
+  padding: 7px 8px 7px 10px;
   font-family: var(--font-body);
   text-align: left;
   box-shadow: 0 6px 18px rgba(8, 17, 31, 0.06);
@@ -213,8 +220,6 @@
 .location-trigger-icon {
   flex: none;
   color: var(--text-muted);
-  width: 24px;
-  height: 24px;
 }
 .location-trigger-copy {
   display: grid;
@@ -226,7 +231,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 21px;
+  font-size: 14px;
   font-weight: 750;
   line-height: 1.1;
 }
@@ -235,7 +240,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--text-muted);
-  font-size: 15px;
+  font-size: 10px;
   font-weight: 650;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -244,20 +249,18 @@
   flex: none;
   color: var(--text-muted);
   transition: transform 180ms ease;
-  width: 18px;
-  height: 18px;
 }
 .location-distance-pill {
   flex: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 76px;
-  padding: 12px 16px;
+  min-width: 48px;
+  padding: 4px 8px;
   border-radius: 999px;
   background: rgba(8, 17, 31, 0.06);
   color: var(--text-primary);
-  font-size: 18px;
+  font-size: 11px;
   font-weight: 800;
   line-height: 1;
   white-space: nowrap;
@@ -417,18 +420,17 @@
   color: #fff;
   border: 0;
   border-radius: 999px;
-  padding: 28px 38px;
+  padding: 14px 26px;
   font-family: var(--font-body);
   font-weight: 700;
-  font-size: 25px;
+  font-size: 15px;
   cursor: pointer;
   box-shadow: var(--shadow-cta);
-  display: inline-flex; align-items: center; gap: 16px;
+  display: inline-flex; align-items: center; gap: 8px;
   transition: background var(--transition), transform var(--transition);
   flex: none;
 }
 .dirA-search-btn:hover { background: var(--orange-600); transform: translateY(-1px); }
-
 
 /* Filter menu under search */
 .dirA-filter-menu-wrap {
@@ -487,8 +489,8 @@
 
 /* Chip row directly under search */
 .dirA-chips {
-  display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;
-  max-width: 980px;
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+  max-width: 920px;
   margin-bottom: 0;
   position: relative;
   z-index: 20;
@@ -503,16 +505,16 @@
   display: none !important;
 }
 .dirA-chip {
-  display: inline-flex; align-items: center; gap: 10px;
+  display: inline-flex; align-items: center; gap: 6px;
   position: relative;
   overflow: visible;
   background: var(--bg-white);
-  border: 1px solid rgba(188, 201, 216, 0.95);
+  border: 1px solid var(--border);
   border-radius: 999px;
-  padding: 18px 28px;
+  padding: 8px 14px;
   font-family: var(--font-body);
-  font-size: 23px;
-  font-weight: 760;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--text-primary);
   cursor: pointer;
   transition: color 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease, transform 180ms ease;
@@ -539,13 +541,13 @@
   transform: translateY(-4px);
 }
 .dirA-chip:hover {
-  border-color: rgba(200, 91, 36, 0.42);
-  color: var(--orange-600);
+  border-color: var(--orange-500);
+  color: var(--orange-500);
   background: var(--bg-white);
 }
 .dirA-chip .plus {
-  width: 16px;
-  height: 16px;
+  width: 13px;
+  height: 13px;
   color: var(--text-muted);
   margin-right: 2px;
   display: inline-flex;
@@ -575,8 +577,8 @@
   background: var(--orange-500);
   border-color: var(--orange-500);
   color: #fff;
-  box-shadow: 0 10px 22px -14px rgba(200,91,36,0.7);
-  transform: none;
+  box-shadow: 0 4px 14px -3px rgba(200,91,36,0.45);
+  transform: translateY(-1px) scale(1.03);
 }
 .dirA-chip.is-toggling {
   animation: dirA-chip-toggle 520ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -631,9 +633,9 @@
 }
 
 .dirA-chip-variable {
-  padding: 18px 28px;
+  padding: 9px 14px 10px;
   overflow: visible;
-  min-height: 66px;
+  min-height: 42px;
 }
 
 #qf-direct-apply {
@@ -670,14 +672,14 @@
 }
 .chip-value-input {
   min-width: 34px;
-  width: 62px;
-  padding: 6px 12px;
+  width: 44px;
+  padding: 3px 9px;
   border: 0;
   border-radius: 999px;
   background: rgba(8, 17, 31, 0.06);
   color: var(--text-primary);
   font-family: var(--font-body);
-  font-size: 22px;
+  font-size: 13px;
   font-weight: 850;
   line-height: 1.1;
   text-align: center;
@@ -695,15 +697,15 @@
 }
 .chip-value-combo .chip-value-input {
   display: inline-flex;
-  width: 72px;
-  padding-right: 24px;
+  width: 52px;
+  padding-right: 18px;
 }
 .chip-value-unit {
   position: absolute;
-  right: 10px;
+  right: 8px;
   top: 50%;
   color: currentColor;
-  font-size: 18px;
+  font-size: 12px;
   font-weight: 850;
   pointer-events: none;
   transform: translateY(-50%);
@@ -719,9 +721,9 @@
 
 .chip-range {
   position: absolute;
-  left: 24px;
-  right: 24px;
-  bottom: 10px;
+  left: 18px;
+  right: 18px;
+  bottom: 8px;
   width: auto;
   height: 14px;
   margin: 0;
@@ -776,10 +778,10 @@
 
 .dirA-chip-clear {
   position: absolute;
-  top: -11px;
-  right: -11px;
-  width: 24px;
-  height: 24px;
+  top: -9px;
+  right: -9px;
+  width: 18px;
+  height: 18px;
   display: none;
   align-items: center;
   justify-content: center;
@@ -787,7 +789,7 @@
   background: #eef2f6;
   border: 1px solid rgba(141, 160, 182, 0.55);
   color: #4c5867;
-  font-size: 17px;
+  font-size: 13px;
   font-weight: 900;
   line-height: 1;
   box-shadow: 0 3px 10px rgba(8, 17, 31, 0.11);
@@ -1238,6 +1240,11 @@
 .dirC-bottom .divider { width: 1px; height: 12px; background: var(--border); }
 
 @media (max-width: 640px) {
+  .dirA-search-workspace {
+    min-height: calc(100svh - var(--nav-height) + 240px);
+    padding-bottom: 190px;
+  }
+
   .dirA-stage {
     padding: 48px 24px 52px;
     gap: 22px;

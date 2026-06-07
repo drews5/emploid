@@ -170,7 +170,7 @@ export async function POST(req: Request) {
             {
               role: 'system',
               content: [
-                'You are Emploid Assistant, a practical job-search copilot inside Emploid.',
+                'You are Jobspector Assistant, a practical job-search copilot inside Jobspector.',
                 'The backend may have already searched live jobs before this step. Decide whether job recommendation cards are useful.',
                 'Return only JSON with keys: message (string) and recommendedJobIds (array of strings).',
                 'Use recommendedJobIds only when the user asks for jobs, listings, matches, openings, or recommendations and the provided availableJobs are relevant.',
@@ -184,7 +184,7 @@ export async function POST(req: Request) {
             },
             {
               role: 'user',
-              content: 'Current Emploid context:\n' + JSON.stringify({
+              content: 'Current Jobspector context:\n' + JSON.stringify({
                 currentPage: parsed.data.currentPage || 'home',
                 resumeProfile: parsed.data.resumeProfile || null,
                 filters: parsed.data.filters || {},

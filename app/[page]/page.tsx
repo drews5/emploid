@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import LegacyPage from '../legacy-page';
 
-const LEGACY_PAGES = ['search', 'browse', 'tracker', 'about', 'blog'];
+const LEGACY_PAGES = ['search', 'browse', 'tracker', 'about', 'blog', 'privacy', 'terms'];
 
 export function generateStaticParams() {
   return LEGACY_PAGES.map((page) => ({ page }));

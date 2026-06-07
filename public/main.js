@@ -1,5 +1,101 @@
 'use strict';
 
+const BRAND_STORAGE_KEY = 'emploid-brand-choice-v1';
+const BRAND_COPY = {
+  emploid: {
+    name: 'Emploid',
+    lower: 'emploid',
+    domain: 'emploid.com',
+  },
+  jobspector: {
+    name: 'Jobspector',
+    lower: 'jobspector',
+    domain: 'jobspector.com',
+  },
+};
+
+function normalizeBrandChoice(value) {
+  return value === 'jobspector' ? 'jobspector' : 'emploid';
+}
+
+function getStoredBrandChoice() {
+  try {
+    return normalizeBrandChoice(window.localStorage.getItem(BRAND_STORAGE_KEY));
+  } catch (_error) {
+    return 'emploid';
+  }
+}
+
+function setStoredBrandChoice(brand) {
+  try {
+    window.localStorage.setItem(BRAND_STORAGE_KEY, normalizeBrandChoice(brand));
+  } catch (_error) {
+    // Ignore storage failures; the toggle still works for the current page.
+  }
+}
+
+function replaceBrandText(value, brand) {
+  if (!value) return value;
+  const next = BRAND_COPY[brand];
+  return String(value)
+    .replace(/jobspector\.com/gi, next.domain)
+    .replace(/emploid\.com/gi, next.domain)
+    .replace(/Jobspector/g, next.name)
+    .replace(/jobspector/g, next.lower)
+    .replace(/Emploid/g, next.name)
+    .replace(/emploid/g, next.lower);
+}
+
+function applyBrandChoice(brand) {
+  const normalized = normalizeBrandChoice(brand);
+  const root = document.body;
+  if (!root) return;
+
+  document.documentElement.dataset.brand = normalized;
+  document.title = BRAND_COPY[normalized].lower;
+
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      const parent = node.parentElement;
+      if (!parent || parent.closest('script, style, textarea, input')) return NodeFilter.FILTER_REJECT;
+      return /jobspector|emploid/i.test(node.nodeValue || '')
+        ? NodeFilter.FILTER_ACCEPT
+        : NodeFilter.FILTER_REJECT;
+    },
+  });
+
+  const textNodes = [];
+  while (walker.nextNode()) textNodes.push(walker.currentNode);
+  textNodes.forEach((node) => {
+    node.nodeValue = replaceBrandText(node.nodeValue, normalized);
+  });
+
+  document.querySelectorAll('[aria-label], [alt], [title], [placeholder], [href]').forEach((element) => {
+    ['aria-label', 'alt', 'title', 'placeholder', 'href'].forEach((attribute) => {
+      if (!element.hasAttribute(attribute)) return;
+      element.setAttribute(attribute, replaceBrandText(element.getAttribute(attribute), normalized));
+    });
+  });
+
+  document.querySelectorAll('.brand-toggle-option').forEach((button) => {
+    const isActive = button.dataset.brandChoice === normalized;
+    button.setAttribute('aria-pressed', String(isActive));
+  });
+}
+
+function initBrandToggle() {
+  const initialBrand = getStoredBrandChoice();
+  applyBrandChoice(initialBrand);
+
+  document.querySelectorAll('.brand-toggle-option').forEach((button) => {
+    button.addEventListener('click', () => {
+      const nextBrand = normalizeBrandChoice(button.dataset.brandChoice);
+      setStoredBrandChoice(nextBrand);
+      applyBrandChoice(nextBrand);
+    });
+  });
+}
+
 function ensureFilsonProLoaded() {
   const showHeroText = () => {
     document.documentElement.classList.add('filson-pro-loaded');
@@ -377,6 +473,8 @@ const PAGE_ROUTES = {
   tracker: '/tracker',
   about: '/about',
   blog: '/blog',
+  privacy: '/privacy',
+  terms: '/terms',
 };
 
 const ROUTE_TO_PAGE = {
@@ -387,12 +485,14 @@ const ROUTE_TO_PAGE = {
   '/tracker': 'tracker',
   '/about': 'about',
   '/blog': 'blog',
+  '/privacy': 'privacy',
+  '/terms': 'terms',
 };
 
 function normalizePageId(pageId) {
   if (pageId === 'search') return 'home';
   if (pageId === 'browse') return 'jobs';
-  if (pageId === 'home' || pageId === 'jobs' || pageId === 'tracker' || pageId === 'about' || pageId === 'blog') return pageId;
+  if (pageId === 'home' || pageId === 'jobs' || pageId === 'tracker' || pageId === 'about' || pageId === 'blog' || pageId === 'privacy' || pageId === 'terms') return pageId;
   return 'home';
 }
 
@@ -574,10 +674,16 @@ function renderAuthState() {
 function setAuthMode(mode = 'signup') {
   currentAuthMode = 'google';
   if (authKicker) authKicker.textContent = 'Google sign in';
-  if (authTitle) authTitle.textContent = 'Continue to Emploid';
-  if (authSubtitle) authSubtitle.textContent = 'Use your Google account to save searches, tracker activity, and account details in Supabase.';
+  if (authTitle) authTitle.textContent = mode === 'tracker'
+    ? 'Sign in to sync your tracker'
+    : 'Continue to Jobspector';
+  if (authSubtitle) authSubtitle.textContent = mode === 'tracker'
+    ? 'Use Google to keep saved and applied jobs tied to your account. Gmail progress monitoring requires a separate inbox permission before Jobspector can read status emails.'
+    : 'Use your Google account to save searches, tracker activity, and account details in Supabase.';
   if (authSubmit) authSubmit.querySelector('span:last-child').textContent = 'Continue with Google';
-  if (authNote) authNote.textContent = 'Your Google name, email, and profile image are synced to your Emploid profile.';
+  if (authNote) authNote.textContent = mode === 'tracker'
+    ? 'We only sync your Google profile with this sign-in. Inbox monitoring will ask for explicit Gmail access when that integration is enabled.'
+    : 'Your Google name, email, and profile image are synced to your Jobspector profile.';
 }
 
 function openAuthModal(mode = 'signup') {
@@ -815,7 +921,6 @@ function normalizeHeroScannerCards() {
     if (scoreValue && Number.isFinite(targetScore)) {
       scoreValue.dataset.score = String(targetScore);
       scoreValue.dataset.revealed = 'false';
-      scoreValue.dataset.previousDistance = '';
       scoreValue.textContent = '?';
     }
 
@@ -847,15 +952,14 @@ function animateHeroTrustScores() {
   const scannerViewport = document.querySelector('.scanner-viewport');
   const defaultCircumference = 100.5;
   const revealDuration = 560;
-  const revealDistance = 8;
 
-  function resetCard(card, scoreEl, arc, distanceFromScan) {
+  function resetCard(card, scoreEl, arc) {
     card.classList.remove('is-scanning', 'is-scanned', 'is-score-applying');
     if (scoreEl) {
       scoreEl.textContent = '?';
       scoreEl.dataset.revealed = 'false';
-      scoreEl.dataset.previousDistance = String(distanceFromScan);
       delete scoreEl.dataset.revealStart;
+      scoreEl.dataset.previousDistance = '';
     }
     if (arc) {
       const circumference = Number.parseFloat(arc.dataset.circumference || '') || defaultCircumference;
@@ -868,6 +972,7 @@ function animateHeroTrustScores() {
     const scannerMidpoint = viewportRect
       ? viewportRect.left + (viewportRect.width / 2)
       : window.innerWidth / 2;
+    const revealDistance = 8;
 
     cards.forEach((card) => {
       const scoreEl = card.querySelector('.trust-ring-value');
@@ -880,25 +985,27 @@ function animateHeroTrustScores() {
         ? rect.right < viewportRect.left - 32 || rect.left > viewportRect.right + 32
         : rect.right < -32 || rect.left > window.innerWidth + 32;
 
-      if (!scoreEl || !Number.isFinite(targetScore)) return;
-
-      if (isOffscreen) {
-        resetCard(card, scoreEl, arc, distanceFromScan);
+      if (isOffscreen && scoreEl) {
+        resetCard(card, scoreEl, arc);
+        scoreEl.dataset.previousDistance = String(distanceFromScan);
         return;
       }
 
+      if (!scoreEl || !Number.isFinite(targetScore)) {
+        return;
+      }
+
+      const isNearScanner = Math.abs(distanceFromScan) <= revealDistance;
+      card.classList.toggle('is-scanning', isNearScanner);
+      const previousDistance = Number.parseFloat(scoreEl.dataset.previousDistance || '');
       const row = card.closest('.scanner-row');
       const movesRight = Boolean(row && row.classList.contains('row-2'));
-      const previousDistance = Number.parseFloat(scoreEl.dataset.previousDistance || '');
       const crossedMiddle = Number.isFinite(previousDistance)
         ? (movesRight ? previousDistance < 0 && distanceFromScan >= 0 : previousDistance > 0 && distanceFromScan <= 0)
         : false;
       const alreadyPastScan = !Number.isFinite(previousDistance) && (
         movesRight ? distanceFromScan > revealDistance : distanceFromScan < -revealDistance
       );
-      const isNearScanner = Math.abs(distanceFromScan) <= 44;
-
-      card.classList.toggle('is-scanning', isNearScanner);
 
       if (scoreEl.dataset.revealed !== 'true' && !crossedMiddle && !alreadyPastScan) {
         scoreEl.textContent = '?';
@@ -915,25 +1022,24 @@ function animateHeroTrustScores() {
         scoreEl.dataset.revealStart = String(now);
       }
 
-      card.classList.add('is-scanned');
+      card.classList.add('is-scanned', 'is-score-applying');
+
       const revealStart = Number(scoreEl.dataset.revealStart || now);
       const progress = Math.min(1, Math.max(0, (now - revealStart) / revealDuration));
       const eased = 1 - Math.pow(1 - progress, 3);
       const currentScore = Math.max(0, Math.round(targetScore * eased));
-
-      if (progress < 1) card.classList.add('is-score-applying');
-      else card.classList.remove('is-score-applying');
-
-      scoreEl.textContent = progress >= 1 ? String(targetScore) : String(currentScore);
+      scoreEl.textContent = String(currentScore);
 
       if (arc) {
-        if (progress >= 1 && arc.dataset.targetOffset) {
-          arc.setAttribute('stroke-dashoffset', arc.dataset.targetOffset);
-        } else {
-          const circumference = Number.parseFloat(arc.dataset.circumference || '') || defaultCircumference;
-          const offset = circumference - ((currentScore / 100) * circumference);
-          arc.setAttribute('stroke-dashoffset', String(offset));
-        }
+        const circumference = Number.parseFloat(arc.dataset.circumference || '') || defaultCircumference;
+        const offset = circumference - ((currentScore / 100) * circumference);
+        arc.setAttribute('stroke-dashoffset', String(offset));
+      }
+
+      if (progress >= 1) {
+        card.classList.remove('is-score-applying');
+        scoreEl.textContent = String(targetScore);
+        if (arc && arc.dataset.targetOffset) arc.setAttribute('stroke-dashoffset', arc.dataset.targetOffset);
       }
 
       scoreEl.dataset.previousDistance = String(distanceFromScan);
@@ -949,7 +1055,6 @@ function initHeroScannerAnimation() {
   normalizeHeroScannerCards();
   animateHeroTrustScores();
 }
-
 function wait(ms) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
@@ -1928,7 +2033,6 @@ function closeMobileFilters() {
   if (window.innerWidth <= 760) setMobileFiltersOpen(false);
 }
 
-
 function setDisclosureMenu(trigger, menu, isOpen) {
   if (!trigger || !menu) return;
   trigger.setAttribute('aria-expanded', String(isOpen));
@@ -2163,26 +2267,41 @@ function initBlogEvents() {
       e.preventDefault();
       const formData = new FormData(hiringIndexForm);
       const companyName = String(formData.get('companyName') || 'This company').trim();
-      const openRoles = Math.max(0, getNumber(formData, 'openRoles'));
-      const closedRoles = Math.max(0, getNumber(formData, 'closedRoles'));
-      const rating = Math.min(5, Math.max(1, getNumber(formData, 'glassdoorRating', 3)));
-      const totalActivity = openRoles + closedRoles;
-      const closeRatio = totalActivity ? closedRoles / totalActivity : 0;
-      const activityScore = Math.min(20, totalActivity * 1.5);
-      const score = Math.round((closeRatio * 55) + (rating * 5) + activityScore);
-      const grade = score >= 85 ? 'A' : score >= 70 ? 'B' : score >= 55 ? 'C' : score >= 40 ? 'D' : 'F';
-      const tone = score >= 70 ? 'good' : score >= 45 ? 'caution' : 'risk';
-      const explanation = grade === 'A' || grade === 'B'
-        ? 'Recent closes and employee sentiment suggest a healthier hiring engine.'
-        : grade === 'C'
-          ? 'There is some movement, but verify the specific team before investing heavy effort.'
-          : 'Open roles are outpacing visible closes, so treat postings with caution until you confirm active interviews.';
+      const listingAge = String(formData.get('listingAge') || 'fresh');
+      const ageScores = { fresh: 24, aging: 16, stale: 6, old: 0 };
+      let score = ageScores[listingAge] ?? 12;
+      const positives = [];
+      const cautions = [];
+
+      if (formData.has('onCareerPage')) { score += 22; positives.push('The role appears on the company career page.'); }
+      else cautions.push('Verify the role on the company career page before tailoring your application.');
+      if (formData.has('namedRecruiter')) { score += 14; positives.push('A recruiter or hiring manager is visible.'); }
+      else cautions.push('No named hiring contact means you may need to find one before following up.');
+      if (formData.has('recentCompanyPost')) { score += 14; positives.push('There is a recent public hiring signal.'); }
+      if (formData.has('clearTeam')) { score += 12; positives.push('The description names a real team, manager, or project.'); }
+      else cautions.push('Generic team language can indicate a recycled or evergreen post.');
+      if (formData.has('salaryListed')) { score += 8; positives.push('Pay transparency is a useful accountability signal.'); }
+      if (formData.has('reposted')) { score -= 18; cautions.push('Repeated reposting lowers confidence unless a recruiter confirms active interviews.'); }
+
+      score = Math.max(0, Math.min(100, Math.round(score)));
+      const grade = score >= 82 ? 'A' : score >= 68 ? 'B' : score >= 52 ? 'C' : score >= 36 ? 'D' : 'F';
+      const tone = score >= 68 ? 'good' : score >= 45 ? 'caution' : 'risk';
+      const explanation = score >= 68
+        ? 'This company shows enough public hiring intent to justify a tailored application.'
+        : score >= 45
+          ? 'There are mixed signals. Do a quick source check and send one targeted outreach note before spending heavy time.'
+          : 'Treat this as low confidence until the role is confirmed on the company site or by a recruiter.';
+      const listItems = (items) => items.length ? items.map((item) => `<li>${escapeHtml(item)}</li>`).join('') : '<li>None from the options selected.</li>';
       const details = `
-        <p>${escapeHtml(companyName)} has ${openRoles} open roles, ${closedRoles} recently closed roles, and a ${rating.toFixed(1)}/5 employee rating signal.</p>
+        <p>${escapeHtml(companyName)} scores ${score}/100 based on public signals a candidate can check without insider data.</p>
         <p>${escapeHtml(explanation)}</p>
+        <div class="tool-result-columns">
+          <div><strong>Positive signals</strong><ul>${listItems(positives)}</ul></div>
+          <div><strong>Follow-up checks</strong><ul>${listItems(cautions)}</ul></div>
+        </div>
       `;
 
-      renderToolResult('company-hiring-index-result', tone, 'Hiring health grade', grade, `${score}/100 hiring health`, details);
+      renderToolResult('company-hiring-index-result', tone, 'Company signal grade', grade, `${score}/100 public signal score`, details);
     });
   }
 
@@ -2240,7 +2359,7 @@ function initBlogEvents() {
         || host.includes('glassdoor.com');
       const tone = isAggregator ? 'caution' : 'good';
       const value = isAggregator ? 'Aggregator' : 'Direct';
-      const heading = isAggregator ? 'Aggregator link - find the direct career page' : 'Direct career page link ✓';
+      const heading = isAggregator ? 'Aggregator link - find the direct career page' : 'Direct career page link verified';
       const details = `
         <p>${escapeHtml(parsedUrl.hostname)} ${isAggregator ? 'looks like a third-party job board. Use it for discovery, then apply through the employer career page.' : 'does not match the common aggregator domains checked here. Confirm the page belongs to the employer before applying.'}</p>
       `;
@@ -2254,24 +2373,44 @@ function initBlogEvents() {
     velocityForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const formData = new FormData(velocityForm);
-      const rolesPosted = Math.max(0, getNumber(formData, 'rolesPosted'));
-      const rolesFilled = Math.max(0, getNumber(formData, 'rolesFilled'));
-      const avgDaysToFill = Math.max(1, getNumber(formData, 'avgDaysToFill', 45));
-      const fillRate = rolesPosted ? Math.min(100, Math.round((rolesFilled / rolesPosted) * 100)) : 0;
-      const speedScore = Math.max(0, Math.round(100 - ((avgDaysToFill - 20) * 1.8)));
-      const velocityScore = Math.round((fillRate * 0.65) + (Math.min(100, speedScore) * 0.35));
-      const tone = velocityScore >= 70 ? 'good' : velocityScore >= 45 ? 'caution' : 'risk';
-      const recommendation = velocityScore >= 70
-        ? 'Prioritize these roles. The company appears to be closing openings at a healthy pace.'
-        : velocityScore >= 45
-          ? 'Apply selectively and verify that the specific role is actively interviewing.'
-          : 'Treat the funnel as slow until a recruiter confirms timeline and urgency.';
+      const daysPosted = Math.max(0, getNumber(formData, 'daysPosted'));
+      const fitLevel = String(formData.get('fitLevel') || 'partial');
+      let priorityScore = fitLevel === 'strong' ? 32 : fitLevel === 'partial' ? 20 : 8;
+
+      if (daysPosted <= 7) priorityScore += 22;
+      else if (daysPosted <= 21) priorityScore += 16;
+      else if (daysPosted <= 45) priorityScore += 8;
+      else priorityScore -= 8;
+
+      const positives = [];
+      const cautions = [];
+      if (formData.has('directCareerPage')) { priorityScore += 16; positives.push('Apply through the employer career page.'); }
+      else cautions.push('Find the role on the employer career page before investing too much time.');
+      if (formData.has('salaryVisible')) { priorityScore += 8; positives.push('Visible pay range makes the role easier to qualify.'); }
+      if (formData.has('contactVisible')) { priorityScore += 12; positives.push('Use the visible contact for a short, specific follow-up.'); }
+      else cautions.push('Look for a recruiter or likely manager on LinkedIn before following up.');
+      if (formData.has('recentHiringPost')) { priorityScore += 10; positives.push('Recent public hiring activity supports higher priority.'); }
+      if (formData.has('easyApplyOnly')) { priorityScore -= 12; cautions.push('Easy Apply only usually means higher applicant volume and lower intent.'); }
+      if (formData.has('genericDescription')) { priorityScore -= 12; cautions.push('Generic descriptions deserve a source check before tailoring.'); }
+
+      priorityScore = Math.max(0, Math.min(100, Math.round(priorityScore)));
+      const tone = priorityScore >= 70 ? 'good' : priorityScore >= 45 ? 'caution' : 'risk';
+      const recommendation = priorityScore >= 70
+        ? 'Spend real effort here: tailor your resume, apply direct, and send one focused outreach note.'
+        : priorityScore >= 45
+          ? 'Apply selectively. Keep the resume edits light until you verify source and timing.'
+          : 'Do not sink major time into this listing unless you can confirm active interviews.';
+      const listItems = (items) => items.length ? items.map((item) => `<li>${escapeHtml(item)}</li>`).join('') : '<li>None from the options selected.</li>';
       const details = `
-        <p>Fill rate: ${fillRate}%. Average time to fill: ${avgDaysToFill} days.</p>
+        <p>Listing age: ${daysPosted} days. Fit level: ${escapeHtml(fitLevel)}.</p>
         <p>${escapeHtml(recommendation)}</p>
+        <div class="tool-result-columns">
+          <div><strong>Use these signals</strong><ul>${listItems(positives)}</ul></div>
+          <div><strong>Watch-outs</strong><ul>${listItems(cautions)}</ul></div>
+        </div>
       `;
 
-      renderToolResult('hiring-velocity-calculator-result', tone, 'Velocity score', `${velocityScore}/100`, 'Hiring funnel movement', details);
+      renderToolResult('hiring-velocity-calculator-result', tone, 'Priority score', `${priorityScore}/100`, 'Recommended application effort', details);
     });
   }
 
@@ -2334,9 +2473,9 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 
 document.addEventListener('click', (event) => {
-  const clickedOutsideNav = !navSearchForm || !navSearchForm.contains(event.target);
-  const clickedOutsideDirA = (!dirAFilterMenuTrigger || !dirAFilterMenuTrigger.contains(event.target)) && (!dirAFilterMenu || !dirAFilterMenu.contains(event.target));
-  if (clickedOutsideNav && clickedOutsideDirA) closeSearchMenus();
+  if (navSearchForm && !navSearchForm.contains(event.target) && dirAFilterMenuTrigger && !dirAFilterMenuTrigger.contains(event.target) && dirAFilterMenu && !dirAFilterMenu.contains(event.target)) {
+    closeSearchMenus();
+  }
 });
 
 document.addEventListener('keydown', (event) => {
@@ -3718,30 +3857,10 @@ document.addEventListener('keydown', (event) => {
    Redesigned Search & Smart Suggest logic
    ========================================================================== */
 
-const autocompleteSuggestions = {
-  roles: [
-    { title: 'Software Engineer', meta: '2.8k+ jobs scanned · 73 avg trust' },
-    { title: 'Product Designer', meta: '840 jobs scanned · 81 avg trust' },
-    { title: 'Product Analyst', meta: '620 jobs scanned · 79 avg trust' },
-    { title: 'Data Scientist', meta: '430 jobs scanned · 75 avg trust' },
-    { title: 'Frontend Engineer', meta: '1.2k+ jobs scanned · 78 avg trust' },
-    { title: 'Product Manager', meta: '950 jobs scanned · 80 avg trust' },
-    { title: 'Operations Manager', meta: '310 jobs scanned · 72 avg trust' },
-    { title: 'Marketing Specialist', meta: '540 jobs scanned · 70 avg trust' }
-  ],
-  companies: [
-    { name: 'Stripe', initial: 'S', color: '#635bff', openings: 84 },
-    { name: 'Anthropic', initial: 'A', color: '#cc785c', openings: 62 },
-    { name: 'Vercel', initial: 'V', color: '#000000', openings: 28 },
-    { name: 'Figma', initial: 'F', color: '#f24e1e', openings: 41 },
-    { name: 'Ramp', initial: 'R', color: '#1a1f2c', openings: 33 },
-    { name: 'Linear', initial: 'L', color: '#5e6ad2', openings: 15 }
-  ]
-};
-
 var selectedSuggestionIndex = -1;
 var currentFilteredSuggestions = [];
-
+var autocompleteRequestId = 0;
+var autocompleteDebounceTimer = null;
 // Active chip filters — independent state so they work even before jobs-shell is visible
 const activeChipFilters = new Set(['direct-apply']);
 
@@ -3885,9 +4004,56 @@ function showAutocompletePanel() {
   }
 }
 
+async function fetchJobSuggestions(query, requestId) {
+  try {
+    const response = await fetch(`/api/jobs?suggest=1&q=${encodeURIComponent(query)}&limit=8`, { cache: 'no-store' });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error || 'Suggestions unavailable.');
+    if (requestId !== autocompleteRequestId) return;
+
+    const suggestions = Array.isArray(payload.data) ? payload.data : [];
+    currentFilteredSuggestions = suggestions.length
+      ? [
+          { type: 'section', label: 'Matching Jobs' },
+          ...suggestions.map((item) => ({
+            type: 'job',
+            title: item.title || item.value || query,
+            meta: `${item.company || 'Company'} • ${item.location || 'Location not listed'} • ${Math.round(Number(item.trustScore || 0))} trust`,
+            value: item.value || item.title || query,
+            initial: getCompanyInitial(item.company || item.title || query),
+            color: scoreColor(Number(item.trustScore || 0)),
+          })),
+        ]
+      : [
+          { type: 'section', label: 'Search' },
+          {
+            type: 'search',
+            title: `Search "${query}"`,
+            meta: 'Search live jobs in Supabase',
+            value: query,
+          },
+        ];
+    selectedSuggestionIndex = -1;
+    renderAutocompletePanel();
+  } catch (error) {
+    if (requestId !== autocompleteRequestId) return;
+    currentFilteredSuggestions = [
+      { type: 'section', label: 'Search' },
+      {
+        type: 'search',
+        title: `Search "${query}"`,
+        meta: 'Search live jobs',
+        value: query,
+      },
+    ];
+    selectedSuggestionIndex = -1;
+    renderAutocompletePanel();
+  }
+}
+
 function updateFilteredSuggestions(typed) {
-  const val = String(typed || '').trim().toLowerCase();
-  
+  const val = String(typed || '').trim();
+
   if (!val) {
     currentFilteredSuggestions = [];
     selectedSuggestionIndex = -1;
@@ -3895,77 +4061,52 @@ function updateFilteredSuggestions(typed) {
     return;
   }
 
-  // Filter roles
-  const filteredRoles = autocompleteSuggestions.roles.filter(r => 
-    r.title.toLowerCase().includes(val)
-  );
-  
-  // Filter companies
-  const filteredCompanies = autocompleteSuggestions.companies.filter(c => 
-    c.name.toLowerCase().includes(val)
-  );
-  
-  currentFilteredSuggestions = [];
-  
-  if (filteredRoles.length > 0) {
-    currentFilteredSuggestions.push({ type: 'section', label: 'Suggested Roles' });
-    filteredRoles.forEach(r => {
-      currentFilteredSuggestions.push({
-        type: 'role',
-        title: r.title,
-        meta: r.meta,
-        value: r.title
-      });
-    });
-  }
-  
-  if (filteredCompanies.length > 0) {
-    currentFilteredSuggestions.push({ type: 'section', label: 'Suggested Companies' });
-    filteredCompanies.forEach(c => {
-      currentFilteredSuggestions.push({
-        type: 'company',
-        title: c.name,
-        meta: `${c.openings} open roles`,
-        value: c.name,
-        initial: c.initial,
-        color: c.color
-      });
-    });
-  }
-  
+  const requestId = ++autocompleteRequestId;
+  currentFilteredSuggestions = [
+    { type: 'section', label: 'Matching Jobs' },
+    {
+      type: 'loading',
+      title: 'Searching live jobs...',
+      meta: 'Checking Supabase listings',
+      value: val,
+    },
+  ];
   selectedSuggestionIndex = -1;
   renderAutocompletePanel();
+
+  if (autocompleteDebounceTimer) window.clearTimeout(autocompleteDebounceTimer);
+  autocompleteDebounceTimer = window.setTimeout(() => fetchJobSuggestions(val, requestId), 180);
 }
 
 function renderAutocompletePanel() {
   const panel = document.getElementById('search-autocomplete-panel');
   if (!panel) return;
-  
+
   if (currentFilteredSuggestions.length === 0) {
     panel.hidden = true;
     return;
   }
-  
+
   panel.hidden = false;
-  
+
   let html = '';
   let selectableIndex = 0;
-  
+
   currentFilteredSuggestions.forEach((item) => {
     if (item.type === 'section') {
-      html += `<div class="autocomplete-section-label">${item.label}</div>`;
+      html += `<div class="autocomplete-section-label">${escapeHtml(item.label)}</div>`;
     } else {
       item.selectableIndex = selectableIndex;
       const isSelected = selectableIndex === selectedSuggestionIndex;
-      
-      const iconMarkup = item.type === 'role' 
+      const isSearchLike = item.type === 'search' || item.type === 'loading';
+      const iconMarkup = isSearchLike
         ? `<div class="autocomplete-row-icon" style="background: var(--orange-soft); color: var(--orange-500);">
              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7.5"></circle><line x1="20.5" y1="20.5" x2="17" y2="17"></line></svg>
            </div>`
-        : `<div class="autocomplete-row-icon" style="background: ${item.color || '#bcc9d8'}; color: #fff;">${item.initial}</div>`;
-        
+        : `<div class="autocomplete-row-icon" style="background: ${item.color || '#bcc9d8'}; color: #fff;">${escapeHtml(item.initial || 'J')}</div>`;
+
       html += `
-        <button type="button" class="autocomplete-row ${isSelected ? 'is-selected' : ''}" data-index="${selectableIndex}">
+        <button type="button" class="autocomplete-row ${isSelected ? 'is-selected' : ''}" data-index="${selectableIndex}" ${item.type === 'loading' ? 'disabled' : ''}>
           ${iconMarkup}
           <div class="autocomplete-row-text">
             <div class="autocomplete-row-title">${escapeHtml(item.title)}</div>
@@ -3976,20 +4117,19 @@ function renderAutocompletePanel() {
       selectableIndex++;
     }
   });
-  
+
   html += `
     <div class="autocomplete-footer">
       <div class="hints">
-        <span class="hint"><span class="kbd">↵</span> open</span>
-        <span class="hint"><span class="kbd">↑</span><span class="kbd">↓</span> navigate</span>
-        <span class="hint"><span class="kbd">esc</span> close</span>
+        <span class="hint"><span class="kbd">Enter</span> search</span>
+        <span class="hint"><span class="kbd">Esc</span> close</span>
       </div>
-      <span class="brand">Emploid Smart Suggest</span>
+      <span class="brand">Live Supabase Suggestions</span>
     </div>
   `;
-  
+
   panel.innerHTML = html;
-  
+
   panel.querySelectorAll('.autocomplete-row').forEach(row => {
     row.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -3998,7 +4138,6 @@ function renderAutocompletePanel() {
     });
   });
 }
-
 function selectAutocompleteIndex(idx) {
   const item = currentFilteredSuggestions.find(i => i.selectableIndex === idx);
   if (item) {
@@ -4267,6 +4406,7 @@ function applyQuickFilterToControls(filterId, isActive) {
       else delete remoteCheckbox.dataset.quickFilter;
     }
   }
+  syncNavFilterMenuState();
 }
 
 function clearQuickFilterFromManualControls(event) {
@@ -4397,6 +4537,7 @@ function initSearchRedesign() {
 
 // Page initialization
 ensureFilsonProLoaded();
+initBrandToggle();
 renderAuthState();
 setAuthMode();
 initializeAuth();
@@ -4405,6 +4546,7 @@ renderResumeMatchUI();
 renderTracker();
 initBlogEvents();
 initHomeInteractions();
+initHeroScannerAnimation();
 initSearchRedesign(); // Initialize search redesign
 applyInitialPageState();
 updateNavSearchVisibility();

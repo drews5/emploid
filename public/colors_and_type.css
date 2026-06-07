@@ -1,4 +1,4 @@
-/* Emploid Design System — colors + type tokens */
+/* Jobspector design system - colors + type tokens */
 
 /* ---------- Fonts ---------- */
 @font-face {
@@ -49,7 +49,7 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
 
   /* ---------- Brand / palette ---------- */
-  /* Primary: Emploid orange */
+  /* Primary: Jobspector orange */
   --orange-500: #c85b24;   /* Primary CTA */
   --orange-600: #a9491b;   /* Hover */
   --orange-300: #edb18f;   /* Decorative border */
