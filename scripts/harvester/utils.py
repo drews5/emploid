@@ -78,7 +78,7 @@ def extract_domain(url: str | None) -> str:
 def is_ats_or_aggregator_domain(domain: str) -> bool:
     return bool(re.search(
         r"(^|\.)("
-        r"greenhouse\.io|lever\.co|ashbyhq\.com|workable\.com|smartrecruiters\.com|"
+        r"greenhouse\.io|lever\.co|ashbyhq\.com|workable\.com|smartrecruiters\.com|myworkdayjobs\.com|"
         r"linkedin\.com|indeed\.com|glassdoor\.com|ziprecruiter\.com|google\.com|adzuna\.com"
         r")$",
         domain or "",

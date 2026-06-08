@@ -3,6 +3,7 @@ name: Crawl and score jobs
 on:
   schedule:
     - cron: "17 */6 * * *"
+    - cron: "47 7 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -13,14 +14,24 @@ jobs:
   crawl:
     name: Crawl ${{ matrix.provider }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
-        provider: [greenhouse, lever, ashby, smartrecruiters]
+        provider: [greenhouse, lever, ashby, smartrecruiters, workday]
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
       PYTHONUNBUFFERED: "1"
+      ATS_DISCOVERY_ENABLED: "true"
+      ATS_DISCOVERY_USE_LOCAL_CATALOG: "true"
+      ATS_DISCOVERY_PAGE_LIMIT: "300"
+      ATS_DISCOVERY_LIMIT: "1000"
+      LEVER_PAGE_SIZE: "100"
+      LEVER_MAX_PAGES: "30"
+      SMARTRECRUITERS_PAGE_SIZE: "100"
+      SMARTRECRUITERS_MAX_PAGES: "50"
+      WORKDAY_PAGE_SIZE: "100"
+      WORKDAY_MAX_JOBS_PER_BOARD: "500"
       SUPABASE_URL_SECRET: ${{ secrets.SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_URL_SECRET: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       SUPABASE_SERVICE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_KEY }}
@@ -72,9 +83,13 @@ jobs:
     name: Crawl aggregator searches
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '47 7 * * *'
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
       PYTHONUNBUFFERED: "1"
+      JSEARCH_MAX_QUERIES: "12"
+      JSEARCH_NUM_PAGES: "1"
+      JSEARCH_DATE_POSTED: "week"
       SUPABASE_URL_SECRET: ${{ secrets.SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_URL_SECRET: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       SUPABASE_SERVICE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_KEY }}

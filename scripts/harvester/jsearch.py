@@ -16,6 +16,10 @@ def fetch_jsearch(query_matrix: list[dict[str, str]]) -> list[dict[str, Any]]:
         print("[JSEARCH] RAPIDAPI_KEY not set; skipping JSearch crawl")
         return []
 
+    max_queries = _env_int("JSEARCH_MAX_QUERIES", len(query_matrix))
+    num_pages = _env_int("JSEARCH_NUM_PAGES", 1)
+    date_posted = os.getenv("JSEARCH_DATE_POSTED", "week").strip() or "week"
+
     headers = {
         "X-RapidAPI-Key": api_key,
         "X-RapidAPI-Host": JSEARCH_HOST,
@@ -23,7 +27,7 @@ def fetch_jsearch(query_matrix: list[dict[str, str]]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
 
     with httpx.Client(timeout=30, headers=headers) as client:
-        for item in query_matrix:
+        for item in query_matrix[:max_queries]:
             title = item.get("title", "").strip()
             location = item.get("location", "").strip()
             if not title:
@@ -35,8 +39,8 @@ def fetch_jsearch(query_matrix: list[dict[str, str]]) -> list[dict[str, Any]]:
                 params={
                     "query": search_query,
                     "page": "1",
-                    "num_pages": "1",
-                    "date_posted": "week",
+                    "num_pages": str(num_pages),
+                    "date_posted": date_posted,
                 },
             )
             response.raise_for_status()
@@ -50,6 +54,16 @@ def fetch_jsearch(query_matrix: list[dict[str, str]]) -> list[dict[str, Any]]:
             time.sleep(0.6)
 
     return rows
+
+
+def _env_int(name: str, default: int) -> int:
+    value = os.getenv(name)
+    if not value:
+        return default
+    try:
+        return max(1, int(value))
+    except ValueError:
+        return default
 
 
 def _normalize_jsearch_job(job: dict[str, Any]) -> dict[str, Any]:

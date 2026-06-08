@@ -1,21 +1,22 @@
 greenhouse:
   - airbnb
   - anthropic
-  - doordash
   - dropbox
-  - linear
-  - retool
+  - figma
+  - reddit
   - robinhood
   - stripe
   - vercel
 lever:
-  - netflix
-  - shopify
-  - mixpanel
+  - outreach
+  - spotify
 ashby:
+  - cursor
+  - elevenlabs
   - linear
   - notion
+  - openai
   - ramp
-  - vercel
 smartrecruiters:
+  - ServiceNow
   - Visa

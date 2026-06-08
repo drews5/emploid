@@ -80,7 +80,7 @@ def expand_ats_boards(companies: dict, only_provider: str | None = None) -> dict
     providers = [
         provider
         for provider in companies
-        if not only_provider or provider == only_provider
+        if provider != "workday" and (not only_provider or provider == only_provider)
     ]
     if not providers:
         return companies

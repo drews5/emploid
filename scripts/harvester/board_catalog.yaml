@@ -1,67 +1,83 @@
-# Public ATS board tokens used to broaden scheduled crawls beyond the small
-# product seed list. These are direct employer job boards, not third-party
-# scraped job pages. Invalid or retired boards are skipped by the crawler.
+# Verified public employer feeds used to broaden scheduled crawls beyond the
+# tiny product seed list. These are direct employer job boards; invalid or
+# retired boards are skipped by the crawler.
 greenhouse:
   - affirm
+  - agoda
   - airbnb
-  - alltrails
+  - andurilindustries
   - anthropic
   - asana
+  - bitgo
+  - boxinc
+  - braze
   - calendly
+  - carta
   - chime
+  - cloudflare
   - coinbase
-  - datadog
+  - cockroachlabs
+  - databricks
+  - digitalocean98
   - discord
-  - doordash
   - dropbox
+  - duolingo
+  - faire
   - figma
   - flexport
+  - gemini
   - gusto
+  - honeycomb
+  - hubspotjobs
   - instacart
+  - klaviyo
   - lyft
-  - opendoor
-  - plaid
+  - mongodb
+  - okta
+  - pinterest
+  - postman
   - reddit
+  - roblox
   - robinhood
-  - segment
+  - samsara
+  - scaleai
+  - sofi
   - stripe
   - toast
   - twilio
-  - uber
   - vercel
-  - zapier
+  - yext
+  - yotpo
+  - zscaler
 lever:
-  - anduril
-  - benchling
-  - brex
-  - canva
-  - cloudflare
-  - coursera
-  - duolingo
-  - flexport
-  - gitlab
-  - headspace
-  - scaleai
-  - shopify
+  - outreach
   - spotify
-  - twitch
 ashby:
-  - airtable
+  - cohere
   - cursor
   - elevenlabs
+  - harvey
   - linear
-  - mercury
+  - modal
   - notion
   - openai
+  - perplexity
   - ramp
-  - rippling
-  - runways
-  - scale
+  - zapier
 smartrecruiters:
-  - Adobe
-  - Atlassian
-  - LinkedIn
-  - McDonalds
-  - PayPal
-  - Square
+  - BoschGroup
+  - ColliersInternationalEMEA
+  - Devoteam
+  - Experian
+  - ServiceNow
+  - SmartRecruiters
   - Visa
+  - WesternDigital
+workday:
+  - Adobe|https://adobe.wd5.myworkdayjobs.com/wday/cxs/adobe/external_experienced/jobs
+  - Citi|https://citi.wd5.myworkdayjobs.com/wday/cxs/citi/2/jobs
+  - Comcast|https://comcast.wd5.myworkdayjobs.com/wday/cxs/comcast/Comcast_Careers/jobs
+  - NVIDIA|https://nvidia.wd5.myworkdayjobs.com/wday/cxs/nvidia/NVIDIAExternalCareerSite/jobs
+  - Salesforce|https://salesforce.wd12.myworkdayjobs.com/wday/cxs/salesforce/External_Career_Site/jobs
+  - Target|https://target.wd5.myworkdayjobs.com/wday/cxs/target/targetcareers/jobs
+  - Workday|https://workday.wd5.myworkdayjobs.com/wday/cxs/workday/Workday/jobs
