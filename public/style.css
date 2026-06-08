@@ -4006,7 +4006,27 @@ html.filson-pro-loaded .hero h1 {
 }
 
 .scanner-viewport::before {
-  display: none;
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 34px;
+  height: 34px;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background:
+    var(--brand-logo-url),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 247, 241, 0.9));
+  background-repeat: no-repeat, no-repeat;
+  background-position: center, center;
+  background-size: 21px 21px, 100% 100%;
+  border: 1px solid rgba(255, 190, 127, 0.72);
+  box-shadow:
+    0 0 0 4px rgba(200, 91, 36, 0.16),
+    0 10px 30px rgba(0, 0, 0, 0.28),
+    0 0 34px rgba(200, 91, 36, 0.38);
+  pointer-events: none;
+  z-index: 10;
 }
 
 .scanner-viewport::after {
@@ -4018,10 +4038,10 @@ html.filson-pro-loaded .hero h1 {
   width: 3px;
   transform: translateX(-50%);
   border-radius: 999px;
-  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.92) 14%, #ffffff 50%, rgba(255, 255, 255, 0.92) 86%, transparent);
+  background: linear-gradient(180deg, transparent, rgba(255, 190, 127, 0.82) 14%, #c85b24 50%, rgba(255, 190, 127, 0.82) 86%, transparent);
   box-shadow:
-    0 0 14px rgba(255, 255, 255, 0.48),
-    0 0 32px rgba(200, 91, 36, 0.38);
+    0 0 14px rgba(255, 190, 127, 0.5),
+    0 0 36px rgba(200, 91, 36, 0.54);
   pointer-events: none;
   z-index: 9;
 }

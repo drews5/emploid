@@ -1101,7 +1101,7 @@ function animateHeroTrustScores() {
       rowState.states = rowState.cards.map((card, cardIndex) => {
         const existing = rowState.states[cardIndex] || {};
         const x = Number.isFinite(existing.x) ? existing.x : rowOffset + (cardIndex * spacing);
-        const startsPastScanner = x + (cardWidth / 2) < viewportWidth / 2;
+        const startsPastScanner = x + (cardWidth / 2) > viewportWidth / 2;
         applyHeroScannerListing(card, nextHeroScannerListing(), { reveal: startsPastScanner });
         card.style.transform = `translate3d(${Math.round(x)}px, 0, 0)`;
         return {
@@ -1129,14 +1129,14 @@ function animateHeroTrustScores() {
     rowStates.forEach((rowState) => {
       const cardWidth = rowState.cardWidth || 324;
       const spacing = rowState.spacing || (cardWidth + 18);
-      const minX = -cardWidth - spacing;
+      const maxX = viewportWidth + spacing;
 
       rowState.states.forEach((state) => {
-        state.x -= rowState.speed * deltaSeconds;
+        state.x += rowState.speed * deltaSeconds;
 
-        if (state.x < minX) {
-          const maxX = Math.max(...rowState.states.map((item) => item.x));
-          state.x = maxX + spacing;
+        if (state.x > maxX) {
+          const minX = Math.min(...rowState.states.map((item) => item.x));
+          state.x = minX - spacing;
           state.revealed = false;
           state.revealStart = null;
           state.previousDistance = (state.x + (cardWidth / 2)) - scannerMidpoint;
@@ -1145,7 +1145,7 @@ function animateHeroTrustScores() {
 
         const center = state.x + (cardWidth / 2);
         const distance = center - scannerMidpoint;
-        const crossedScanner = state.previousDistance > 0 && distance <= 0;
+        const crossedScanner = state.previousDistance < 0 && distance >= 0;
         const isNearScanner = Math.abs(distance) <= 12;
         state.card.classList.toggle('is-scanning', isNearScanner);
 
