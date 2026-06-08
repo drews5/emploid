@@ -695,7 +695,7 @@ function setAuthMode(mode = 'signup') {
     : `Continue to ${brand.name}`;
   if (authSubtitle) authSubtitle.textContent = mode === 'tracker'
     ? `Use Google to keep saved and applied jobs tied to your account. Gmail progress monitoring requires a separate inbox permission before ${brand.name} can read status emails.`
-    : 'Use your Google account to save searches, tracker activity, and account details in Supabase.';
+    : 'Use your Google account to save searches, tracker activity, and account details.';
   if (authSubmit) authSubmit.querySelector('span:last-child').textContent = 'Continue with Google';
   if (authNote) authNote.textContent = mode === 'tracker'
     ? 'We only sync your Google profile with this sign-in. Inbox monitoring will ask for explicit Gmail access when that integration is enabled.'
@@ -794,7 +794,7 @@ function waitForGoogleIdentity(timeout = 5000) {
   });
 }
 
-async function syncCurrentSupabaseSession() {
+async function syncCurrentAccountSession() {
   try {
     const response = await fetch('/api/auth/me', { credentials: 'same-origin' });
     if (!response.ok) return;
@@ -840,8 +840,8 @@ async function initializeGoogleSignIn(options = {}) {
   const { showPrompt = true } = options;
   const config = await fetchAuthConfig();
 
-  if (!config.googleConfigured || !config.supabaseConfigured) {
-    if (authNote) authNote.textContent = 'Add Supabase keys and NEXT_PUBLIC_GOOGLE_CLIENT_ID to enable Google sign in.';
+  if (!config.googleConfigured || !config.accountServiceConfigured) {
+    if (authNote) authNote.textContent = 'Add account service keys and NEXT_PUBLIC_GOOGLE_CLIENT_ID to enable Google sign in.';
     return false;
   }
 
@@ -893,7 +893,7 @@ async function startGoogleSignIn() {
 }
 
 async function initializeAuth() {
-  await syncCurrentSupabaseSession();
+  await syncCurrentAccountSession();
   if (!authSession) {
     await initializeGoogleSignIn({ showPrompt: true });
   }
@@ -2892,7 +2892,7 @@ function normalizeStoredJob(job) {
     company: companyName,
     companyContext: company.trust_score
       ? `Company trust ${Math.round(Number(company.trust_score) * 100)}`
-      : 'Stored Supabase listing',
+      : 'Stored listing',
     location,
     source: sourceProvider,
     jobType: job && job.job_type ? job.job_type : 'Full-time',
@@ -3167,7 +3167,7 @@ async function runLiveJobSearch(rawQuery) {
       hasSearched: true,
       isLoading: false,
       query,
-      source: 'supabase',
+      source: 'database',
       error: '',
     };
     applyFilters();
@@ -4136,7 +4136,7 @@ async function fetchJobSuggestions(query, requestId) {
           {
             type: 'search',
             title: `Search "${query}"`,
-            meta: 'Search live jobs in Supabase',
+            meta: 'Search live jobs',
             value: query,
           },
         ];
@@ -4174,7 +4174,7 @@ function updateFilteredSuggestions(typed) {
     {
       type: 'loading',
       title: 'Searching live jobs...',
-      meta: 'Checking Supabase listings',
+      meta: 'Checking live listings',
       value: val,
     },
   ];
@@ -4231,7 +4231,7 @@ function renderAutocompletePanel() {
         <span class="hint"><span class="kbd">Enter</span> search</span>
         <span class="hint"><span class="kbd">Esc</span> close</span>
       </div>
-      <span class="brand">Live Supabase Suggestions</span>
+      <span class="brand">Live Job Suggestions</span>
     </div>
   `;
 

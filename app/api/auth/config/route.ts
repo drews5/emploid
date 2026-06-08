@@ -8,7 +8,7 @@ export async function GET() {
   return NextResponse.json({
     googleClientId,
     googleConfigured: Boolean(googleClientId),
-    supabaseConfigured: Boolean(
+    accountServiceConfigured: Boolean(
       process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     ),
   })
