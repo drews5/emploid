@@ -918,153 +918,258 @@ async function signOutAuth() {
   showToast('Signed out.');
 }
 
+const HERO_SCANNER_LISTINGS = [
+  { title: 'Financial Analyst', company: 'Target', location: 'Minneapolis, MN', meta: '$75k-$90k', mode: 'Hybrid', score: 88 },
+  { title: 'Product Designer', company: 'Figma', location: 'San Francisco, CA', meta: '$132k-$165k', mode: 'Remote', score: 93 },
+  { title: 'Marketing Manager', company: 'Best Buy', location: 'Minneapolis, MN', meta: '$85k-$102k', mode: 'Hybrid', score: 54 },
+  { title: 'Software Engineer', company: 'Google', location: 'Chicago, IL', meta: '$135k-$168k', mode: 'Hybrid', score: 85 },
+  { title: 'Operations Coordinator', company: 'Peloton', location: 'New York, NY', meta: '$58k-$68k', mode: 'On-site', score: 22 },
+  { title: 'Recruiting Coordinator', company: 'Adobe', location: 'San Jose, CA', meta: '$68k-$82k', mode: 'Hybrid', score: 92 },
+  { title: 'Data Analyst', company: 'Stripe', location: 'Seattle, WA', meta: '$110k-$140k', mode: 'Remote', score: 78 },
+  { title: 'Product Manager', company: 'Airbnb', location: 'San Francisco, CA', meta: '$145k-$185k', mode: 'Hybrid', score: 35 },
+  { title: 'Customer Success Lead', company: 'Notion', location: 'Denver, CO', meta: '$98k-$118k', mode: 'Remote', score: 81 },
+  { title: 'Frontend Engineer', company: 'Vercel', location: 'Remote, US', meta: '$128k-$172k', mode: 'Remote', score: 90 },
+  { title: 'Revenue Analyst', company: 'Ramp', location: 'New York, NY', meta: '$96k-$124k', mode: 'Hybrid', score: 76 },
+  { title: 'UX Researcher', company: 'Dropbox', location: 'Austin, TX', meta: '$118k-$146k', mode: 'Remote', score: 86 },
+  { title: 'Account Executive', company: 'HubSpot', location: 'Boston, MA', meta: '$95k-$150k', mode: 'Hybrid', score: 72 },
+  { title: 'Data Engineer', company: 'Netflix', location: 'Los Gatos, CA', meta: '$150k-$210k', mode: 'On-site', score: 89 },
+  { title: 'People Operations', company: 'DoorDash', location: 'Phoenix, AZ', meta: '$72k-$88k', mode: 'Hybrid', score: 64 },
+  { title: 'Security Analyst', company: 'Cloudflare', location: 'Remote, US', meta: '$112k-$138k', mode: 'Remote', score: 84 },
+  { title: 'Program Manager', company: 'Visa', location: 'Atlanta, GA', meta: '$105k-$132k', mode: 'Hybrid', score: 79 },
+  { title: 'Business Analyst', company: 'Robinhood', location: 'Menlo Park, CA', meta: '$110k-$145k', mode: 'Hybrid', score: 68 },
+  { title: 'Content Strategist', company: 'Canva', location: 'Austin, TX', meta: '$86k-$112k', mode: 'Remote', score: 83 },
+  { title: 'Support Specialist', company: 'Linear', location: 'Remote, US', meta: '$70k-$92k', mode: 'Remote', score: 91 },
+  { title: 'QA Engineer', company: 'Anthropic', location: 'San Francisco, CA', meta: '$120k-$160k', mode: 'Hybrid', score: 87 },
+  { title: 'Finance Manager', company: 'Shopify', location: 'Remote, US', meta: '$118k-$150k', mode: 'Remote', score: 74 },
+  { title: 'Growth Associate', company: 'Duolingo', location: 'Pittsburgh, PA', meta: '$82k-$104k', mode: 'Hybrid', score: 59 },
+  { title: 'Backend Engineer', company: 'GitHub', location: 'Remote, US', meta: '$132k-$178k', mode: 'Remote', score: 94 },
+  { title: 'Talent Sourcer', company: 'Asana', location: 'San Francisco, CA', meta: '$78k-$96k', mode: 'Hybrid', score: 61 },
+  { title: 'Implementation Consultant', company: 'ServiceNow', location: 'Chicago, IL', meta: '$104k-$136k', mode: 'Hybrid', score: 82 },
+  { title: 'Machine Learning Engineer', company: 'NVIDIA', location: 'Santa Clara, CA', meta: '$160k-$220k', mode: 'On-site', score: 95 },
+  { title: 'Clinical Ops Analyst', company: 'Mayo Clinic', location: 'Rochester, MN', meta: '$74k-$96k', mode: 'Hybrid', score: 77 },
+  { title: 'Lifecycle Marketer', company: 'Mailchimp', location: 'Atlanta, GA', meta: '$92k-$118k', mode: 'Remote', score: 80 },
+  { title: 'Inventory Planner', company: 'Chewy', location: 'Dallas, TX', meta: '$68k-$86k', mode: 'On-site', score: 47 },
+  { title: 'Platform Engineer', company: 'Datadog', location: 'New York, NY', meta: '$140k-$185k', mode: 'Hybrid', score: 88 },
+  { title: 'Design Producer', company: 'Pinterest', location: 'Remote, US', meta: '$104k-$132k', mode: 'Remote', score: 73 },
+];
+
+let heroScannerListingCursor = 0;
+let heroScannerAnimationFrame = 0;
+
+function getHeroScannerTone(score) {
+  if (score >= 75) return { className: 'high', label: 'High Trust', stroke: 'var(--score-high)' };
+  if (score >= 55) return { className: 'medium', label: 'Medium Trust', stroke: 'var(--score-mid)' };
+  return { className: 'low', label: 'Low Trust', stroke: 'var(--score-low)' };
+}
+
+function nextHeroScannerListing() {
+  const listing = HERO_SCANNER_LISTINGS[heroScannerListingCursor % HERO_SCANNER_LISTINGS.length];
+  heroScannerListingCursor += 1;
+  return listing;
+}
+
+function applyHeroScannerListing(card, listing, options = {}) {
+  const title = card.querySelector('.card-title');
+  if (title) title.textContent = listing.title;
+
+  const info = card.querySelector('.card-info');
+  if (info) info.textContent = `${listing.company} - ${listing.location}`;
+
+  const tagEls = card.querySelectorAll('.card-tag');
+  if (tagEls[0]) tagEls[0].textContent = listing.meta;
+  if (tagEls[1]) tagEls[1].textContent = listing.mode;
+
+  const tags = card.querySelector('.card-tags');
+  if (tags) tags.setAttribute('hidden', '');
+
+  const tone = getHeroScannerTone(listing.score);
+  const label = card.querySelector('.trust-label');
+  if (label) {
+    label.classList.remove('high', 'medium', 'low');
+    label.classList.add(tone.className);
+    label.textContent = tone.label;
+  }
+
+  const scoreValue = card.querySelector('.trust-ring-value');
+  if (scoreValue) {
+    scoreValue.dataset.score = String(listing.score);
+    scoreValue.dataset.revealed = options.reveal ? 'true' : 'false';
+    delete scoreValue.dataset.revealStart;
+    scoreValue.textContent = options.reveal ? String(listing.score) : '?';
+  }
+
+  const scoreArc = card.querySelector('.trust-ring-svg circle:last-child');
+  if (scoreArc) {
+    const circumference = Number.parseFloat(scoreArc.getAttribute('stroke-dasharray')) || 100.5;
+    const targetOffset = circumference - ((listing.score / 100) * circumference);
+    scoreArc.dataset.circumference = String(circumference);
+    scoreArc.dataset.targetOffset = String(targetOffset);
+    scoreArc.setAttribute('stroke', tone.stroke);
+    scoreArc.setAttribute('stroke-dashoffset', options.reveal ? String(targetOffset) : String(circumference));
+  }
+
+  card.classList.toggle('is-scanned', Boolean(options.reveal));
+  card.classList.remove('is-scanning', 'is-score-applying');
+}
+
+function setHeroCardScoreProgress(card, progress) {
+  const scoreEl = card.querySelector('.trust-ring-value');
+  if (!scoreEl) return;
+
+  const arc = card.querySelector('.trust-ring-svg circle:last-child');
+  const targetScore = Number.parseInt(scoreEl.dataset.score || '0', 10);
+  const safeProgress = Math.min(1, Math.max(0, progress));
+  const eased = 1 - Math.pow(1 - safeProgress, 3);
+  const currentScore = Math.max(0, Math.round(targetScore * eased));
+  scoreEl.textContent = String(currentScore);
+
+  if (arc) {
+    const circumference = Number.parseFloat(arc.dataset.circumference || '') || 100.5;
+    arc.setAttribute('stroke-dashoffset', String(circumference - ((currentScore / 100) * circumference)));
+    if (safeProgress >= 1 && arc.dataset.targetOffset) arc.setAttribute('stroke-dashoffset', arc.dataset.targetOffset);
+  }
+
+  if (safeProgress >= 1) {
+    scoreEl.textContent = String(targetScore);
+    card.classList.remove('is-score-applying');
+  }
+}
+
 function normalizeHeroScannerCards() {
   const cards = document.querySelectorAll('.scanner-layer-detailed .job-card-detailed');
   if (!cards.length) return;
 
-  cards.forEach((card) => {
-    const info = card.querySelector('.card-info');
-    if (info) {
-      const company = info.textContent.split(/\u2022/)[0].trim();
-      info.textContent = company || 'Hiring company';
-    }
-
-    const tags = card.querySelector('.card-tags');
-    if (tags) tags.setAttribute('hidden', '');
-
-    const scoreValue = card.querySelector('.trust-ring-value');
-    const targetScore = Number.parseInt(scoreValue && scoreValue.textContent ? scoreValue.textContent : '0', 10);
-    if (scoreValue && Number.isFinite(targetScore)) {
-      scoreValue.dataset.score = String(targetScore);
-      scoreValue.dataset.revealed = 'false';
-      scoreValue.textContent = '?';
-    }
-
-    const scoreArc = card.querySelector('.trust-ring-svg circle:last-child');
-    if (scoreArc && Number.isFinite(targetScore)) {
-      const circumference = Number.parseFloat(scoreArc.getAttribute('stroke-dasharray')) || 100.5;
-      scoreArc.dataset.circumference = String(circumference);
-      scoreArc.dataset.targetOffset = String(circumference - ((targetScore / 100) * circumference));
-      scoreArc.setAttribute('stroke-dashoffset', String(circumference));
-    }
+  cards.forEach((card, index) => {
+    applyHeroScannerListing(card, HERO_SCANNER_LISTINGS[index % HERO_SCANNER_LISTINGS.length], { reveal: false });
   });
 }
 
 function animateHeroTrustScores() {
-  const cards = Array.from(document.querySelectorAll('.scanner-layer-detailed .job-card-detailed'));
-  if (!cards.length) return;
+  const scannerViewport = document.querySelector('.scanner-viewport');
+  const rows = Array.from(document.querySelectorAll('.scanner-layer-detailed .scanner-row:not(.row-3)'));
+  if (!scannerViewport || !rows.length) return;
+
+  if (heroScannerAnimationFrame) {
+    window.cancelAnimationFrame(heroScannerAnimationFrame);
+    heroScannerAnimationFrame = 0;
+  }
+
+  const rowStates = rows.map((row, rowIndex) => {
+    const track = row.querySelector('.scanner-track');
+    const cards = Array.from(row.querySelectorAll('.job-card-detailed'));
+    if (track) {
+      track.style.animation = 'none';
+      track.style.transform = 'none';
+    }
+
+    return {
+      row,
+      track,
+      cards,
+      speed: rowIndex === 0 ? 94 : 82,
+      states: [],
+    };
+  }).filter((state) => state.track && state.cards.length);
 
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    cards.forEach((card) => {
-      const scoreEl = card.querySelector('.trust-ring-value');
-      const arc = card.querySelector('.trust-ring-svg circle:last-child');
-      if (scoreEl && scoreEl.dataset.score) scoreEl.textContent = scoreEl.dataset.score;
-      if (arc && arc.dataset.targetOffset) arc.setAttribute('stroke-dashoffset', arc.dataset.targetOffset);
-      card.classList.add('is-scanned');
+    rowStates.forEach((rowState) => {
+      rowState.cards.forEach((card) => {
+        applyHeroScannerListing(card, nextHeroScannerListing(), { reveal: true });
+      });
     });
     return;
   }
 
-  const scannerViewport = document.querySelector('.scanner-viewport');
-  const defaultCircumference = 100.5;
+  function layoutRows() {
+    const viewportWidth = scannerViewport.getBoundingClientRect().width || window.innerWidth;
+    rowStates.forEach((rowState, rowIndex) => {
+      const firstCard = rowState.cards[0];
+      const cardWidth = firstCard ? (firstCard.getBoundingClientRect().width || 324) : 324;
+      const gap = viewportWidth <= 640 ? 14 : 18;
+      const spacing = cardWidth + gap;
+      const rowOffset = rowIndex === 0 ? 24 : Math.floor(spacing * 0.48);
+      const requiredCards = Math.ceil(viewportWidth / spacing) + 3;
+
+      while (rowState.cards.length < requiredCards && rowState.track && rowState.cards[0]) {
+        const clone = rowState.cards[0].cloneNode(true);
+        rowState.track.appendChild(clone);
+        rowState.cards.push(clone);
+      }
+
+      rowState.cardWidth = cardWidth;
+      rowState.spacing = spacing;
+      rowState.states = rowState.cards.map((card, cardIndex) => {
+        const existing = rowState.states[cardIndex] || {};
+        const x = Number.isFinite(existing.x) ? existing.x : rowOffset + (cardIndex * spacing);
+        const startsPastScanner = x + (cardWidth / 2) < viewportWidth / 2;
+        applyHeroScannerListing(card, nextHeroScannerListing(), { reveal: startsPastScanner });
+        card.style.transform = `translate3d(${Math.round(x)}px, 0, 0)`;
+        return {
+          card,
+          x,
+          revealed: startsPastScanner,
+          revealStart: startsPastScanner ? 0 : null,
+          previousDistance: (x + (cardWidth / 2)) - (viewportWidth / 2),
+        };
+      });
+    });
+  }
+
+  let previousTime = 0;
   const revealDuration = 560;
 
-  function resetCard(card, scoreEl, arc) {
-    card.classList.remove('is-scanning', 'is-scanned', 'is-score-applying');
-    if (scoreEl) {
-      scoreEl.textContent = '?';
-      scoreEl.dataset.revealed = 'false';
-      delete scoreEl.dataset.revealStart;
-      scoreEl.dataset.previousDistance = '';
-    }
-    if (arc) {
-      const circumference = Number.parseFloat(arc.dataset.circumference || '') || defaultCircumference;
-      arc.setAttribute('stroke-dashoffset', String(circumference));
-    }
-  }
+  function updateStream(now) {
+    if (!previousTime) previousTime = now;
+    const deltaSeconds = Math.min(0.05, (now - previousTime) / 1000);
+    previousTime = now;
 
-  function updateScores(now) {
-    const viewportRect = scannerViewport ? scannerViewport.getBoundingClientRect() : null;
-    const scannerMidpoint = viewportRect
-      ? viewportRect.left + (viewportRect.width / 2)
-      : window.innerWidth / 2;
-    const revealDistance = 8;
+    const viewportWidth = scannerViewport.getBoundingClientRect().width || window.innerWidth;
+    const scannerMidpoint = viewportWidth / 2;
 
-    cards.forEach((card) => {
-      const scoreEl = card.querySelector('.trust-ring-value');
-      const arc = card.querySelector('.trust-ring-svg circle:last-child');
-      const targetScore = Number.parseInt(scoreEl && scoreEl.dataset.score ? scoreEl.dataset.score : '0', 10);
-      const rect = card.getBoundingClientRect();
-      const cardCenter = rect.left + (rect.width / 2);
-      const distanceFromScan = cardCenter - scannerMidpoint;
-      const isOffscreen = viewportRect
-        ? rect.right < viewportRect.left - 32 || rect.left > viewportRect.right + 32
-        : rect.right < -32 || rect.left > window.innerWidth + 32;
+    rowStates.forEach((rowState) => {
+      const cardWidth = rowState.cardWidth || 324;
+      const spacing = rowState.spacing || (cardWidth + 18);
+      const minX = -cardWidth - spacing;
 
-      if (isOffscreen && scoreEl) {
-        resetCard(card, scoreEl, arc);
-        scoreEl.dataset.previousDistance = String(distanceFromScan);
-        return;
-      }
+      rowState.states.forEach((state) => {
+        state.x -= rowState.speed * deltaSeconds;
 
-      if (!scoreEl || !Number.isFinite(targetScore)) {
-        return;
-      }
-
-      const isNearScanner = Math.abs(distanceFromScan) <= revealDistance;
-      card.classList.toggle('is-scanning', isNearScanner);
-      const previousDistance = Number.parseFloat(scoreEl.dataset.previousDistance || '');
-      const row = card.closest('.scanner-row');
-      const movesRight = Boolean(row && row.classList.contains('row-2'));
-      const crossedMiddle = Number.isFinite(previousDistance)
-        ? (movesRight ? previousDistance < 0 && distanceFromScan >= 0 : previousDistance > 0 && distanceFromScan <= 0)
-        : false;
-      const alreadyPastScan = !Number.isFinite(previousDistance) && (
-        movesRight ? distanceFromScan > revealDistance : distanceFromScan < -revealDistance
-      );
-
-      if (scoreEl.dataset.revealed !== 'true' && !crossedMiddle && !alreadyPastScan) {
-        scoreEl.textContent = '?';
-        if (arc) {
-          const circumference = Number.parseFloat(arc.dataset.circumference || '') || defaultCircumference;
-          arc.setAttribute('stroke-dashoffset', String(circumference));
+        if (state.x < minX) {
+          const maxX = Math.max(...rowState.states.map((item) => item.x));
+          state.x = maxX + spacing;
+          state.revealed = false;
+          state.revealStart = null;
+          state.previousDistance = (state.x + (cardWidth / 2)) - scannerMidpoint;
+          applyHeroScannerListing(state.card, nextHeroScannerListing(), { reveal: false });
         }
-        scoreEl.dataset.previousDistance = String(distanceFromScan);
-        return;
-      }
 
-      if (scoreEl.dataset.revealed !== 'true') {
-        scoreEl.dataset.revealed = 'true';
-        scoreEl.dataset.revealStart = String(now);
-      }
+        const center = state.x + (cardWidth / 2);
+        const distance = center - scannerMidpoint;
+        const crossedScanner = state.previousDistance > 0 && distance <= 0;
+        const isNearScanner = Math.abs(distance) <= 12;
+        state.card.classList.toggle('is-scanning', isNearScanner);
 
-      card.classList.add('is-scanned', 'is-score-applying');
+        if (!state.revealed && crossedScanner) {
+          state.revealed = true;
+          state.revealStart = now;
+          state.card.classList.add('is-scanned', 'is-score-applying');
+        }
 
-      const revealStart = Number(scoreEl.dataset.revealStart || now);
-      const progress = Math.min(1, Math.max(0, (now - revealStart) / revealDuration));
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const currentScore = Math.max(0, Math.round(targetScore * eased));
-      scoreEl.textContent = String(currentScore);
+        if (state.revealed && state.revealStart) {
+          setHeroCardScoreProgress(state.card, (now - state.revealStart) / revealDuration);
+        }
 
-      if (arc) {
-        const circumference = Number.parseFloat(arc.dataset.circumference || '') || defaultCircumference;
-        const offset = circumference - ((currentScore / 100) * circumference);
-        arc.setAttribute('stroke-dashoffset', String(offset));
-      }
-
-      if (progress >= 1) {
-        card.classList.remove('is-score-applying');
-        scoreEl.textContent = String(targetScore);
-        if (arc && arc.dataset.targetOffset) arc.setAttribute('stroke-dashoffset', arc.dataset.targetOffset);
-      }
-
-      scoreEl.dataset.previousDistance = String(distanceFromScan);
+        state.card.style.transform = `translate3d(${Math.round(state.x)}px, 0, 0)`;
+        state.previousDistance = distance;
+      });
     });
 
-    window.requestAnimationFrame(updateScores);
+    heroScannerAnimationFrame = window.requestAnimationFrame(updateStream);
   }
 
-  window.requestAnimationFrame(updateScores);
+  layoutRows();
+  window.addEventListener('resize', layoutRows, { passive: true });
+  heroScannerAnimationFrame = window.requestAnimationFrame(updateStream);
 }
 
 function initHeroScannerAnimation() {
