@@ -1,10 +1,30 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
+import { PAGE_METADATA, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from './site';
 
 export const metadata: Metadata = {
-  title: 'emploid',
-  description:
-    'Over 40% of online job postings are ghost jobs. emploid scans thousands of postings to filter out the fakes, so you only spend time on real opportunities.',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: PAGE_METADATA.home.title,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    siteName: SITE_NAME,
+    title: PAGE_METADATA.home.title,
+    description: SITE_DESCRIPTION,
+    url: '/',
+  },
+  twitter: {
+    card: 'summary',
+    title: PAGE_METADATA.home.title,
+    description: SITE_DESCRIPTION,
+  },
   icons: { icon: '/images/logoicon.svg' },
 };
 

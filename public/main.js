@@ -2056,7 +2056,6 @@ function setDisclosureMenu(trigger, menu, isOpen) {
 
 function closeSearchMenus() {
   setDisclosureMenu(navFilterTrigger, navFilterMenu, false);
-  setDisclosureMenu(dirAFilterMenuTrigger, dirAFilterMenu, false);
 }
 
 function updateNavSearchVisibility() {
@@ -2488,7 +2487,7 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 
 document.addEventListener('click', (event) => {
-  if (navSearchForm && !navSearchForm.contains(event.target) && dirAFilterMenuTrigger && !dirAFilterMenuTrigger.contains(event.target) && dirAFilterMenu && !dirAFilterMenu.contains(event.target)) {
+  if (navSearchForm && !navSearchForm.contains(event.target) && dirAFilterMenu && !dirAFilterMenu.contains(event.target)) {
     closeSearchMenus();
   }
 });

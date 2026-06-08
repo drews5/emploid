@@ -223,6 +223,7 @@ function buildJobsQuery(supabase: any, searchParams: URLSearchParams, options: {
   const filtered = applyJobFilters(query, searchParams);
   query = filtered.query;
   const q = filtered.q;
+  const shouldRankCandidates = Boolean(q && sort !== 'salary' && sort !== 'date_posted');
 
   if (q) {
     const broadFilter = buildTextSearchFilter(q);
@@ -251,26 +252,30 @@ function buildJobsQuery(supabase: any, searchParams: URLSearchParams, options: {
       query = query.order('created_at', { ascending: false });
   }
 
-  // Pagination
-  const from = (page - 1) * per_page;
-  const to = from + per_page - 1;
+  // For relevance searches, fetch a larger candidate window first, then rank
+  // and paginate in the API. This avoids losing strong matches that happen to
+  // sit just outside the first database page.
+  const from = shouldRankCandidates ? 0 : (page - 1) * per_page;
+  const candidateLimit = Math.min(240, Math.max(80, per_page * page * 4));
+  const to = shouldRankCandidates ? candidateLimit - 1 : from + per_page - 1;
   query = query.range(from, to);
 
-  return { query, page, per_page };
+  return { query, page, per_page, shouldRankCandidates };
 }
 
 async function runJobsQuery(supabase: any, searchParams: URLSearchParams, options: { textSearch?: boolean } = {}) {
-  const { query, page, per_page } = buildJobsQuery(supabase, searchParams, options);
+  const { query, page, per_page, shouldRankCandidates } = buildJobsQuery(supabase, searchParams, options);
   const { data, error, count } = await query;
   if (error) throw error;
   const q = sanitizeSearchInput(searchParams.get('q'));
   let rows = data || [];
 
-  if (q && searchParams.get('sort') !== 'salary' && searchParams.get('sort') !== 'date_posted') {
+  if (shouldRankCandidates) {
     rows = rows
       .map((job: any) => ({ ...job, _search_rank: scoreJobSearchMatch(job, q) }))
       .sort((a: any, b: any) => b._search_rank - a._search_rank);
-    rows = rows.slice(0, per_page);
+    const from = (page - 1) * per_page;
+    rows = rows.slice(from, from + per_page);
     rows = rows.map(({ _search_rank, ...job }: any) => job);
   }
   return { data: rows, count: count ?? 0, page, per_page };
@@ -463,6 +468,12 @@ export const GET = withPublic(async (req, { supabase }) => {
   let result;
   try {
     result = await runJobsQuery(supabase, searchParams);
+    if (q && result.data.length < Math.min(result.per_page, JSEARCH_LOW_RESULT_THRESHOLD)) {
+      const broadResult = await runJobsQuery(supabase, searchParams, { textSearch: false });
+      if (broadResult.data.length > result.data.length) {
+        result = broadResult;
+      }
+    }
   } catch (error: any) {
     console.warn('[JOBS_LIST_TEXT_SEARCH_FALLBACK]', error);
     try {
