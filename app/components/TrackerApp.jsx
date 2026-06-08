@@ -292,7 +292,6 @@ function matchesSearch(app, query) {
     app.location,
     app.salary,
     app.notes,
-    app.source,
     (app.tags || []).join(' '),
   ]
     .join(' ')
@@ -795,7 +794,6 @@ function DetailPanel({ app, onClose, onStageChange, onToggleFlag, onOpenListing,
           </div>
           <div className="detail-section">
             <h4>Details</h4>
-            <div className="detail-row"><div className="k">Source</div><div className="v">{app.source}</div></div>
             <div className="detail-row"><div className="k">Salary</div><div className="v">{app.salary}</div></div>
             <div className="detail-row"><div className="k">Location</div><div className="v">{app.location}</div></div>
             <div className="detail-row"><div className="k">Date applied</div><div className="v">{fmtDate(app.applied)}</div></div>
@@ -850,7 +848,7 @@ function DetailPanel({ app, onClose, onStageChange, onToggleFlag, onOpenListing,
         </div>
         <div className="detail-foot">
           <button className="btn btn-primary detail-primary" onClick={() => onOpenListing(app)}>
-            Open listing <Icon d={I.external} />
+            Open Posting -&gt;
           </button>
           <div className="tracker-menu-wrap detail-status-wrap" ref={menuRef}>
             <button className="btn btn-secondary" onClick={() => setStatusMenuOpen(!statusMenuOpen)}>

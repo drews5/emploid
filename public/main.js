@@ -311,8 +311,8 @@ function buildTrustRing(score, size = 'small') {
   `;
 }
 
-function buildSourceMarkup(source) {
-  return `<span class="source-inline source-${sourceClass(source)}">${escapeHtml(source)}</span>`;
+function buildSourceMarkup() {
+  return '';
 }
 
 function buildSignalTag(type, label) {
@@ -326,7 +326,7 @@ function repostTagTone(score) {
 }
 
 function buildApplyLabel(domain) {
-  return domain ? `Open on ${domain} →` : 'Open listing →';
+  return 'Open Posting ->';
 }
 
 function trackerActionIcon(action) {
@@ -551,12 +551,12 @@ function buildReactTrackerRecord(job, stage = 'applied') {
       ? (job.hiringContact
           ? `Opened apply link from ${brand.name}. Hiring contact spotted; follow up quickly while this listing is still warm.`
           : `Opened apply link from ${brand.name}. Revisit within 5 business days if the listing still looks active.`)
-      : `Saved from ${brand.name}. Verify the source and apply when this role deserves time.`,
+      : `Saved from ${brand.name}. Verify the posting and apply when this role deserves time.`,
     hot: false,
     stall: false,
     listingUrl: buildInternalListingUrl(job),
     tags: [
-      job.directCompanyLink ? 'Live source link' : 'No source link',
+      job.directCompanyLink ? 'Active posting link' : 'Posting link not verified',
       job.hiringContact ? 'Hiring contact spotted' : 'No recruiter listed',
       `${job.workMode} role`
     ]
@@ -1448,7 +1448,7 @@ function renderHomePreview() {
       <article class="preview-job-card tone-${trustInfo.tone}">
         <div class="preview-job-main">
           <h3 class="preview-card-title">${listing.title}</h3>
-          <p class="preview-card-company">${listing.company} · ${listing.location} · ${buildSourceMarkup(listing.source)}</p>
+          <p class="preview-card-company">${listing.company} - ${listing.location}</p>
           <div class="preview-job-meta">
             <span>${listing.salary}</span>
             <span>${listing.workMode}</span>
@@ -1741,9 +1741,9 @@ function trackJobApplication(job, stage = 'applied') {
       ? 'A recruiter signal was found here. Follow up within 48 hours while the role is still warm.'
       : isApplied
         ? 'Give this role 5 business days, then send one concise follow-up if it still looks active.'
-        : 'Verify the source and apply when this role deserves time.',
+        : 'Verify the posting and apply when this role deserves time.',
     tags: [
-      job.directCompanyLink ? 'Live source link' : 'No source link',
+      job.directCompanyLink ? 'Active posting link' : 'Posting link not verified',
       job.hiringContact ? 'Hiring contact spotted' : 'No recruiter listed',
       `${job.workMode} role`
     ],
@@ -1896,7 +1896,7 @@ function renderTrackerList() {
               <span class="tracker-chip ${trustClass}">${application.trustScore} Trust Score</span>
             </div>
             <h3 class="tracker-card-title">${application.role}</h3>
-            <p class="tracker-card-subline">${application.company} ? ${buildSourceMarkup(application.source)} ? ${trackerActivityLabel(application)}</p>
+            <p class="tracker-card-subline">${application.company} - ${trackerActivityLabel(application)}</p>
             ${trackerStageMarkup(application.stage, application.id, `${application.role} at ${application.company}`, waveTrackerId === application.id)}
             <div class="tracker-meta-row">
               ${metaPills.map((item) => `<span class="tracker-meta-pill">${item}</span>`).join('')}
@@ -2756,7 +2756,6 @@ function buildJobSearchIndex(job) {
     job.title,
     job.company,
     job.location,
-    job.source,
     job.workMode,
     job.jobType,
     job.description,
@@ -2832,7 +2831,7 @@ function normalizeLiveJob(job) {
     }
   }
 
-  const source = stripHtml(job && job.source ? job.source : liveJobSearchState.source || 'Live source');
+  const source = stripHtml(job && job.source ? job.source : liveJobSearchState.source || 'Live posting');
   const directSignal = Boolean(job && job.directCompanyLink);
   const aggregatorDomain = /(^|\.)google\.com$|(^|\.)linkedin\.com$|(^|\.)indeed\.com$|(^|\.)glassdoor\.com$|(^|\.)ziprecruiter\.com$|(^|\.)monster\.com$|(^|\.)adzuna\.com$|(^|\.)greenhouse\.io$|(^|\.)lever\.co$/i.test(domain);
   const aggregatorSource = /google|linkedin|indeed|glassdoor|ziprecruiter|monster|adzuna/i.test(source);
@@ -2859,8 +2858,8 @@ function normalizeLiveJob(job) {
     directCompanyLink: directSignal || Boolean(url && domain && !aggregatorDomain && !aggregatorSource),
     hiringContact: Boolean(job && job.hiringContact),
     sentiment: stripHtml(job && job.sentiment ? job.sentiment : 'stable'),
-    description: stripHtml(job && job.description ? job.description : 'Open the source listing to verify details and apply.'),
-    requirements: Array.isArray(job && job.requirements) ? job.requirements.map(stripHtml).filter(Boolean) : ['Review the source listing for role-specific requirements.'],
+    description: stripHtml(job && job.description ? job.description : 'Open the posting to verify details and apply.'),
+    requirements: Array.isArray(job && job.requirements) ? job.requirements.map(stripHtml).filter(Boolean) : ['Review the posting for role-specific requirements.'],
     domain,
     url,
     saved: Boolean(job && job.saved),
@@ -2908,10 +2907,10 @@ function normalizeStoredJob(job) {
     directCompanyLink: Boolean(applyUrl && !/(linkedin|indeed|glassdoor|ziprecruiter|google|adzuna)/i.test(domain)),
     hiringContact: false,
     sentiment: daysPosted <= 14 ? 'growing' : 'stable',
-    description: job && job.description ? job.description : 'Open the source listing to verify details and apply.',
+    description: job && job.description ? job.description : 'Open the posting to verify details and apply.',
     requirements: Array.isArray(job && job.trust_flags) && job.trust_flags.length
       ? job.trust_flags.map((flag) => String(flag).replace(/_/g, ' '))
-      : ['Review the source listing for role-specific requirements.'],
+      : ['Review the posting for role-specific requirements.'],
     domain,
     url: applyUrl,
     saved: false,
@@ -3256,7 +3255,7 @@ workModeCheckboxes.forEach((checkbox) => checkbox.addEventListener('change', app
 
 function buildSmartTags(job) {
   const tags = [];
-  if (job.directCompanyLink) tags.push(buildSignalTag('green', 'Live Source Link'));
+  if (job.directCompanyLink) tags.push(buildSignalTag('green', 'Active Posting Link'));
   if (job.recentHiringActivity) tags.push(buildSignalTag('green', 'Actively Hiring'));
   if (!job.salaryDisclosed) tags.push(buildSignalTag('amber', 'Salary Not Disclosed'));
   if (job.repostCount > 1) tags.push(buildSignalTag(repostTagTone(job.trustScore), 'Reposted'));
@@ -3304,7 +3303,7 @@ function renderJobs() {
       <div class="jobs-loading-state">
         <span></span>
         <strong>Scanning live listings</strong>
-        <p>We are pulling current openings and keeping source links attached.</p>
+        <p>We are pulling current openings and keeping posting links attached.</p>
       </div>
     `;
     return;
@@ -3343,7 +3342,6 @@ function renderJobs() {
           <div class="job-company-line">
             <span>${escapeHtml(job.company)}</span>
             <span>${escapeHtml(job.location)}</span>
-            ${buildSourceMarkup(job.source)}
           </div>
           <div class="job-meta-line">
             ${resumeChip}
@@ -3462,7 +3460,6 @@ function compactJobForAi(job) {
     company: job.company,
     companyContext: job.companyContext,
     location: job.location,
-    source: job.source,
     jobType: job.jobType,
     workMode: job.workMode,
     salaryDisclosed: job.salaryDisclosed,
@@ -3576,7 +3573,7 @@ function openModal(id) {
       <div class="modal-header-left">
         <p class="modal-report-label">Listing Trust Score Report</p>
         <h2>${job.title}</h2>
-        <p>${job.company} · ${job.location} · ${buildSourceMarkup(job.source)}</p>
+        <p>${escapeHtml(job.company)} - ${escapeHtml(job.location)}</p>
       </div>
       <div class="modal-header-right">
         <button class="btn-bookmark job-modal-bookmark${job.saved ? ' saved' : ''}" type="button" aria-label="${job.saved ? 'Remove bookmark' : 'Save job'}">${bookmarkIcon(job.saved)}</button>
@@ -3589,7 +3586,7 @@ function openModal(id) {
         <p>${job.description}</p>
         <h3>What we found</h3>
         <div class="modal-signal-grid">
-          ${job.directCompanyLink ? buildSignalTag('green', 'Live Source Link') : ''}
+          ${job.directCompanyLink ? buildSignalTag('green', 'Active Posting Link') : ''}
           ${job.recentHiringActivity ? buildSignalTag('green', 'Recent Hiring Activity') : ''}
           ${!job.salaryDisclosed ? buildSignalTag('amber', 'Salary Not Disclosed') : ''}
           ${job.repostCount > 1 ? buildSignalTag(repostTagTone(job.trustScore), 'Reposted') : ''}
@@ -3601,7 +3598,7 @@ function openModal(id) {
       <aside class="modal-sidebar">
         <div class="sidebar-apply-block">
           <a href="${job.url}" target="_blank" rel="noopener" class="btn btn-primary btn-lg sidebar-apply-btn">${buildApplyLabel(job.domain)}</a>
-          <p class="sidebar-apply-note">Opens the live source listing in a new tab</p>
+          <p class="sidebar-apply-note">Opens the posting in a new tab</p>
         </div>
         <div class="intel-card">
           <p class="intel-card-label">Trust Breakdown</p>
@@ -3615,7 +3612,7 @@ function openModal(id) {
           <div class="factor-list">
             ${buildBreakdownRow('Salary transparency', salaryScore)}
             ${buildBreakdownRow('Posting freshness', freshnessScore)}
-            ${buildBreakdownRow('Live source link', directScore)}
+            ${buildBreakdownRow('Posting link', directScore)}
             ${buildBreakdownRow('Recent Hiring Activity', activityScore)}
           </div>
         </div>
@@ -3837,7 +3834,7 @@ function appendAssistantJobCards(jobs) {
       </div>
       <div class="assistant-job-actions">
         <button class="assistant-job-detail" type="button">Details</button>
-        <a href="${escapeHtml(job.url)}" target="_blank" rel="noopener" class="assistant-job-open">Open listing</a>
+        <a href="${escapeHtml(job.url)}" target="_blank" rel="noopener" class="assistant-job-open">Open Posting -></a>
       </div>
     `;
 

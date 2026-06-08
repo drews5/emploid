@@ -111,7 +111,6 @@ function compactJob(job: any) {
     title: job.title,
     company: job.company,
     location: job.location,
-    source: job.source,
     jobType: job.jobType,
     workMode: job.workMode,
     salary: job.salary,

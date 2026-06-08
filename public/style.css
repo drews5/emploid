@@ -3837,6 +3837,7 @@ html.filson-pro-loaded .hero h1 {
   text-overflow: ellipsis;
 }
 .card-source {
+  display: none;
   font-weight: 600;
 }
 .card-tags {

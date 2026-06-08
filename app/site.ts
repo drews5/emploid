@@ -22,7 +22,7 @@ export const PAGE_METADATA = {
   browse: {
     path: '/browse',
     title: 'Find Job | emploid',
-    description: 'Browse active job listings with trust scores, pay filters, direct apply links, and source freshness signals.',
+    description: 'Browse active job listings with trust scores, pay filters, direct apply links, and posting freshness signals.',
   },
   tracker: {
     path: '/tracker',
@@ -32,7 +32,7 @@ export const PAGE_METADATA = {
   about: {
     path: '/about',
     title: 'About and methodology | emploid',
-    description: 'Learn how Emploid evaluates job listing trust, source quality, posting age, salary transparency, and hiring signals.',
+    description: 'Learn how Emploid evaluates job listing trust, posting quality, posting age, salary transparency, and hiring signals.',
   },
   blog: {
     path: '/blog',
