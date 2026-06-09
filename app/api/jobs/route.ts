@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withPublic } from '@/lib/middleware';
+import {
+  analyzeJobSearchQuery,
+  buildSemanticSearchFilter,
+  sanitizeJobSearchInput,
+  scoreSemanticJobMatch,
+} from '@/lib/neural-job-search';
 import { createServiceClient } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
@@ -30,23 +36,11 @@ const JOB_LIST_SELECT = [
 ].join(',');
 
 function sanitizeSearchInput(value: string | null) {
-  return String(value || '')
-    .replace(/[^a-zA-Z0-9\s@.+#/-]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 120);
+  return sanitizeJobSearchInput(value);
 }
 
 function escapeIlike(value: string) {
   return value.replace(/[%_]/g, (match) => `\\${match}`);
-}
-
-function splitSearchTerms(value: string) {
-  return sanitizeSearchInput(value)
-    .toLowerCase()
-    .split(/\s+/)
-    .filter((term) => term.length >= 2)
-    .slice(0, 8);
 }
 
 function ilikePattern(value: string) {
@@ -159,59 +153,7 @@ function applyJobFilters(query: any, searchParams: URLSearchParams) {
   return { query, q };
 }
 
-function buildTextSearchFilter(q: string) {
-  const terms = splitSearchTerms(q);
-  const slugValues = [slugify(q), ...terms.map(slugify)].filter((value) => value && value !== 'unknown');
-  const values = [q, ...terms].filter(Boolean);
-  const clauses = new Set<string>();
-
-  for (const value of values) {
-    const pattern = ilikePattern(value);
-    clauses.add(`title.ilike.${pattern}`);
-    clauses.add(`location.ilike.${pattern}`);
-  }
-
-  for (const value of slugValues) {
-    clauses.add(`canonical_company_key.ilike.${ilikePattern(value)}`);
-  }
-
-  return Array.from(clauses).join(',');
-}
-
-function scoreJobSearchMatch(job: any, q: string) {
-  const normalizedQuery = q.toLowerCase();
-  const terms = splitSearchTerms(q);
-  const company = String(job.companies?.name || job.company_name || '').toLowerCase();
-  const title = String(job.title || '').toLowerCase();
-  const location = String(job.location || '').toLowerCase();
-  const description = stripHtml(job.description || '').toLowerCase();
-  let score = 0;
-
-  if (title === normalizedQuery) score += 120;
-  if (title.startsWith(normalizedQuery)) score += 80;
-  if (title.includes(normalizedQuery)) score += 60;
-  if (company === normalizedQuery) score += 95;
-  if (company.includes(normalizedQuery)) score += 65;
-  if (location.includes(normalizedQuery)) score += 25;
-
-  for (const term of terms) {
-    if (title.includes(term)) score += 18;
-    if (company.includes(term)) score += 14;
-    if (location.includes(term)) score += 7;
-    if (description.includes(term)) score += 3;
-  }
-
-  score += Math.min(25, Math.max(0, Number(job.ghost_score || 0)) / 4);
-  const postedAt = job.posted_at ? new Date(job.posted_at) : null;
-  if (postedAt && !Number.isNaN(postedAt.getTime())) {
-    const daysOld = Math.max(0, Math.round((Date.now() - postedAt.getTime()) / 86400000));
-    score += Math.max(0, 14 - Math.min(14, daysOld / 3));
-  }
-
-  return score;
-}
-
-function buildJobsQuery(supabase: any, searchParams: URLSearchParams, options: { textSearch?: boolean } = {}) {
+function buildJobsQuery(supabase: any, searchParams: URLSearchParams, options: { semanticFilter?: boolean } = {}) {
   const sort = searchParams.get('sort') || 'relevance';
   const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
   const per_page = Math.min(Math.max(1, parseInt(searchParams.get('per_page') || '20')), 50);
@@ -223,15 +165,20 @@ function buildJobsQuery(supabase: any, searchParams: URLSearchParams, options: {
   const filtered = applyJobFilters(query, searchParams);
   query = filtered.query;
   const q = filtered.q;
+  const intent = analyzeJobSearchQuery(q);
   const shouldRankCandidates = Boolean(q && sort !== 'salary' && sort !== 'date_posted');
 
-  if (q) {
-    const broadFilter = buildTextSearchFilter(q);
-    if (options.textSearch === false || !broadFilter) {
-      if (broadFilter) query = query.or(broadFilter);
-    } else {
-      query = query.textSearch('search_vector', q, { config: 'english', type: 'plain' });
-    }
+  if (q && !searchParams.get('remote_type') && intent.remoteTypes.length) {
+    query = query.in('remote_type', intent.remoteTypes);
+  }
+
+  if (q && !searchParams.get('job_type') && intent.jobTypes.length) {
+    query = query.in('job_type', intent.jobTypes);
+  }
+
+  if (q && options.semanticFilter !== false) {
+    const semanticFilter = buildSemanticSearchFilter(intent, { ilikePattern, slugify });
+    if (semanticFilter) query = query.or(semanticFilter);
   }
 
   // Sorting
@@ -256,23 +203,22 @@ function buildJobsQuery(supabase: any, searchParams: URLSearchParams, options: {
   // and paginate in the API. This avoids losing strong matches that happen to
   // sit just outside the first database page.
   const from = shouldRankCandidates ? 0 : (page - 1) * per_page;
-  const candidateLimit = Math.min(240, Math.max(80, per_page * page * 4));
+  const candidateLimit = Math.min(600, Math.max(140, per_page * page * 8));
   const to = shouldRankCandidates ? candidateLimit - 1 : from + per_page - 1;
   query = query.range(from, to);
 
-  return { query, page, per_page, shouldRankCandidates };
+  return { query, page, per_page, shouldRankCandidates, intent };
 }
 
-async function runJobsQuery(supabase: any, searchParams: URLSearchParams, options: { textSearch?: boolean } = {}) {
-  const { query, page, per_page, shouldRankCandidates } = buildJobsQuery(supabase, searchParams, options);
+async function runJobsQuery(supabase: any, searchParams: URLSearchParams, options: { semanticFilter?: boolean } = {}) {
+  const { query, page, per_page, shouldRankCandidates, intent } = buildJobsQuery(supabase, searchParams, options);
   const { data, error, count } = await query;
   if (error) throw error;
-  const q = sanitizeSearchInput(searchParams.get('q'));
   let rows = data || [];
 
   if (shouldRankCandidates) {
     rows = rows
-      .map((job: any) => ({ ...job, _search_rank: scoreJobSearchMatch(job, q) }))
+      .map((job: any) => ({ ...job, _search_rank: scoreSemanticJobMatch(job, intent) }))
       .sort((a: any, b: any) => b._search_rank - a._search_rank);
     const from = (page - 1) * per_page;
     rows = rows.slice(from, from + per_page);
@@ -285,21 +231,37 @@ async function runSuggestionQuery(supabase: any, searchParams: URLSearchParams) 
   const q = sanitizeSearchInput(searchParams.get('q'));
   if (q.length < 2) return [];
 
+  const intent = analyzeJobSearchQuery(q);
+  const semanticFilter = buildSemanticSearchFilter(intent, { ilikePattern, slugify });
   const limit = Math.min(Math.max(1, parseInt(searchParams.get('limit') || '8')), 12);
-  const suggestionQuery = await supabase
+  let suggestionQuery = supabase
     .from('jobs')
     .select('id,title,location,ghost_score,posted_at,companies(name, logo_url, slug)')
-    .eq('is_active', true)
-    .or(buildTextSearchFilter(q))
-    .order('ghost_score', { ascending: false, nullsFirst: false })
-    .limit(Math.max(limit, 12));
+    .eq('is_active', true);
 
-  if (suggestionQuery.error) throw suggestionQuery.error;
-  const rows = suggestionQuery.data || [];
+  if (semanticFilter) suggestionQuery = suggestionQuery.or(semanticFilter);
+  suggestionQuery = suggestionQuery
+    .order('ghost_score', { ascending: false, nullsFirst: false })
+    .limit(Math.max(limit * 3, 24));
+
+  const result = await suggestionQuery;
+  let rows = result.data || [];
+
+  if (result.error) throw result.error;
+  if (rows.length < limit && semanticFilter) {
+    const fallback = await supabase
+      .from('jobs')
+      .select('id,title,location,ghost_score,posted_at,companies(name, logo_url, slug)')
+      .eq('is_active', true)
+      .order('ghost_score', { ascending: false, nullsFirst: false })
+      .limit(Math.max(limit * 4, 32));
+    if (fallback.error) throw fallback.error;
+    rows = [...rows, ...(fallback.data || [])];
+  }
 
   const seen = new Set<string>();
   return rows
-    .map((job: any) => ({ ...job, _search_rank: scoreJobSearchMatch(job, q) }))
+    .map((job: any) => ({ ...job, _search_rank: scoreSemanticJobMatch(job, intent) }))
     .sort((a: any, b: any) => b._search_rank - a._search_rank)
     .filter((job: any) => {
       const key = `${String(job.title || '').toLowerCase()}|${String(job.companies?.name || '').toLowerCase()}`;
@@ -469,7 +431,7 @@ export const GET = withPublic(async (req, { supabase }) => {
   try {
     result = await runJobsQuery(supabase, searchParams);
     if (q && result.data.length < Math.min(result.per_page, JSEARCH_LOW_RESULT_THRESHOLD)) {
-      const broadResult = await runJobsQuery(supabase, searchParams, { textSearch: false });
+      const broadResult = await runJobsQuery(supabase, searchParams, { semanticFilter: false });
       if (broadResult.data.length > result.data.length) {
         result = broadResult;
       }
@@ -477,7 +439,7 @@ export const GET = withPublic(async (req, { supabase }) => {
   } catch (error: any) {
     console.warn('[JOBS_LIST_TEXT_SEARCH_FALLBACK]', error);
     try {
-      result = await runJobsQuery(supabase, searchParams, { textSearch: false });
+      result = await runJobsQuery(supabase, searchParams, { semanticFilter: false });
     } catch (fallbackError: any) {
       console.error('[JOBS_LIST]', fallbackError);
       return NextResponse.json({ error: fallbackError.message || 'Job search failed' }, { status: 500 });
