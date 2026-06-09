@@ -5,6 +5,7 @@ import {
   normalizeGoogleJobQuery,
   parseGoogleJobsHtml,
 } from '@/lib/google-jobs';
+import { createServiceClient } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -281,6 +282,8 @@ async function requestAdzunaJobs(what: string, where: string, maxResults: number
   if (what) params.set('what', what);
   if (where) params.set('where', where);
 
+  await incrementAdzunaUsage();
+
   const response = await fetch(`https://api.adzuna.com/v1/api/jobs/us/search/1?${params.toString()}`, { cache: 'no-store' });
   const text = await response.text();
   let payload: any = {};
@@ -294,6 +297,34 @@ async function requestAdzunaJobs(what: string, where: string, maxResults: number
   if (!response.ok) throw new Error(payload.error || payload.display || 'Adzuna search failed.');
 
   return Array.isArray(payload.results) ? payload.results : [];
+}
+
+async function incrementAdzunaUsage() {
+  if (
+    !(process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL) ||
+    !(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY)
+  ) return;
+
+  try {
+    const service = createServiceClient();
+    const today = new Date().toISOString().slice(0, 10);
+    const { data: usage } = await service
+      .from('adzuna_usage')
+      .select('usage_date, request_count')
+      .eq('usage_date', today)
+      .maybeSingle();
+    const currentCount = Number(usage?.request_count || 0);
+
+    await service
+      .from('adzuna_usage')
+      .upsert({
+        usage_date: today,
+        request_count: currentCount + 1,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'usage_date' });
+  } catch (error) {
+    console.warn('[ADZUNA_USAGE]', error);
+  }
 }
 
 async function fetchAdzunaJobs(query: string, maxResults: number) {
