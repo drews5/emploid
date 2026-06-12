@@ -251,7 +251,6 @@ export function scoreSemanticJobMatch(job: any, intent: JobSearchIntent) {
 
 export function buildSemanticSearchFilter(intent: JobSearchIntent, helpers: {
   ilikePattern: (value: string) => string;
-  slugify: (value: string) => string;
 }) {
   const clauses = new Set<string>();
   const terms = intent.candidateTerms
@@ -262,13 +261,6 @@ export function buildSemanticSearchFilter(intent: JobSearchIntent, helpers: {
     const pattern = helpers.ilikePattern(term);
     clauses.add(`title.ilike.${pattern}`);
     clauses.add(`location.ilike.${pattern}`);
-  }
-
-  for (const term of [intent.raw, ...intent.importantTerms].filter(Boolean).slice(0, 8)) {
-    const slug = helpers.slugify(term);
-    if (slug && slug !== 'unknown') {
-      clauses.add(`canonical_company_key.ilike.${helpers.ilikePattern(slug)}`);
-    }
   }
 
   return Array.from(clauses).join(',');

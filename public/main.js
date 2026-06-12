@@ -3158,16 +3158,26 @@ async function runLiveJobSearch(rawQuery) {
   setLiveSearchLoading(true, query);
 
   try {
-    const response = await fetch(`/api/jobs?q=${encodeURIComponent(apiQuery)}&per_page=30&sort=trust`, { cache: 'no-store' });
-    const payload = await response.json().catch(() => ({}));
+    let response = await fetch(`/api/jobs?q=${encodeURIComponent(apiQuery)}&per_page=30&sort=trust`, { cache: 'no-store' });
+    let payload = await response.json().catch(() => ({}));
+    let source = 'database';
+    let normalizeSearchResult = normalizeStoredJob;
+
+    if (!response.ok) {
+      response = await fetch(`/api/google-jobs?q=${encodeURIComponent(apiQuery)}&max=30`, { cache: 'no-store' });
+      payload = await response.json().catch(() => ({}));
+      source = payload && payload.meta && payload.meta.source ? payload.meta.source : 'live';
+      normalizeSearchResult = normalizeLiveJob;
+    }
+
     if (!response.ok) throw new Error(payload.error || 'Live job search failed.');
 
-    allJobs = Array.isArray(payload.data) ? payload.data.map(normalizeStoredJob).filter((job) => job.url) : [];
+    allJobs = Array.isArray(payload.data) ? payload.data.map(normalizeSearchResult).filter((job) => job.url) : [];
     liveJobSearchState = {
       hasSearched: true,
       isLoading: false,
       query,
-      source: 'database',
+      source,
       error: '',
     };
     applyFilters();

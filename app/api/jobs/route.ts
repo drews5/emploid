@@ -21,17 +21,12 @@ const JOB_LIST_SELECT = [
   'salary_min',
   'salary_max',
   'source',
-  'source_provider',
-  'external_source',
   'source_url',
   'apply_url',
   'job_type',
   'posted_at',
   'first_seen_at',
-  'trust_flags',
   'ghost_score',
-  'company_trust_score',
-  'canonical_company_key',
   'companies(name, logo_url, slug, total_active_listings, avg_ghost_score)',
 ].join(',');
 
@@ -177,7 +172,7 @@ function buildJobsQuery(supabase: any, searchParams: URLSearchParams, options: {
   }
 
   if (q && options.semanticFilter !== false) {
-    const semanticFilter = buildSemanticSearchFilter(intent, { ilikePattern, slugify });
+    const semanticFilter = buildSemanticSearchFilter(intent, { ilikePattern });
     if (semanticFilter) query = query.or(semanticFilter);
   }
 
@@ -232,7 +227,7 @@ async function runSuggestionQuery(supabase: any, searchParams: URLSearchParams) 
   if (q.length < 2) return [];
 
   const intent = analyzeJobSearchQuery(q);
-  const semanticFilter = buildSemanticSearchFilter(intent, { ilikePattern, slugify });
+  const semanticFilter = buildSemanticSearchFilter(intent, { ilikePattern });
   const limit = Math.min(Math.max(1, parseInt(searchParams.get('limit') || '8')), 12);
   let suggestionQuery = supabase
     .from('jobs')

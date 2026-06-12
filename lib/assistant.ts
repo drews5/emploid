@@ -40,13 +40,14 @@ interface AssistantCompletions {
   create(args: CreateChatCompletionArgs): Promise<ChatCompletionResponse>;
 }
 
+const LEGACY_API_KEY_NAME = ['G', 'ROQ_API_KEY'].join('');
+const LEGACY_MODEL_NAME = ['G', 'ROQ_MODEL'].join('');
+const LEGACY_BASE_URL = ['https://api', ['g', 'roq'].join(''), 'com/openai/v1'].join('.');
+
 function getAssistantConfig() {
-  const legacyApiKeyName = ['G', 'ROQ_API_KEY'].join('');
-  const legacyModelName = ['G', 'ROQ_MODEL'].join('');
-  const legacyBaseUrl = ['https://api', ['g', 'roq'].join(''), 'com/openai/v1'].join('.');
-  const apiKey = process.env.ASSISTANT_API_KEY || process.env[legacyApiKeyName];
-  const baseUrl = process.env.ASSISTANT_API_BASE_URL || legacyBaseUrl;
-  const model = process.env.ASSISTANT_MODEL || process.env[legacyModelName] || 'llama-3.1-8b-instant';
+  const apiKey = process.env.ASSISTANT_API_KEY || process.env[LEGACY_API_KEY_NAME];
+  const baseUrl = process.env.ASSISTANT_API_BASE_URL || LEGACY_BASE_URL;
+  const model = ASSISTANT_MODEL;
 
   if (!apiKey || !baseUrl) {
     throw new Error('Assistant is not configured.');
@@ -139,7 +140,10 @@ export function getAssistantClient() {
 
 export const assistant = { chat };
 
-export const ASSISTANT_MODEL = process.env.ASSISTANT_MODEL || 'llama-3.1-8b-instant';
+export const ASSISTANT_MODEL =
+  process.env.ASSISTANT_MODEL ||
+  process.env[LEGACY_MODEL_NAME] ||
+  'llama-3.1-8b-instant';
 
 export function parseAssistantJson<T>(content: string | null | undefined, fallback: T): T {
   if (!content) return fallback;

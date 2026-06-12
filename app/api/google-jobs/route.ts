@@ -496,14 +496,17 @@ export async function GET(req: NextRequest) {
     if (merged.length >= maxResults) break;
   }
 
+  const fallbackJobs = merged.length ? [] : getPreparsedJobs(q, maxResults);
+  const jobs = merged.length ? merged : fallbackJobs;
+
   return NextResponse.json({
-    data: merged,
+    data: jobs,
     meta: {
-      source: 'live',
-      total: merged.length,
+      source: merged.length ? 'live' : 'preparsed',
+      total: jobs.length,
       query: normalizeGoogleJobQuery(q),
       attempts: [...providerAttempts, ...attempts],
-      blocked: attempts.some((attempt) => attempt.blocked) && merged.length === 0,
+      blocked: attempts.some((attempt) => attempt.blocked) && jobs.length === 0,
     },
   });
 }

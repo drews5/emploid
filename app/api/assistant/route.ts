@@ -94,15 +94,20 @@ function jobSearchQuery(input: {
 async function searchLiveJobs(req: Request, query: string) {
   if (!query) return [];
 
-  const searchUrl = new URL('/api/google-jobs', req.url);
-  searchUrl.searchParams.set('q', query);
-  searchUrl.searchParams.set('max', '8');
+  try {
+    const searchUrl = new URL('/api/google-jobs', req.url);
+    searchUrl.searchParams.set('q', query);
+    searchUrl.searchParams.set('max', '8');
 
-  const response = await fetch(searchUrl, { cache: 'no-store' });
-  const payload = await response.json().catch(() => null);
-  if (!response.ok || !payload || !Array.isArray(payload.data)) return [];
+    const response = await fetch(searchUrl, { cache: 'no-store' });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok || !payload || !Array.isArray(payload.data)) return [];
 
-  return payload.data.slice(0, 8);
+    return payload.data.slice(0, 8);
+  } catch (error) {
+    console.warn('[ASSISTANT_JOB_SEARCH]', error);
+    return [];
+  }
 }
 
 function compactJob(job: any) {
