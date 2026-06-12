@@ -131,6 +131,29 @@ function compactJob(job: any) {
   };
 }
 
+function fallbackAssistantDecision(prompt: string, availableJobs: any[], shouldSearch: boolean): AssistantDecision {
+  const recommendedJobs = shouldSearch ? availableJobs.slice(0, 4) : [];
+
+  if (recommendedJobs.length) {
+    return {
+      message: `I found ${recommendedJobs.length} relevant job${recommendedJobs.length === 1 ? '' : 's'} for "${prompt.trim()}". Review the matches below and open a posting to verify the latest details.`,
+      recommendedJobIds: recommendedJobs.map((job) => String(job.id)),
+    };
+  }
+
+  if (shouldSearch) {
+    return {
+      message: `I could not find a strong match for "${prompt.trim()}". Try a broader role title, company name, skill, or location.`,
+      recommendedJobIds: [],
+    };
+  }
+
+  return {
+    message: 'emplAID is temporarily using limited mode. Ask me to find a role, company, skill, or location and I can still search current job listings.',
+    recommendedJobIds: [],
+  };
+}
+
 export async function POST(req: Request) {
   const parsed = AssistantRequest.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
@@ -148,14 +171,18 @@ export async function POST(req: Request) {
   const encoder = new TextEncoder();
   const body = new ReadableStream({
     async start(controller) {
+      let prompt = latestUserMessage(parsed.data.messages);
+      let shouldSearch = false;
+      let searchQuery = '';
+      let availableJobs: any[] = parsed.data.jobs || [];
+
       try {
-        const prompt = latestUserMessage(parsed.data.messages);
-        const shouldSearch = shouldSearchJobs({
+        shouldSearch = shouldSearchJobs({
           prompt,
           currentPage: parsed.data.currentPage,
           filters: parsed.data.filters,
         });
-        const searchQuery = shouldSearch
+        searchQuery = shouldSearch
           ? jobSearchQuery({
               prompt,
               filters: parsed.data.filters,
@@ -164,7 +191,7 @@ export async function POST(req: Request) {
           : '';
         const liveJobs = shouldSearch ? await searchLiveJobs(req, searchQuery) : [];
         const suppliedJobs = parsed.data.jobs || [];
-        const availableJobs = liveJobs.length ? liveJobs : suppliedJobs;
+        availableJobs = liveJobs.length ? liveJobs : suppliedJobs;
 
         const completion = await assistant.chat.completions.create({
           model: ASSISTANT_MODEL,
@@ -226,7 +253,13 @@ export async function POST(req: Request) {
         controller.close();
       } catch (error) {
         console.error('[ASSISTANT_ERROR]', error);
-        controller.enqueue(encoder.encode(sse({ error: 'The assistant could not answer right now.' })));
+        const fallback = fallbackAssistantDecision(prompt, availableJobs, shouldSearch);
+        const availableById = new Map(availableJobs.map((job: any) => [String(job.id), job]));
+        const recommendedJobs = fallback.recommendedJobIds
+          .map((id) => availableById.get(id))
+          .filter(Boolean);
+        controller.enqueue(encoder.encode(sse({ delta: fallback.message })));
+        controller.enqueue(encoder.encode(sse({ done: true, jobs: recommendedJobs, searchedLiveJobs: shouldSearch, searchQuery })));
         controller.close();
       }
     },
