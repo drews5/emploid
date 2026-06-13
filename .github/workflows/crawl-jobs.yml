@@ -2,8 +2,8 @@ name: Crawl and score jobs
 
 on:
   schedule:
-    - cron: "17 */6 * * *"
-    - cron: "47 7 * * *"
+    - cron: "0 8 * * *"
+      timezone: "America/Chicago"
   workflow_dispatch:
 
 concurrency:
@@ -17,6 +17,7 @@ jobs:
     timeout-minutes: 45
     strategy:
       fail-fast: false
+      max-parallel: 2
       matrix:
         provider: [greenhouse, lever, ashby, smartrecruiters, workday]
     env:
@@ -24,8 +25,8 @@ jobs:
       PYTHONUNBUFFERED: "1"
       ATS_DISCOVERY_ENABLED: "true"
       ATS_DISCOVERY_USE_LOCAL_CATALOG: "true"
-      ATS_DISCOVERY_PAGE_LIMIT: "300"
-      ATS_DISCOVERY_LIMIT: "1000"
+      ATS_DISCOVERY_PAGE_LIMIT: "120"
+      ATS_DISCOVERY_LIMIT: "500"
       LEVER_PAGE_SIZE: "100"
       LEVER_MAX_PAGES: "30"
       SMARTRECRUITERS_PAGE_SIZE: "100"
@@ -83,7 +84,6 @@ jobs:
     name: Crawl aggregator searches
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '47 7 * * *'
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
       PYTHONUNBUFFERED: "1"
