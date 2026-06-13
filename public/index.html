@@ -737,12 +737,12 @@
               <input id="jobs-search-query" type="text" placeholder="Role, company, skill..." autocomplete="off" />
               <span class="dirA-search-divider"></span>
               <span class="dirA-search-loc" id="jobs-location-picker">
-                <input type="hidden" id="jobs-search-location" value="Minneapolis, MN" />
+                <input type="hidden" id="jobs-search-location" value="anywhere" />
                 <button class="location-trigger" id="jobs-location-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
                   <svg class="location-trigger-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                   <span class="location-trigger-copy">
-                    <span class="location-trigger-label" id="jobs-location-label">Minneapolis, ...</span>
-                    <span class="location-trigger-hint" id="jobs-location-hint">Precise location</span>
+                    <span class="location-trigger-label" id="jobs-location-label">Anywhere</span>
+                    <span class="location-trigger-hint" id="jobs-location-hint">No location preference</span>
                   </span>
                   <span class="location-distance-pill" id="jobs-distance-value">30 mi</span>
                   <svg class="location-trigger-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -754,9 +754,9 @@
                     </span>
                     <span><strong id="jobs-ip-location-label">Finding your area</strong><small>Approximate from IP</small></span>
                   </button>
-                  <button class="location-option is-selected" type="button" data-location-option="preset" data-value="remote" role="option" aria-selected="true"><span class="location-option-dot"></span><span><strong>Remote</strong><small>Work from home roles</small></span></button>
+                  <button class="location-option" type="button" data-location-option="preset" data-value="remote" role="option" aria-selected="false"><span class="location-option-dot"></span><span><strong>Remote</strong><small>Work from home roles</small></span></button>
                   <button class="location-option" type="button" data-location-option="preset" data-value="hybrid" role="option"><span class="location-option-dot"></span><span><strong>Hybrid</strong><small>Mix office and home</small></span></button>
-                  <button class="location-option" type="button" data-location-option="preset" data-value="anywhere" role="option"><span class="location-option-dot"></span><span><strong>Anywhere</strong><small>No location preference</small></span></button>
+                  <button class="location-option is-selected" type="button" data-location-option="preset" data-value="anywhere" role="option" aria-selected="true"><span class="location-option-dot"></span><span><strong>Anywhere</strong><small>No location preference</small></span></button>
                   <button class="location-option" type="button" data-location-option="precise" role="option"><span class="location-option-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v3"></path><path d="M12 19v3"></path><path d="M2 12h3"></path><path d="M19 12h3"></path><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="2"></circle></svg></span><span><strong>Use precise location</strong><small>Requires browser permission</small></span></button>
                   <label class="location-specific" for="jobs-location-custom">
                     <span>Specific location</span>

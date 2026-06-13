@@ -3058,7 +3058,7 @@ function requestPreciseLocation() {
 function initLocationPicker() {
   if (!jobsLocationPicker || !jobsLocationInput || !jobsLocationTrigger || !jobsLocationMenu) return;
 
-  selectLocation(jobsLocationInput.value || 'remote');
+  selectLocation(jobsLocationInput.value || 'anywhere');
   updateDistanceLabels();
   fetchIpLocationSuggestion();
 
