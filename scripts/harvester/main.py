@@ -129,7 +129,7 @@ def _env_bool(name: str, default: bool) -> bool:
 
 
 def run(include_jsearch: bool = False, only_provider: str | None = None) -> dict:
-    stats = {"seen": 0, "new": 0, "updated": 0, "deactivated": 0, "errors": 0, "notes": ""}
+    stats = {"seen": 0, "new": 0, "updated": 0, "unchanged": 0, "deactivated": 0, "errors": 0, "notes": ""}
     run_source = only_provider or ("all+jsearch" if include_jsearch else "all")
     run_id = db.create_crawl_run(run_source)
 
@@ -145,9 +145,16 @@ def run(include_jsearch: bool = False, only_provider: str | None = None) -> dict
             print(f"[JSEARCH] failed: {exc}", file=sys.stderr)
 
     stats["seen"] = len(raw_jobs)
-    existing = db.fetch_existing_jobs()
+    existing = db.fetch_existing_jobs(provider=only_provider)
     history = trust.build_history([*existing, *raw_jobs])
     company_score_map = trust.company_scores(existing, raw_jobs)
+    existing_by_provider_id = {
+        (row.get("source_provider"), str(row.get("source_job_id"))): row
+        for row in existing
+        if row.get("source_provider") and row.get("source_job_id") is not None
+    }
+    existing_by_url = {row.get("source_url"): row for row in existing if row.get("source_url")}
+    company_cache: dict[str, dict] = {}
 
     for job in raw_jobs:
         score_data = company_score_map.get(job.get("canonical_company_key"), {"trust_score": 0.60})
@@ -158,8 +165,15 @@ def run(include_jsearch: bool = False, only_provider: str | None = None) -> dict
         job["company_trust_score"] = company_score
 
         try:
-            company = db.resolve_company(job, company_score_map)
-            result = db.upsert_job(job, company)
+            company_key = job.get("canonical_company_key") or job.get("company_slug") or job.get("company_name")
+            company = company_cache.get(company_key)
+            if not company:
+                company = db.resolve_company(job, company_score_map)
+                company_cache[company_key] = company
+            existing_job = existing_by_provider_id.get((job.get("source_provider"), str(job.get("source_job_id"))))
+            if not existing_job and job.get("source_url"):
+                existing_job = existing_by_url.get(job.get("source_url"))
+            result = db.upsert_job(job, company, existing_job)
             stats[result] += 1
         except Exception as exc:
             stats["errors"] += 1
@@ -171,7 +185,11 @@ def run(include_jsearch: bool = False, only_provider: str | None = None) -> dict
         if not matching:
             continue
         try:
-            company = db.resolve_company(matching, company_score_map)
+            company_key = matching.get("canonical_company_key") or matching.get("company_slug") or matching.get("company_name")
+            company = company_cache.get(company_key)
+            if not company:
+                company = db.resolve_company(matching, company_score_map)
+                company_cache[company_key] = company
             stats["deactivated"] += db.deactivate_missing_ats(provider, company["id"], seen_ids)
         except Exception as exc:
             stats["errors"] += 1
@@ -185,7 +203,7 @@ def run(include_jsearch: bool = False, only_provider: str | None = None) -> dict
             print(f"[JSEARCH_EXPIRE] failed: {exc}", file=sys.stderr)
 
     db.finish_crawl_run(run_id, stats)
-    print(f"[DONE] seen={stats['seen']} new={stats['new']} updated={stats['updated']} deactivated={stats['deactivated']} errors={stats['errors']}")
+    print(f"[DONE] seen={stats['seen']} new={stats['new']} updated={stats['updated']} unchanged={stats['unchanged']} deactivated={stats['deactivated']} errors={stats['errors']}")
     return stats
 
 

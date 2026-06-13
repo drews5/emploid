@@ -198,7 +198,7 @@ function buildJobsQuery(supabase: any, searchParams: URLSearchParams, options: {
   // and paginate in the API. This avoids losing strong matches that happen to
   // sit just outside the first database page.
   const from = shouldRankCandidates ? 0 : (page - 1) * per_page;
-  const candidateLimit = Math.min(600, Math.max(140, per_page * page * 8));
+  const candidateLimit = Math.min(240, Math.max(100, per_page * page * 5));
   const to = shouldRankCandidates ? candidateLimit - 1 : from + per_page - 1;
   query = query.range(from, to);
 
@@ -394,7 +394,6 @@ async function upsertJSearchJobs(query: string) {
       last_seen_at: new Date().toISOString(),
       is_active: true,
       description_hash: hashDescription(description),
-      raw: job,
     };
 
     if (existing.data?.id) {
