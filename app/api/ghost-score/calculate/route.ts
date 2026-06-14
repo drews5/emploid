@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase-server';
+import { createServiceClient } from '@/lib/appwrite-server';
 import { calculateGhostScore } from '@/lib/ghost-score';
 import { JobIdSchema } from '@/lib/validations';
 import { timingSafeEqual } from 'crypto';

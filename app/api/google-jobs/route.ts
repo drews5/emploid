@@ -5,7 +5,7 @@ import {
   normalizeGoogleJobQuery,
   parseGoogleJobsHtml,
 } from '@/lib/google-jobs';
-import { createServiceClient } from '@/lib/supabase-server';
+import { createServiceClient } from '@/lib/appwrite-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -301,8 +301,8 @@ async function requestAdzunaJobs(what: string, where: string, maxResults: number
 
 async function incrementAdzunaUsage() {
   if (
-    !(process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL) ||
-    !(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY)
+    !process.env.APPWRITE_ENDPOINT ||
+    !process.env.APPWRITE_API_KEY
   ) return;
 
   try {

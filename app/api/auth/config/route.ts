@@ -9,7 +9,7 @@ export async function GET() {
     googleClientId,
     googleConfigured: Boolean(googleClientId),
     accountServiceConfigured: Boolean(
-      process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      process.env.APPWRITE_ENDPOINT && process.env.APPWRITE_PROJECT_ID && process.env.APPWRITE_API_KEY
     ),
   })
 }

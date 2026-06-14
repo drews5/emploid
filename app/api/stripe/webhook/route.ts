@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase-server';
+import { createServiceClient } from '@/lib/appwrite-server';
 import Stripe from 'stripe';
 
 export async function POST(req: NextRequest) {
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
-      const userId = session.metadata?.supabase_user_id;
+      const userId = session.metadata?.appwrite_user_id || session.metadata?.supabase_user_id;
 
       if (userId) {
         const { error } = await supabase

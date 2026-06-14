@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase-server';
-import type { SupabaseClient, User } from '@supabase/supabase-js';
+import { createClient, type AppwriteBackendClient, type AppwriteUser } from '@/lib/appwrite-server';
 
 /**
  * Wraps an API handler with authentication.
@@ -9,7 +8,7 @@ import type { SupabaseClient, User } from '@supabase/supabase-js';
 export function withAuth(
   handler: (
     req: NextRequest,
-    context: { user: User; supabase: SupabaseClient; params?: any }
+    context: { user: NonNullable<AppwriteUser>; supabase: AppwriteBackendClient; params?: any }
   ) => Promise<NextResponse>
 ) {
   return async (req: NextRequest, routeContext?: { params?: any }) => {
@@ -40,13 +39,13 @@ export function withAuth(
 }
 
 /**
- * Wraps a public API handler with error boundaries and a Supabase client.
+ * Wraps a public API handler with error boundaries and the Appwrite backend.
  * No auth required but provides consistent error handling.
  */
 export function withPublic(
   handler: (
     req: NextRequest,
-    context: { supabase: SupabaseClient; params?: any }
+    context: { supabase: AppwriteBackendClient; params?: any }
   ) => Promise<NextResponse>
 ) {
   return async (req: NextRequest, routeContext?: { params?: any }) => {

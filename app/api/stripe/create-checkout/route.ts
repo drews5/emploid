@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase-server';
+import { createClient } from '@/lib/appwrite-server';
 import Stripe from 'stripe';
 
 export async function POST(req: NextRequest) {
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email,
-        metadata: { supabase_user_id: user.id },
+        metadata: { appwrite_user_id: user.id },
       });
       customerId = customer.id;
 
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${origin}/?checkout=success`,
       cancel_url: `${origin}/?checkout=cancel`,
-      metadata: { supabase_user_id: user.id },
+      metadata: { appwrite_user_id: user.id },
     });
 
     return NextResponse.json({ url: session.url }, { status: 200 });

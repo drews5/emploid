@@ -6,7 +6,7 @@ import {
   sanitizeJobSearchInput,
   scoreSemanticJobMatch,
 } from '@/lib/neural-job-search';
-import { createServiceClient } from '@/lib/supabase-server';
+import { createServiceClient } from '@/lib/appwrite-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -321,7 +321,7 @@ async function fetchJSearch(query: string) {
 }
 
 async function upsertJSearchJobs(query: string) {
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_SERVICE_KEY) {
+  if (!process.env.APPWRITE_API_KEY) {
     return { attempted: false, inserted: 0 };
   }
 

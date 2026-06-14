@@ -1,174 +1,68 @@
-import sys
+import hashlib
 import json
-import os
-import re
-import unicodedata
-from datetime import datetime, timezone
-from supabase import create_client, Client
+import sys
 
-url: str = os.environ.get("SUPABASE_URL", "http://localhost:54321")
-key: str = os.environ.get("SUPABASE_SERVICE_KEY", "")
-if not key:
-    print("[INGEST] FATAL: SUPABASE_SERVICE_KEY is not set.", file=sys.stderr)
-    sys.exit(1)
-
-supabase: Client = create_client(url, key)
+from harvester.db import resolve_company, upsert_job
+from harvester.utils import slugify
 
 
-def slugify(text: str) -> str:
-    """Generate a URL-safe slug from arbitrary text.
-    Handles unicode, special chars, ampersands, apostrophes, etc."""
-    # Normalize unicode characters
-    text = unicodedata.normalize("NFKD", text)
-    # Replace common special patterns
-    text = text.replace("&", "and")
-    text = text.replace("'", "")
-    text = text.replace("'", "")
-    # Convert to ASCII, lowercase
-    text = text.encode("ascii", "ignore").decode("ascii").lower()
-    # Replace any non-alphanumeric chars with hyphens
-    text = re.sub(r"[^a-z0-9]+", "-", text)
-    # Strip leading/trailing hyphens and collapse multiples
-    text = re.sub(r"-+", "-", text).strip("-")
-    return text or "unknown"
-
-
-# Fields that the scraper is allowed to set/overwrite.
-# This prevents nulling out existing data when the scraper omits a field.
-ALLOWED_UPDATE_FIELDS = {
-    "title", "location", "remote_type", "salary_min", "salary_max",
-    "salary_is_estimate", "description", "source", "source_url",
-    "apply_url", "experience_level", "job_type", "posted_at",
-    "last_seen_at", "is_active",
-}
-
-
-def ingest():
-    """Read normalized job JSON from stdin (one per line) and upsert into Supabase."""
+def ingest() -> None:
+    """Read normalized job JSON from stdin and upsert it into Appwrite."""
     print("[INGEST] Listening on stdin for normalized jobs...", file=sys.stderr)
-    inserted = 0
-    updated = 0
-    skipped = 0
-    errors = 0
+    stats = {"new": 0, "updated": 0, "unchanged": 0, "skipped": 0, "errors": 0}
 
     for line in sys.stdin:
         line = line.strip()
         if not line:
             continue
         try:
-            job_data = json.loads(line)
-
-            # ── 1. Upsert company ──────────────────────────
-            c_name = job_data.get("company")
-            if not c_name:
-                print(f"[INGEST] WARN: Skipping job with no company name", file=sys.stderr)
-                skipped += 1
+            source = json.loads(line)
+            company_name = str(source.get("company") or "").strip()
+            title = str(source.get("title") or "").strip()
+            apply_url = source.get("apply_url") or source.get("source_url")
+            if not company_name or not title or not apply_url:
+                stats["skipped"] += 1
                 continue
 
-            c_slug = slugify(c_name)
+            company_slug = slugify(company_name)
+            company = resolve_company({
+                "company_name": company_name,
+                "company_slug": company_slug,
+                "canonical_company_key": company_slug,
+            })
+            description = str(source.get("description") or "")
+            source_url = source.get("source_url") or apply_url
+            normalized = {
+                "title": title,
+                "company_name": company_name,
+                "company_slug": company_slug,
+                "canonical_company_key": company_slug,
+                "location": source.get("location"),
+                "remote_type": source.get("remote_type"),
+                "description_html": description,
+                "source": source.get("source") or "company_direct",
+                "source_provider": source.get("source_provider") or "legacy_ingest",
+                "source_job_id": source.get("source_job_id") or hashlib.sha256(source_url.encode()).hexdigest()[:32],
+                "source_url": source_url,
+                "apply_url": apply_url,
+                "employment_type": source.get("job_type"),
+                "posted_at": source.get("posted_at"),
+                "description_hash": hashlib.sha256(description.encode()).hexdigest()[:16] if description else None,
+                "ghost_score": source.get("ghost_score"),
+                "trust_flags": [],
+                "company_trust_score": company.get("trust_score"),
+            }
+            outcome = upsert_job(normalized, company)
+            stats[outcome] = stats.get(outcome, 0) + 1
+            print(f"[INGEST] {outcome.title()}: {title} @ {company_name}", file=sys.stderr)
+        except json.JSONDecodeError as exc:
+            print(f"[INGEST] Invalid JSON: {exc}", file=sys.stderr)
+            stats["errors"] += 1
+        except Exception as exc:
+            print(f"[INGEST] ERROR: {exc}", file=sys.stderr)
+            stats["errors"] += 1
 
-            comp_resp = (
-                supabase.table("companies")
-                .upsert({"name": c_name, "slug": c_slug}, on_conflict="slug")
-                .execute()
-            )
-
-            comp_id = None
-            if comp_resp.data and len(comp_resp.data) > 0:
-                comp_id = comp_resp.data[0]["id"]
-            else:
-                comp_query = (
-                    supabase.table("companies")
-                    .select("id")
-                    .eq("slug", c_slug)
-                    .execute()
-                )
-                if comp_query.data:
-                    comp_id = comp_query.data[0]["id"]
-
-            if not comp_id:
-                print(f"[INGEST] ERROR: Failed to resolve company ID for '{c_name}'", file=sys.stderr)
-                errors += 1
-                continue
-
-            # ── 2. Prepare job record ──────────────────────
-            job_data["company_id"] = comp_id
-            # Remove derived field used only for company resolution
-            job_data.pop("company", None)
-
-            # ── 3. Validate required fields ────────────────
-            if not job_data.get("title"):
-                print(f"[INGEST] WARN: Skipping job with no title at {c_name}", file=sys.stderr)
-                skipped += 1
-                continue
-
-            if not job_data.get("apply_url"):
-                print(f"[INGEST] WARN: Skipping job with no apply_url: {job_data.get('title')}", file=sys.stderr)
-                skipped += 1
-                continue
-
-            # ── 4. Dedup: prefer source_url, fallback to title+company+location+source
-            existing = None
-            source_url = job_data.get("source_url", "").strip()
-
-            if source_url:
-                match_resp = (
-                    supabase.table("jobs")
-                    .select("id, repost_count, source_url")
-                    .eq("source_url", source_url)
-                    .execute()
-                )
-                if match_resp.data:
-                    existing = match_resp.data[0]
-
-            if not existing:
-                # More specific dedup: include source to avoid cross-board false positives
-                dedup_query = (
-                    supabase.table("jobs")
-                    .select("id, repost_count")
-                    .eq("company_id", comp_id)
-                    .eq("title", job_data.get("title", ""))
-                    .eq("source", job_data.get("source", ""))
-                )
-                loc = job_data.get("location", "")
-                if loc:
-                    dedup_query = dedup_query.eq("location", loc)
-
-                match_resp = dedup_query.execute()
-                if match_resp.data:
-                    existing = match_resp.data[0]
-
-            now_iso = datetime.now(timezone.utc).isoformat()
-
-            if existing:
-                # Only update fields that are actually present and non-empty
-                safe_update = {"last_seen_at": now_iso}
-                for field in ALLOWED_UPDATE_FIELDS:
-                    if field in job_data and job_data[field] is not None and job_data[field] != "":
-                        safe_update[field] = job_data[field]
-
-                supabase.table("jobs").update(safe_update).eq("id", existing["id"]).execute()
-                updated += 1
-                print(f"[INGEST] Updated: {job_data.get('title')} @ {c_name}", file=sys.stderr)
-            else:
-                # Insert new job
-                job_data["first_seen_at"] = now_iso
-                job_data["last_seen_at"] = now_iso
-                new_job = supabase.table("jobs").insert(job_data).execute()
-                inserted += 1
-                print(f"[INGEST] Inserted: {job_data.get('title')} @ {c_name}", file=sys.stderr)
-
-        except json.JSONDecodeError as e:
-            print(f"[INGEST] ERROR: Invalid JSON: {e}", file=sys.stderr)
-            errors += 1
-        except Exception as e:
-            print(f"[INGEST] ERROR: {e}", file=sys.stderr)
-            errors += 1
-
-    print(
-        f"[INGEST] Done. Inserted: {inserted}, Updated: {updated}, Skipped: {skipped}, Errors: {errors}",
-        file=sys.stderr,
-    )
+    print(f"[INGEST] Done: {stats}", file=sys.stderr)
 
 
 if __name__ == "__main__":

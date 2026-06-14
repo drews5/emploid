@@ -40,7 +40,7 @@ echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] Scraping complete. Triggering ghost score
 
 # ── Trigger batch ghost score recalculation ────────────
 # Score all newly ingested jobs that don't have a ghost score yet
-API_BASE="${NEXT_PUBLIC_SUPABASE_URL:-http://localhost:3000}"
+API_BASE="${API_BASE_URL:-http://localhost:3000}"
 INTERNAL_KEY="${INTERNAL_API_KEY:-}"
 
 if [ -n "$INTERNAL_KEY" ]; then

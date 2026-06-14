@@ -208,7 +208,7 @@ def run(include_jsearch: bool = False, only_provider: str | None = None) -> dict
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Harvest ATS/JSearch jobs into Supabase and score trust inline.")
+    parser = argparse.ArgumentParser(description="Harvest ATS/JSearch jobs into Appwrite and score trust inline.")
     parser.add_argument("--include-jsearch", action="store_true", help="Run configured JSearch queries. Use sparingly on low API quotas.")
     parser.add_argument("--provider", help="Only crawl one provider, e.g. greenhouse or jsearch.")
     args = parser.parse_args()

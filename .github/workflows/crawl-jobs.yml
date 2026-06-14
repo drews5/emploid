@@ -33,10 +33,10 @@ jobs:
       SMARTRECRUITERS_MAX_PAGES: "50"
       WORKDAY_PAGE_SIZE: "100"
       WORKDAY_MAX_JOBS_PER_BOARD: "500"
-      SUPABASE_URL_SECRET: ${{ secrets.SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_URL_SECRET: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      SUPABASE_SERVICE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_KEY }}
-      SUPABASE_SERVICE_ROLE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      APPWRITE_ENDPOINT: "https://nyc.cloud.appwrite.io/v1"
+      APPWRITE_PROJECT_ID: "6a2f1924002c0b611bb1"
+      APPWRITE_DATABASE_ID: "emploid"
+      APPWRITE_API_KEY: ${{ secrets.APPWRITE_API_KEY }}
       RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
     steps:
       - uses: actions/checkout@v4
@@ -55,29 +55,12 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ -n "${SUPABASE_URL_SECRET}" ]]; then
-            echo "SUPABASE_URL=${SUPABASE_URL_SECRET}" >> "$GITHUB_ENV"
-            echo "SUPABASE_URL configured: yes"
-          elif [[ -n "${NEXT_PUBLIC_SUPABASE_URL_SECRET}" ]]; then
-            echo "SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL_SECRET}" >> "$GITHUB_ENV"
-            echo "NEXT_PUBLIC_SUPABASE_URL configured: yes"
-          else
-            echo "::error::Missing Supabase URL secret. Add SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL in repository Actions secrets."
+          if [[ -z "${APPWRITE_API_KEY}" ]]; then
+            echo "::error::Missing APPWRITE_API_KEY repository Actions secret."
             exit 1
           fi
 
-          if [[ -n "${SUPABASE_SERVICE_KEY_SECRET}" ]]; then
-            echo "SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY_SECRET}" >> "$GITHUB_ENV"
-            echo "SUPABASE_SERVICE_KEY configured: yes"
-          elif [[ -n "${SUPABASE_SERVICE_ROLE_KEY_SECRET}" ]]; then
-            echo "SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_ROLE_KEY_SECRET}" >> "$GITHUB_ENV"
-            echo "SUPABASE_SERVICE_ROLE_KEY configured: yes"
-          else
-            echo "::error::Missing Supabase service key secret. Add SUPABASE_SERVICE_KEY or SUPABASE_SERVICE_ROLE_KEY in repository Actions secrets."
-            exit 1
-          fi
-
-      - name: Crawl ATS listings into Supabase
+      - name: Crawl ATS listings into Appwrite
         run: python -u -m scripts.harvester.main --provider "${{ matrix.provider }}"
 
   aggregate:
@@ -90,10 +73,10 @@ jobs:
       JSEARCH_MAX_QUERIES: "12"
       JSEARCH_NUM_PAGES: "1"
       JSEARCH_DATE_POSTED: "week"
-      SUPABASE_URL_SECRET: ${{ secrets.SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_URL_SECRET: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      SUPABASE_SERVICE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_KEY }}
-      SUPABASE_SERVICE_ROLE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      APPWRITE_ENDPOINT: "https://nyc.cloud.appwrite.io/v1"
+      APPWRITE_PROJECT_ID: "6a2f1924002c0b611bb1"
+      APPWRITE_DATABASE_ID: "emploid"
+      APPWRITE_API_KEY: ${{ secrets.APPWRITE_API_KEY }}
       RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
     steps:
       - uses: actions/checkout@v4
@@ -112,27 +95,10 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ -n "${SUPABASE_URL_SECRET}" ]]; then
-            echo "SUPABASE_URL=${SUPABASE_URL_SECRET}" >> "$GITHUB_ENV"
-            echo "SUPABASE_URL configured: yes"
-          elif [[ -n "${NEXT_PUBLIC_SUPABASE_URL_SECRET}" ]]; then
-            echo "SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL_SECRET}" >> "$GITHUB_ENV"
-            echo "NEXT_PUBLIC_SUPABASE_URL configured: yes"
-          else
-            echo "::error::Missing Supabase URL secret. Add SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL in repository Actions secrets."
+          if [[ -z "${APPWRITE_API_KEY}" ]]; then
+            echo "::error::Missing APPWRITE_API_KEY repository Actions secret."
             exit 1
           fi
 
-          if [[ -n "${SUPABASE_SERVICE_KEY_SECRET}" ]]; then
-            echo "SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY_SECRET}" >> "$GITHUB_ENV"
-            echo "SUPABASE_SERVICE_KEY configured: yes"
-          elif [[ -n "${SUPABASE_SERVICE_ROLE_KEY_SECRET}" ]]; then
-            echo "SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_ROLE_KEY_SECRET}" >> "$GITHUB_ENV"
-            echo "SUPABASE_SERVICE_ROLE_KEY configured: yes"
-          else
-            echo "::error::Missing Supabase service key secret. Add SUPABASE_SERVICE_KEY or SUPABASE_SERVICE_ROLE_KEY in repository Actions secrets."
-            exit 1
-          fi
-
-      - name: Crawl JSearch into Supabase
+      - name: Crawl JSearch into Appwrite
         run: python -u -m scripts.harvester.main --include-jsearch --provider jsearch
