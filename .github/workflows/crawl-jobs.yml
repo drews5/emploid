@@ -37,7 +37,6 @@ jobs:
       APPWRITE_PROJECT_ID: "6a2f1924002c0b611bb1"
       APPWRITE_DATABASE_ID: "emploid"
       APPWRITE_API_KEY: ${{ secrets.APPWRITE_API_KEY }}
-      RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -62,43 +61,3 @@ jobs:
 
       - name: Crawl ATS listings into Appwrite
         run: python -u -m scripts.harvester.main --provider "${{ matrix.provider }}"
-
-  aggregate:
-    name: Crawl aggregator searches
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-      PYTHONUNBUFFERED: "1"
-      JSEARCH_MAX_QUERIES: "12"
-      JSEARCH_NUM_PAGES: "1"
-      JSEARCH_DATE_POSTED: "week"
-      APPWRITE_ENDPOINT: "https://nyc.cloud.appwrite.io/v1"
-      APPWRITE_PROJECT_ID: "6a2f1924002c0b611bb1"
-      APPWRITE_DATABASE_ID: "emploid"
-      APPWRITE_API_KEY: ${{ secrets.APPWRITE_API_KEY }}
-      RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: "pip"
-          cache-dependency-path: scripts/requirements.txt
-
-      - name: Install dependencies
-        run: python -m pip install --upgrade pip && python -m pip install -r scripts/requirements.txt
-
-      - name: Validate required secrets
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          if [[ -z "${APPWRITE_API_KEY}" ]]; then
-            echo "::error::Missing APPWRITE_API_KEY repository Actions secret."
-            exit 1
-          fi
-
-      - name: Crawl JSearch into Appwrite
-        run: python -u -m scripts.harvester.main --include-jsearch --provider jsearch

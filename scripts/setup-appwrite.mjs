@@ -52,7 +52,8 @@ const definitions = [
       index('provider_job_idx', ['source_provider', 'source_job_id']), index('source_url_idx', ['source_url'], 'key', undefined, [255]),
       index('remote_idx', ['remote_type']), index('job_type_idx', ['job_type']), index('experience_idx', ['experience_level']),
       index('ghost_idx', ['ghost_score']), index('salary_idx', ['salary_max']), index('posted_idx', ['posted_at']),
-      index('title_search', ['title'], 'fulltext'), index('location_search', ['location'], 'fulltext'),
+      index('title_search', ['title'], 'fulltext'), index('description_search', ['description'], 'fulltext'),
+      index('location_search', ['location'], 'fulltext'),
     ],
   },
   {

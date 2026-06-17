@@ -1321,8 +1321,10 @@ let liveJobSearchState = {
   hasSearched: false,
   isLoading: false,
   query: '',
+  location: '',
   source: '',
   error: '',
+  meta: null,
 };
 
 const mainNav = document.getElementById('main-nav');
@@ -2547,6 +2549,7 @@ function applyInitialPageState() {
   const params = new URLSearchParams(window.location.search);
   const legacyPage = params.get('page');
   const query = params.get('q');
+  const location = params.get('location');
   const jobId = params.get('job');
   const page = normalizePageId(legacyPage || getPageIdFromPath(window.location.pathname));
 
@@ -2561,6 +2564,7 @@ function applyInitialPageState() {
   if (searchInput) searchInput.value = query || '';
   if (jobsSearchQuery) jobsSearchQuery.value = query || '';
   if (navSearchQuery) navSearchQuery.value = query || '';
+  if (location && typeof selectLocation === 'function') selectLocation(location, location, 'Specific location', 'custom');
   pendingInitialJobId = jobId || null;
 }
 
@@ -2867,6 +2871,8 @@ function normalizeLiveJob(job) {
 }
 
 function normalizeStoredJob(job) {
+  if (job && job._display_only) return normalizeLiveJob(job);
+
   const company = job && job.companies ? job.companies : {};
   const title = job && job.title ? job.title : 'Untitled role';
   const companyName = company.name || job.company_name || 'Company not listed';
@@ -3126,6 +3132,44 @@ function setLiveSearchLoading(isLoading, query = liveJobSearchState.query) {
   renderJobs();
 }
 
+function buildLiveJobSearchParams(query, page, location) {
+  const params = new URLSearchParams({
+    q: query,
+    page: String(Math.max(1, page || 1)),
+    per_page: String(PAGE_SIZE),
+    sort: 'trust',
+  });
+  if (location) params.set('location', location);
+  return params;
+}
+
+function usesServerJobPagination() {
+  return liveJobSearchState.source === 'database' && liveJobSearchState.meta && Number(liveJobSearchState.meta.total_pages || 0) > 0;
+}
+
+async function fetchLiveJobSearchPage(query, page = 1, location = liveJobSearchState.location || '') {
+  setLiveSearchLoading(true, query);
+
+  const response = await fetch(`/api/jobs?${buildLiveJobSearchParams(query, page, location).toString()}`, { cache: 'no-store' });
+  const payload = await response.json().catch(() => ({}));
+  const source = 'database';
+
+  if (!response.ok) throw new Error(payload.error || 'Live job search failed.');
+
+  allJobs = Array.isArray(payload.data) ? payload.data.map(normalizeStoredJob).filter((job) => job.url) : [];
+  currentPage = Number(payload && payload.meta && payload.meta.page) || page;
+  liveJobSearchState = {
+    hasSearched: true,
+    isLoading: false,
+    query,
+    location,
+    source,
+    error: '',
+    meta: payload && payload.meta ? payload.meta : null,
+  };
+  applyFilters({ preservePage: true });
+}
+
 async function runLiveJobSearch(rawQuery) {
   const query = String(rawQuery || '').trim();
   if (!query) {
@@ -3147,40 +3191,19 @@ async function runLiveJobSearch(rawQuery) {
     hideAutocompletePanel();
   }
 
-  // Read location selection and construct API query
-  let apiQuery = query;
-  const loc = getLocationSearchValue();
-  if (loc && !query.toLowerCase().includes(loc.toLowerCase())) {
-    apiQuery = `${query} ${loc}`;
-  }
+  const selectedLocation = getLocationSearchValue();
+  const isWorkModeSelection = /^(remote|hybrid)$/.test(String(selectedLocation || '').toLowerCase());
+  const loc = isWorkModeSelection ? '' : selectedLocation;
+  const apiQuery = isWorkModeSelection && !query.toLowerCase().includes(selectedLocation.toLowerCase())
+    ? `${query} ${selectedLocation}`
+    : query;
 
-  navigateTo('jobs', { params: new URLSearchParams({ q: query }), scroll: false });
-  setLiveSearchLoading(true, query);
+  const nextUrlParams = new URLSearchParams({ q: apiQuery });
+  if (loc) nextUrlParams.set('location', loc);
+  navigateTo('jobs', { params: nextUrlParams, scroll: false });
 
   try {
-    let response = await fetch(`/api/jobs?q=${encodeURIComponent(apiQuery)}&per_page=30&sort=trust`, { cache: 'no-store' });
-    let payload = await response.json().catch(() => ({}));
-    let source = 'database';
-    let normalizeSearchResult = normalizeStoredJob;
-
-    if (!response.ok) {
-      response = await fetch(`/api/google-jobs?q=${encodeURIComponent(apiQuery)}&max=30`, { cache: 'no-store' });
-      payload = await response.json().catch(() => ({}));
-      source = payload && payload.meta && payload.meta.source ? payload.meta.source : 'live';
-      normalizeSearchResult = normalizeLiveJob;
-    }
-
-    if (!response.ok) throw new Error(payload.error || 'Live job search failed.');
-
-    allJobs = Array.isArray(payload.data) ? payload.data.map(normalizeSearchResult).filter((job) => job.url) : [];
-    liveJobSearchState = {
-      hasSearched: true,
-      isLoading: false,
-      query,
-      source,
-      error: '',
-    };
-    applyFilters();
+    await fetchLiveJobSearchPage(apiQuery, 1, loc);
   } catch (error) {
     allJobs = [];
     filteredJobs = [];
@@ -3188,15 +3211,18 @@ async function runLiveJobSearch(rawQuery) {
       hasSearched: true,
       isLoading: false,
       query,
+      location: loc,
       source: '',
       error: error instanceof Error ? error.message : 'Live job search failed.',
+      meta: null,
     };
     renderJobs();
     showToast('Live job search is unavailable right now.');
   }
 }
 
-function applyFilters() {
+function applyFilters(options) {
+  const preservePage = Boolean(options && options.preservePage);
   if (typeof syncQuickFiltersUI === 'function') {
     syncQuickFiltersUI();
   }
@@ -3246,7 +3272,7 @@ function applyFilters() {
   if (resumeMatchActive && resumeProfile && !query && filteredJobs.length > 13) {
     filteredJobs = filteredJobs.slice(0, 13);
   }
-  currentPage = 1;
+  if (!preservePage) currentPage = 1;
   renderJobs();
   if (pendingInitialJobId) {
     const matchedJob = filteredJobs.find((job) => String(job.id) === String(pendingInitialJobId));
@@ -3326,13 +3352,16 @@ function renderJobs() {
     return;
   }
 
-  const totalPages = Math.ceil(filteredJobs.length / PAGE_SIZE);
-  const start = (currentPage - 1) * PAGE_SIZE;
-  const end = Math.min(start + PAGE_SIZE, filteredJobs.length);
-  const pageJobs = filteredJobs.slice(start, end);
+  const serverPaged = usesServerJobPagination();
+  const serverMeta = liveJobSearchState.meta || {};
+  const totalPages = serverPaged ? Number(serverMeta.total_pages || 1) : Math.ceil(filteredJobs.length / PAGE_SIZE);
+  const start = serverPaged ? (Number(serverMeta.page || currentPage) - 1) * Number(serverMeta.per_page || PAGE_SIZE) : (currentPage - 1) * PAGE_SIZE;
+  const pageJobs = serverPaged ? filteredJobs : filteredJobs.slice(start, Math.min(start + PAGE_SIZE, filteredJobs.length));
+  const totalMatches = serverPaged ? Number(serverMeta.total || filteredJobs.length) : filteredJobs.length;
+  const end = Math.min(start + pageJobs.length, totalMatches);
 
-  jobsCount.textContent = `${filteredJobs.length.toLocaleString()} openings`;
-  jobsCountSub.textContent = `Showing ${start + 1}-${end} of ${filteredJobs.length.toLocaleString()} live matches${liveJobSearchState.query ? ` for "${liveJobSearchState.query}"` : ''}`;
+  jobsCount.textContent = `${totalMatches.toLocaleString()} openings`;
+  jobsCountSub.textContent = `Showing ${start + 1}-${end} of ${totalMatches.toLocaleString()} live matches${liveJobSearchState.query ? ` for "${liveJobSearchState.query}"` : ''}`;
 
   pageJobs.forEach((job) => {
     const trustInfo = getTrustInfo(job.trustScore);
@@ -3409,6 +3438,7 @@ function createPaginationButton(label, config) {
 
 function renderPagination(totalPages) {
   if (!paginationEl || totalPages <= 1) return;
+  const serverPaged = usesServerJobPagination();
   const startPage = Math.max(1, currentPage - 2);
   const endPage = Math.min(totalPages, startPage + 4);
   const normalizedStart = Math.max(1, endPage - 4);
@@ -3416,20 +3446,34 @@ function renderPagination(totalPages) {
   paginationEl.appendChild(createPaginationButton('Previous', {
     text: true,
     disabled: currentPage === 1,
-    onClick: () => { if (currentPage > 1) { currentPage -= 1; renderJobs(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }
+    onClick: () => {
+      if (currentPage <= 1) return;
+      if (serverPaged) fetchLiveJobSearchPage(liveJobSearchState.query, currentPage - 1, liveJobSearchState.location);
+      else { currentPage -= 1; renderJobs(); }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }));
 
   for (let pageNumber = normalizedStart; pageNumber <= endPage; pageNumber += 1) {
     paginationEl.appendChild(createPaginationButton(String(pageNumber), {
       active: currentPage === pageNumber,
-      onClick: () => { currentPage = pageNumber; renderJobs(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      onClick: () => {
+        if (serverPaged) fetchLiveJobSearchPage(liveJobSearchState.query, pageNumber, liveJobSearchState.location);
+        else { currentPage = pageNumber; renderJobs(); }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }));
   }
 
   paginationEl.appendChild(createPaginationButton('Next', {
     text: true,
     disabled: currentPage === totalPages,
-    onClick: () => { if (currentPage < totalPages) { currentPage += 1; renderJobs(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }
+    onClick: () => {
+      if (currentPage >= totalPages) return;
+      if (serverPaged) fetchLiveJobSearchPage(liveJobSearchState.query, currentPage + 1, liveJobSearchState.location);
+      else { currentPage += 1; renderJobs(); }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }));
 }
 

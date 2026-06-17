@@ -156,7 +156,7 @@ class AppwriteQuery implements PromiseLike<any> {
     if (clauses.length) this.filters.push(Query.or(clauses));
     return this;
   }
-  order(field: string, options?: { ascending?: boolean }) { const attribute = field === 'created_at' ? '$createdAt' : field === 'updated_at' ? '$updatedAt' : field; this.orders.push(options?.ascending ? Query.orderAsc(attribute) : Query.orderDesc(attribute)); return this; }
+  order(field: string, options?: { ascending?: boolean }) { const attribute = field === 'id' ? '$id' : field === 'created_at' ? '$createdAt' : field === 'updated_at' ? '$updatedAt' : field; this.orders.push(options?.ascending ? Query.orderAsc(attribute) : Query.orderDesc(attribute)); return this; }
   range(from: number, to: number) { this.offsetValue = from; this.limitValue = Math.max(1, to - from + 1); return this; }
   limit(value: number) { this.limitValue = value; return this; }
   single() { this.singleMode = 'single'; this.limitValue = Math.min(this.limitValue, 2); return this; }
